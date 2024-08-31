@@ -18,6 +18,7 @@ type (
 func (r *router) Attach(router *echo.Group) {
 	emailVerificationRouter := router.Group("/email-verifications")
 	emailVerificationRouter.POST("/request-code", controller.Handler(r.controller.RequestCode()))
+	emailVerificationRouter.POST("/verify-code", controller.Handler(r.controller.VerifyCode()))
 }
 
 func NewRouter(

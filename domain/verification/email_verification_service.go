@@ -16,6 +16,15 @@ type (
 			EmailVerification,
 			error,
 		)
+
+		VerifyCode(
+			ctx context.APIContext,
+			email string,
+			code string,
+		) (
+			EmailVerification,
+			error,
+		)
 	}
 
 	service struct {
@@ -48,7 +57,33 @@ func (s *service) RequestCode(
 		return EmailVerification{}, err
 	}
 
-	return s.repository.Create(ctx, verification)
+	return s.repository.InsertOne(ctx, verification)
+}
+
+func (s *service) VerifyCode(
+	ctx context.APIContext,
+	email string,
+	code string,
+) (
+	EmailVerification,
+	error,
+) {
+	emailVerification, err := s.repository.FindOneByEmail(ctx, email)
+	if err != nil {
+		return EmailVerification{}, err
+	}
+	if emailVerification.Code != code {
+		return EmailVerification{}, ErrInvalidCode
+	}
+	if emailVerification.IsVerified {
+		return EmailVerification{}, ErrAlreadyVerified
+	}
+
+	return s.repository.UpdateOne_IsVerified(
+		ctx,
+		emailVerification.ID,
+		true,
+	)
 }
 
 func makeRequestCodeBody(code string) string {
