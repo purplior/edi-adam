@@ -1,9 +1,9 @@
 package persist
 
 import (
-	"github.com/podossaem/root/domain/context"
-	"github.com/podossaem/root/domain/verification"
-	"github.com/podossaem/root/infra/database/mymongo"
+	"github.com/podossaem/podoroot/domain/context"
+	"github.com/podossaem/podoroot/domain/verification"
+	"github.com/podossaem/podoroot/infra/database/mymongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"

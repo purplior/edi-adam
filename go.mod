@@ -1,4 +1,4 @@
-module github.com/podossaem/root
+module github.com/podossaem/podoroot
 
 go 1.23.0
 

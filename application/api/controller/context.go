@@ -2,7 +2,7 @@ package controller
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/podossaem/root/application/api/response"
+	"github.com/podossaem/podoroot/application/api/response"
 )
 
 type (

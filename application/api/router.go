@@ -2,7 +2,7 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
-	verification "github.com/podossaem/root/domain/verification/app"
+	verification "github.com/podossaem/podoroot/domain/verification/app"
 )
 
 type (

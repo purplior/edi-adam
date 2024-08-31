@@ -5,9 +5,9 @@ import (
 	"log"
 	"time"
 
-	"github.com/podossaem/root/application/config"
-	"github.com/podossaem/root/domain/constant"
-	domainContext "github.com/podossaem/root/domain/context"
+	"github.com/podossaem/podoroot/application/config"
+	"github.com/podossaem/podoroot/domain/constant"
+	domainContext "github.com/podossaem/podoroot/domain/context"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"

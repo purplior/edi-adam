@@ -1,10 +1,10 @@
 package verification
 
 import (
-	"github.com/podossaem/root/application/config"
-	"github.com/podossaem/root/domain/context"
-	"github.com/podossaem/root/lib/mymail"
-	"github.com/podossaem/root/lib/strgen"
+	"github.com/podossaem/podoroot/application/config"
+	"github.com/podossaem/podoroot/domain/context"
+	"github.com/podossaem/podoroot/lib/mymail"
+	"github.com/podossaem/podoroot/lib/strgen"
 )
 
 type (

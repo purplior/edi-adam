@@ -9,12 +9,12 @@ import (
 	"github.com/google/wire"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/podossaem/root/application/api"
-	"github.com/podossaem/root/application/config"
-	"github.com/podossaem/root/domain"
-	"github.com/podossaem/root/infra"
-	"github.com/podossaem/root/infra/database"
-	"github.com/podossaem/root/infra/database/mymongo"
+	"github.com/podossaem/podoroot/application/api"
+	"github.com/podossaem/podoroot/application/config"
+	"github.com/podossaem/podoroot/domain"
+	"github.com/podossaem/podoroot/infra"
+	"github.com/podossaem/podoroot/infra/database"
+	"github.com/podossaem/podoroot/infra/database/mymongo"
 )
 
 func StartApplication(

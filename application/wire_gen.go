@@ -10,13 +10,13 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/podossaem/root/application/api"
-	"github.com/podossaem/root/application/config"
-	"github.com/podossaem/root/domain/verification"
-	"github.com/podossaem/root/domain/verification/app"
-	"github.com/podossaem/root/domain/verification/persist"
-	"github.com/podossaem/root/infra/database"
-	"github.com/podossaem/root/infra/database/mymongo"
+	"github.com/podossaem/podoroot/application/api"
+	"github.com/podossaem/podoroot/application/config"
+	"github.com/podossaem/podoroot/domain/verification"
+	"github.com/podossaem/podoroot/domain/verification/app"
+	"github.com/podossaem/podoroot/domain/verification/persist"
+	"github.com/podossaem/podoroot/infra/database"
+	"github.com/podossaem/podoroot/infra/database/mymongo"
 )
 
 // Injectors from app.go:

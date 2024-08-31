@@ -3,7 +3,7 @@ package database
 import (
 	"context"
 
-	"github.com/podossaem/root/infra/database/mymongo"
+	"github.com/podossaem/podoroot/infra/database/mymongo"
 )
 
 func Init(

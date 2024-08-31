@@ -1,6 +1,6 @@
 package verification
 
-import "github.com/podossaem/root/domain/context"
+import "github.com/podossaem/podoroot/domain/context"
 
 type (
 	EmailVerificationRepository interface {

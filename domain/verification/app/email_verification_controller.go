@@ -1,11 +1,11 @@
 package app
 
 import (
-	"github.com/podossaem/root/application/api/controller"
-	"github.com/podossaem/root/application/api/response"
-	"github.com/podossaem/root/domain/context"
-	"github.com/podossaem/root/domain/exception"
-	"github.com/podossaem/root/domain/verification"
+	"github.com/podossaem/podoroot/application/api/controller"
+	"github.com/podossaem/podoroot/application/api/response"
+	"github.com/podossaem/podoroot/domain/context"
+	"github.com/podossaem/podoroot/domain/exception"
+	"github.com/podossaem/podoroot/domain/verification"
 )
 
 type (

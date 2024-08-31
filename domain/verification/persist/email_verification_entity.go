@@ -3,8 +3,8 @@ package persist
 import (
 	"time"
 
-	"github.com/podossaem/root/domain/verification"
-	"github.com/podossaem/root/lib/mydate"
+	"github.com/podossaem/podoroot/domain/verification"
+	"github.com/podossaem/podoroot/lib/mydate"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
