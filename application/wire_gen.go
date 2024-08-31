@@ -15,6 +15,8 @@ import (
 	"github.com/podossaem/root/domain/verification"
 	"github.com/podossaem/root/domain/verification/app"
 	"github.com/podossaem/root/domain/verification/persist"
+	"github.com/podossaem/root/infra/database"
+	"github.com/podossaem/root/infra/database/mymongo"
 )
 
 // Injectors from app.go:
@@ -25,7 +27,8 @@ func Start() error {
 	emailVerificationController := app.NewEmailVerificationController(emailVerificationService)
 	router := app.NewRouter(emailVerificationController)
 	apiRouter := api.NewRouter(router)
-	error2 := StartApplication(apiRouter)
+	client := mymongo.NewClient()
+	error2 := StartApplication(apiRouter, client)
 	return error2
 }
 
@@ -33,11 +36,25 @@ func Start() error {
 
 func StartApplication(
 	router api.Router,
+	mymongoClient *mymongo.Client,
 ) error {
+	if err := database.Init(mymongoClient); err != nil {
+		return err
+	}
 	app2 := echo.New()
 	app2.
 		Use(middleware.Logger())
 	router.Attach(app2)
 
-	return app2.Start(fmt.Sprintf(":%d", config.AppPort()))
+	if err := app2.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
+		return err
+	}
+
+	defer func() {
+		if err := database.Dispose(mymongoClient); err != nil {
+			panic(err)
+		}
+	}()
+
+	return nil
 }

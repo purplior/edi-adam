@@ -47,6 +47,14 @@ func Phase() constants.Phase {
 	return convertPhaseStringToEnum(phase)
 }
 
+func MongoDbURI() string {
+	return os.Getenv("MONGO_DB_URI")
+}
+
+func MongoDbName() string {
+	return os.Getenv("MONGO_DB_NAME")
+}
+
 func IsEnvLoaded() bool {
 	return isEnvLoaded
 }
