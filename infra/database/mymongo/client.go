@@ -2,7 +2,7 @@ package mymongo
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/podossaem/root/application/config"
@@ -40,7 +40,7 @@ func (c *Client) Connect(ctx context.Context) error {
 
 	defaultDBName := c.opt.DefaultDbName
 	if len(defaultDBName) > 0 {
-		fmt.Printf("# Default DB Name: %s\n", "****")
+		log.Printf("# Default DB Name: %s\n", "****")
 		c.databaseMap[defaultDBName] = NewDatabase(c.Client.Database(defaultDBName))
 	}
 

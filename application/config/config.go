@@ -2,7 +2,7 @@ package config
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"os"
 	"strconv"
 
@@ -13,7 +13,7 @@ import (
 func Init() error {
 	phase := Phase()
 
-	fmt.Printf("# Phase: %s\n", convertPhaseEnumToDisplay((phase)))
+	log.Printf("# Phase: %s\n", convertPhaseEnumToDisplay((phase)))
 	var envFilePath string
 	switch phase {
 	case constant.Phase_Local:
@@ -53,6 +53,14 @@ func MongoDbURI() string {
 
 func MongoDbName() string {
 	return os.Getenv("MONGO_DB_NAME")
+}
+
+func CsEmail() string {
+	return os.Getenv("CS_EMAIL")
+}
+
+func CsEmailPassword() string {
+	return os.Getenv("CS_EMAIL_PASSWORD")
 }
 
 func IsEnvLoaded() bool {
