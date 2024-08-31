@@ -33,23 +33,16 @@ func (c *emailVerificationController) RequestCode() controller.HandlerFunc {
 		apiCtx, cancel := context.NewAPIContext()
 		defer cancel()
 
-		verification, err := c.service.RequestCode(apiCtx, dto.Email)
-		if err != nil {
+		if _, err := c.service.RequestCode(apiCtx, dto.Email); err != nil {
 			return ctx.SendError(response.ErrorResponse{
 				Status:  response.Status_InternalServerError,
 				Message: response.Message_ErrorNormal,
 			})
 		}
 
-		responseData := struct {
-			ID string `json:"id"`
-		}{
-			ID: verification.ID,
-		}
-
 		return ctx.SendJSON(response.JSONResponse{
 			Status: response.Status_Created,
-			Data:   responseData,
+			Data:   nil,
 		})
 	}
 }

@@ -7,20 +7,20 @@ import (
 	"strconv"
 
 	"github.com/joho/godotenv"
-	"github.com/podossaem/root/domain/constants"
+	"github.com/podossaem/root/domain/constant"
 )
 
 func Init() error {
 	phase := Phase()
 
-	fmt.Printf("# set phase: %s\n", convertPhaseEnumToDisplay((phase)))
+	fmt.Printf("# Phase: %s\n", convertPhaseEnumToDisplay((phase)))
 	var envFilePath string
 	switch phase {
-	case constants.Phase_Local:
+	case constant.Phase_Local:
 		envFilePath = ".env.local"
-	case constants.Phase_Stage:
+	case constant.Phase_Stage:
 		envFilePath = ".env.stage"
-	case constants.Phase_Production:
+	case constant.Phase_Production:
 		envFilePath = ".env.prod"
 	default:
 		envFilePath = ".env"
@@ -38,10 +38,10 @@ func Init() error {
 	return err
 }
 
-func Phase() constants.Phase {
+func Phase() constant.Phase {
 	phase := os.Getenv("APP_PHASE")
 	if len(phase) == 0 {
-		return constants.Phase_Production
+		return constant.Phase_Production
 	}
 
 	return convertPhaseStringToEnum(phase)
@@ -69,16 +69,16 @@ func AppPort() int {
 	return port
 }
 
-func convertPhaseStringToEnum(phaseString string) constants.Phase {
+func convertPhaseStringToEnum(phaseString string) constant.Phase {
 	enm, is := phaseStringToEnumMap[phaseString]
 	if !is {
-		return constants.Phase_Invalid
+		return constant.Phase_Invalid
 	}
 
 	return enm
 }
 
-func convertPhaseEnumToDisplay(phaseEnum constants.Phase) string {
+func convertPhaseEnumToDisplay(phaseEnum constant.Phase) string {
 	for k, v := range phaseStringToEnumMap {
 		if v == phaseEnum {
 			return k
@@ -91,9 +91,9 @@ func convertPhaseEnumToDisplay(phaseEnum constants.Phase) string {
 var (
 	isEnvLoaded = false
 
-	phaseStringToEnumMap = map[string]constants.Phase{
-		"local": constants.Phase_Local,
-		"stage": constants.Phase_Stage,
-		"prod":  constants.Phase_Production,
+	phaseStringToEnumMap = map[string]constant.Phase{
+		"local": constant.Phase_Local,
+		"stage": constant.Phase_Stage,
+		"prod":  constant.Phase_Production,
 	}
 )

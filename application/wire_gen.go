@@ -22,12 +22,12 @@ import (
 // Injectors from app.go:
 
 func Start() error {
-	emailVerificationRepository := persist.NewEmailVerificationRepository()
+	client := mymongo.NewClient()
+	emailVerificationRepository := persist.NewEmailVerificationRepository(client)
 	emailVerificationService := verification.NewEmailVerificationService(emailVerificationRepository)
 	emailVerificationController := app.NewEmailVerificationController(emailVerificationService)
 	router := app.NewRouter(emailVerificationController)
 	apiRouter := api.NewRouter(router)
-	client := mymongo.NewClient()
 	error2 := StartApplication(apiRouter, client)
 	return error2
 }

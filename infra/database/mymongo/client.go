@@ -2,10 +2,11 @@ package mymongo
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/podossaem/root/application/config"
-	"github.com/podossaem/root/domain/constants"
+	"github.com/podossaem/root/domain/constant"
 	domainContext "github.com/podossaem/root/domain/context"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -13,14 +14,14 @@ import (
 )
 
 const (
-	Collection_Verification = "verifications"
+	Collection_EmailVerification = "email_verifications"
 )
 
 type (
 	ConstructorOption struct {
-		Phase         constants.Phase
+		Phase         constant.Phase
 		URI           string
-		DefaultDBName string
+		DefaultDbName string
 	}
 
 	Client struct {
@@ -37,8 +38,9 @@ func (c *Client) Connect(ctx context.Context) error {
 		c.Client = client
 	}
 
-	defaultDBName := c.opt.DefaultDBName
+	defaultDBName := c.opt.DefaultDbName
 	if len(defaultDBName) > 0 {
+		fmt.Printf("# Default DB Name: %s\n", "****")
 		c.databaseMap[defaultDBName] = NewDatabase(c.Client.Database(defaultDBName))
 	}
 
@@ -72,7 +74,9 @@ func (c *Client) MyCollection(
 	name string,
 	opts ...*options.CollectionOptions,
 ) *MyMongoCollection {
-	db := c.databaseMap[c.opt.DefaultDBName]
+	db := c.databaseMap[c.opt.DefaultDbName]
+
+	print(db)
 
 	return db.MyCollection(name, opts...)
 }
@@ -98,7 +102,7 @@ func (c *Client) clientOptions() *options.ClientOptions {
 		SetServerAPIOptions(serverAPIOptions)
 
 	switch c.opt.Phase {
-	case constants.Phase_Production:
+	case constant.Phase_Production:
 		clientOptions.SetHeartbeatInterval(10 * time.Second)
 		clientOptions.SetMaxPoolSize(100)
 		clientOptions.SetMinPoolSize(1)
@@ -116,8 +120,8 @@ func (c *Client) clientOptions() *options.ClientOptions {
 func NewClient() *Client {
 	opt := ConstructorOption{
 		Phase:         config.Phase(),
-		URI:           "",
-		DefaultDBName: "",
+		URI:           config.MongoDbURI(),
+		DefaultDbName: config.MongoDbName(),
 	}
 
 	client := &Client{

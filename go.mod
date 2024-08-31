@@ -3,6 +3,7 @@ module github.com/podossaem/root
 go 1.23.0
 
 require (
+	github.com/google/uuid v1.6.0
 	github.com/google/wire v0.6.0
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.12.0
