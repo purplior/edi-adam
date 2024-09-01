@@ -4,6 +4,7 @@ import (
 	"github.com/podossaem/podoroot/domain/context"
 	domain "github.com/podossaem/podoroot/domain/user"
 	"github.com/podossaem/podoroot/infra/database/mymongo"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -13,6 +14,31 @@ type (
 	}
 )
 
+func (r *userRepository) FindByAccount(
+	ctx context.APIContext,
+	joinMethod string,
+	accountID string,
+) (
+	domain.User,
+	error,
+) {
+	var entity User
+	if err := r.
+		baseCollection().
+		FindOne(
+			ctx,
+			bson.M{
+				"join_method": joinMethod,
+				"account_id":  accountID,
+			},
+		).
+		Decode(&entity); err != nil {
+		return domain.User{}, err
+	}
+
+	return entity.ToModel(), nil
+}
+
 func (r *userRepository) InsertOne(
 	ctx context.APIContext,
 	user domain.User,
@@ -20,7 +46,7 @@ func (r *userRepository) InsertOne(
 	domain.User,
 	error,
 ) {
-	entity := MakeUser(user)
+	entity := MakeUser(user).BeforeInsert()
 
 	result, err := r.baseCollection().InsertOne(ctx, entity)
 	if err != nil {

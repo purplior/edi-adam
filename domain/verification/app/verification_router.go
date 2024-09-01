@@ -9,7 +9,9 @@ type (
 	VerificationRouter interface {
 		Attach(router *echo.Group)
 	}
+)
 
+type (
 	verificationRouter struct {
 		emailVerificationController EmailVerificationController
 	}

@@ -1,4 +1,4 @@
-package credential
+package auth
 
 import (
 	"encoding/json"
@@ -34,3 +34,21 @@ func (m *Identity) SyncWith(data map[string]interface{}) {
 	m.Nickname = dt.Str(data["nickname"])
 	m.Role = dt.Int(data["role"])
 }
+
+type (
+	IdentityToken struct {
+		AccessToken  string `json:"accessToken"`
+		RefreshToken string `json:"refreshToken"`
+	}
+
+	SignInByEmailVerificationRequest struct {
+		AccountID string `json:"accountId"`
+		Password  string `json:"password"`
+	}
+
+	SignUpByEmailVerificationRequest struct {
+		VerificationID string `json:"verificationId"`
+		Password       string `json:"password"`
+		Nickname       string `json:"nickname"`
+	}
+)

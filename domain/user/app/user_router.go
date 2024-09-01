@@ -2,7 +2,6 @@ package app
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/podossaem/podoroot/application/api/controller"
 )
 
 type (
@@ -16,14 +15,6 @@ type (
 )
 
 func (r *userRouter) Attach(router *echo.Group) {
-	userRouterGroup := router.Group("/users")
-
-	userRouterGroup.POST(
-		"/sign-up-by-email",
-		controller.Handler(
-			r.userController.SignUpByEmailVerification(),
-		),
-	)
 }
 
 func NewUserRouter(

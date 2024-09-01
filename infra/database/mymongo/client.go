@@ -41,13 +41,15 @@ func (c *Client) Connect(ctx context.Context) error {
 
 	defaultDBName := c.opt.DefaultDbName
 	if len(defaultDBName) > 0 {
-		log.Printf("# Default DB Name: %s\n", "****")
+		log.Println("# [mymongo] use default db name.")
 		c.databaseMap[defaultDBName] = NewDatabase(c.Client.Database(defaultDBName))
 	}
 
 	if err := c.Client.Ping(ctx, readpref.Primary()); err != nil {
 		return err
 	}
+
+	log.Println("# [mymongo] is connected.")
 
 	return nil
 }

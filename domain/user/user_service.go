@@ -1,60 +1,65 @@
 package user
 
-import (
-	"github.com/podossaem/podoroot/domain/context"
-	"github.com/podossaem/podoroot/domain/verification"
-)
+import "github.com/podossaem/podoroot/domain/context"
 
 type (
 	UserService interface {
-		SignUpByEmailVerification(
+		GetByAccount(
 			ctx context.APIContext,
-			request SignUpRequest,
+			joinMethod string,
+			accountID string,
 		) (
 			User,
 			error,
 		)
+
+		CreateOne(
+			ctx context.APIContext,
+			user User,
+		) (
+			newUser User,
+			err error,
+		)
 	}
 
 	userService struct {
-		emailVerificationService verification.EmailVerificationService
-		userRepository           UserRepository
+		userRepository UserRepository
 	}
 )
 
-func (s *userService) SignUpByEmailVerification(
+func (s *userService) GetByAccount(
 	ctx context.APIContext,
-	request SignUpRequest,
+	joinMethod string,
+	accountID string,
 ) (
 	User,
 	error,
 ) {
-	verification, err := s.emailVerificationService.Consume(
+	return s.userRepository.FindByAccount(
 		ctx,
-		request.VerificationID,
-	)
-	if err != nil {
-		return User{}, err
-	}
-
-	return s.userRepository.InsertOne(
-		ctx,
-		User{
-			JoinMethod:      JoinMethod_Email,
-			AccountID:       verification.Email,
-			AccountPassword: request.Password,
-			Nickname:        request.Nickname,
-			Role:            Role_User,
-		},
+		joinMethod,
+		accountID,
 	)
 }
 
+func (s *userService) CreateOne(
+	ctx context.APIContext,
+	user User,
+) (
+	newUser User,
+	err error,
+) {
+	if err := user.HashPassword(); err != nil {
+		return User{}, err
+	}
+
+	return s.userRepository.InsertOne(ctx, user)
+}
+
 func NewUserService(
-	emailVerificationService verification.EmailVerificationService,
 	userRepository UserRepository,
 ) UserService {
 	return &userService{
-		emailVerificationService: emailVerificationService,
-		userRepository:           userRepository,
+		userRepository: userRepository,
 	}
 }

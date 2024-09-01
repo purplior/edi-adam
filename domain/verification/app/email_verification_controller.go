@@ -4,7 +4,7 @@ import (
 	"github.com/podossaem/podoroot/application/api/controller"
 	"github.com/podossaem/podoroot/application/api/response"
 	"github.com/podossaem/podoroot/domain/context"
-	"github.com/podossaem/podoroot/domain/verification"
+	domain "github.com/podossaem/podoroot/domain/verification"
 )
 
 type (
@@ -19,9 +19,11 @@ type (
 		 */
 		VerifyCode() controller.HandlerFunc
 	}
+)
 
+type (
 	emailVerificationController struct {
-		emailVerificationService verification.EmailVerificationService
+		emailVerificationService domain.EmailVerificationService
 	}
 )
 
@@ -81,7 +83,7 @@ func (c *emailVerificationController) VerifyCode() controller.HandlerFunc {
 }
 
 func NewEmailVerificationController(
-	emailVerificationService verification.EmailVerificationService,
+	emailVerificationService domain.EmailVerificationService,
 ) EmailVerificationController {
 	return &emailVerificationController{
 		emailVerificationService: emailVerificationService,

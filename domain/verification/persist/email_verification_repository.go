@@ -2,7 +2,7 @@ package persist
 
 import (
 	"github.com/podossaem/podoroot/domain/context"
-	"github.com/podossaem/podoroot/domain/verification"
+	domain "github.com/podossaem/podoroot/domain/verification"
 	"github.com/podossaem/podoroot/infra/database/mymongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,9 +17,9 @@ type (
 
 func (r *emailVerificationRepository) InsertOne(
 	ctx context.APIContext,
-	emailVerification verification.EmailVerification,
+	emailVerification domain.EmailVerification,
 ) (
-	createdEmailVerification verification.EmailVerification,
+	createdEmailVerification domain.EmailVerification,
 	err error,
 ) {
 	entity := MakeEmailVerification(emailVerification).BeforeInsert()
@@ -38,7 +38,7 @@ func (r *emailVerificationRepository) FindOneById(
 	ctx context.APIContext,
 	id string,
 ) (
-	verification.EmailVerification,
+	domain.EmailVerification,
 	error,
 ) {
 	oid, _ := primitive.ObjectIDFromHex(id)
@@ -58,7 +58,7 @@ func (r *emailVerificationRepository) FindOneById(
 		Decode(&entity)
 
 	if err != nil {
-		return verification.EmailVerification{}, err
+		return domain.EmailVerification{}, err
 	}
 
 	return entity.ToModel(), nil
@@ -68,7 +68,7 @@ func (r *emailVerificationRepository) FindOneByEmail(
 	ctx context.APIContext,
 	email string,
 ) (
-	verification.EmailVerification,
+	domain.EmailVerification,
 	error,
 ) {
 	var entity EmailVerification
@@ -86,7 +86,7 @@ func (r *emailVerificationRepository) FindOneByEmail(
 		Decode(&entity)
 
 	if err != nil {
-		return verification.EmailVerification{}, err
+		return domain.EmailVerification{}, err
 	}
 
 	return entity.ToModel(), nil
@@ -97,7 +97,7 @@ func (r *emailVerificationRepository) UpdateOne_IsVerified(
 	id string,
 	isVerified bool,
 ) (
-	verification.EmailVerification,
+	domain.EmailVerification,
 	error,
 ) {
 	oid, _ := primitive.ObjectIDFromHex(id)
@@ -122,7 +122,7 @@ func (r *emailVerificationRepository) UpdateOne_IsVerified(
 		Decode(&entity)
 
 	if err != nil {
-		return verification.EmailVerification{}, err
+		return domain.EmailVerification{}, err
 	}
 
 	return entity.ToModel(), err
@@ -133,7 +133,7 @@ func (r *emailVerificationRepository) UpdateOne_isConsumed(
 	id string,
 	isConsumed bool,
 ) (
-	verification.EmailVerification,
+	domain.EmailVerification,
 	error,
 ) {
 	oid, _ := primitive.ObjectIDFromHex(id)
@@ -158,7 +158,7 @@ func (r *emailVerificationRepository) UpdateOne_isConsumed(
 		Decode(&entity)
 
 	if err != nil {
-		return verification.EmailVerification{}, err
+		return domain.EmailVerification{}, err
 	}
 
 	return entity.ToModel(), err
@@ -170,7 +170,7 @@ func (r *emailVerificationRepository) baseCollection() *mymongo.MyMongoCollectio
 
 func NewEmailVerificationRepository(
 	mongoClient *mymongo.Client,
-) verification.EmailVerificationRepository {
+) domain.EmailVerificationRepository {
 	return &emailVerificationRepository{
 		mongoClient: mongoClient,
 	}

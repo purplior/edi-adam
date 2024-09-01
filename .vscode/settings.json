@@ -6,8 +6,10 @@
     "podo",
     "bson",
     "mydate",
+    "myjwt",
     "mymongo",
     "mymail",
+    "myredis",
     "strgen",
     "readpref"
   ]

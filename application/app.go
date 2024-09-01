@@ -15,13 +15,18 @@ import (
 	"github.com/podossaem/podoroot/infra"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/mymongo"
+	"github.com/podossaem/podoroot/infra/database/myredis"
 )
 
 func StartApplication(
 	router api.Router,
 	mymongoClient *mymongo.Client,
+	myredisClient *myredis.Client,
 ) error {
-	if err := database.Init(mymongoClient); err != nil {
+	if err := database.Init(
+		mymongoClient,
+		myredisClient,
+	); err != nil {
 		return err
 	}
 

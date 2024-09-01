@@ -13,7 +13,7 @@ import (
 func Init() error {
 	phase := Phase()
 
-	log.Printf("# Phase: %s\n", convertPhaseEnumToDisplay((phase)))
+	log.Printf("# [config] phase: %s\n", convertPhaseEnumToDisplay((phase)))
 	var envFilePath string
 	switch phase {
 	case constant.Phase_Local:
@@ -61,6 +61,10 @@ func CsEmail() string {
 
 func CsEmailPassword() string {
 	return os.Getenv("CS_EMAIL_PASSWORD")
+}
+
+func JwtSecretKey() string {
+	return os.Getenv("JWT_SECRET_KEY")
 }
 
 func IsEnvLoaded() bool {

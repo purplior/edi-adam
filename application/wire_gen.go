@@ -12,14 +12,17 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/podossaem/podoroot/application/api"
 	"github.com/podossaem/podoroot/application/config"
+	"github.com/podossaem/podoroot/domain/auth"
+	"github.com/podossaem/podoroot/domain/auth/app"
 	"github.com/podossaem/podoroot/domain/user"
-	"github.com/podossaem/podoroot/domain/user/app"
+	app2 "github.com/podossaem/podoroot/domain/user/app"
 	persist2 "github.com/podossaem/podoroot/domain/user/persist"
 	"github.com/podossaem/podoroot/domain/verification"
-	app2 "github.com/podossaem/podoroot/domain/verification/app"
+	app3 "github.com/podossaem/podoroot/domain/verification/app"
 	"github.com/podossaem/podoroot/domain/verification/persist"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/mymongo"
+	"github.com/podossaem/podoroot/infra/database/myredis"
 )
 
 // Injectors from app.go:
@@ -29,13 +32,17 @@ func Start() error {
 	emailVerificationRepository := persist.NewEmailVerificationRepository(client)
 	emailVerificationService := verification.NewEmailVerificationService(emailVerificationRepository)
 	userRepository := persist2.NewUserRepository(client)
-	userService := user.NewUserService(emailVerificationService, userRepository)
-	userController := app.NewUserController(userService)
-	userRouter := app.NewUserRouter(userController)
-	emailVerificationController := app2.NewEmailVerificationController(emailVerificationService)
-	verificationRouter := app2.NewVerificationRouter(emailVerificationController)
-	router := api.NewRouter(userRouter, verificationRouter)
-	error2 := StartApplication(router, client)
+	userService := user.NewUserService(userRepository)
+	authService := auth.NewAuthService(emailVerificationService, userService)
+	authController := app.NewAuthController(authService)
+	authRouter := app.NewAuthRouter(authController)
+	userController := app2.NewUserController()
+	userRouter := app2.NewUserRouter(userController)
+	emailVerificationController := app3.NewEmailVerificationController(emailVerificationService)
+	verificationRouter := app3.NewVerificationRouter(emailVerificationController)
+	router := api.NewRouter(authRouter, userRouter, verificationRouter)
+	myredisClient := myredis.NewClient()
+	error2 := StartApplication(router, client, myredisClient)
 	return error2
 }
 
@@ -44,16 +51,20 @@ func Start() error {
 func StartApplication(
 	router api.Router,
 	mymongoClient *mymongo.Client,
+	myredisClient *myredis.Client,
 ) error {
-	if err := database.Init(mymongoClient); err != nil {
+	if err := database.Init(
+		mymongoClient,
+		myredisClient,
+	); err != nil {
 		return err
 	}
-	app3 := echo.New()
-	app3.
+	app4 := echo.New()
+	app4.
 		Use(middleware.Logger())
-	router.Attach(app3)
+	router.Attach(app4)
 
-	if err := app3.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
+	if err := app4.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
 		return err
 	}
 

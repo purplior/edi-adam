@@ -4,14 +4,19 @@ import (
 	"context"
 
 	"github.com/podossaem/podoroot/infra/database/mymongo"
+	"github.com/podossaem/podoroot/infra/database/myredis"
 )
 
 func Init(
-	client *mymongo.Client,
+	mymongoClient *mymongo.Client,
+	myredisClient *myredis.Client,
 ) error {
 	ctx := context.Background()
 
-	if err := client.Connect(ctx); err != nil {
+	if err := mymongoClient.Connect(ctx); err != nil {
+		return err
+	}
+	if err := myredisClient.Connect(ctx); err != nil {
 		return err
 	}
 

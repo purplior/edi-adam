@@ -3,7 +3,7 @@ package persist
 import (
 	"time"
 
-	"github.com/podossaem/podoroot/domain/verification"
+	domain "github.com/podossaem/podoroot/domain/verification"
 	"github.com/podossaem/podoroot/lib/mydate"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -26,13 +26,13 @@ func (e EmailVerification) BeforeInsert() EmailVerification {
 	return e
 }
 
-func (e EmailVerification) ToModel() verification.EmailVerification {
+func (e EmailVerification) ToModel() domain.EmailVerification {
 	id := ""
 	if !e.ID.IsZero() {
 		id = e.ID.Hex()
 	}
 
-	return verification.EmailVerification{
+	return domain.EmailVerification{
 		ID:         id,
 		Email:      e.Email,
 		Code:       e.Code,
@@ -43,7 +43,7 @@ func (e EmailVerification) ToModel() verification.EmailVerification {
 	}
 }
 
-func MakeEmailVerification(m verification.EmailVerification) EmailVerification {
+func MakeEmailVerification(m domain.EmailVerification) EmailVerification {
 	oid, _ := primitive.ObjectIDFromHex(m.ID)
 
 	return EmailVerification{
