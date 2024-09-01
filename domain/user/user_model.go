@@ -4,7 +4,7 @@ import "time"
 
 type (
 	User struct {
-		ID              string    `json:"id"`
+		ID              string    `json:"id,omitempty"`
 		JoinMethod      string    `json:"joinMethod"`
 		AccountID       string    `json:"accountId"`
 		AccountPassword string    `json:"accountPassword"`
@@ -12,10 +12,16 @@ type (
 		Role            int       `json:"role"`
 		CreatedAt       time.Time `json:"createdAt"`
 	}
+
+	SignUpRequest struct {
+		VerificationID string `json:"verificationId"`
+		Password       string `json:"password"`
+		Nickname       string `json:"nickname"`
+	}
 )
 
 const (
-	SignUpMethod_Email = "email"
-	Role_Normal        = 100
-	Role_Master        = 10000
+	JoinMethod_Email = "email"
+	Role_User        = 100
+	Role_Master      = 10000
 )

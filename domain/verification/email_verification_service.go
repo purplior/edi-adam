@@ -3,12 +3,21 @@ package verification
 import (
 	"github.com/podossaem/podoroot/application/config"
 	"github.com/podossaem/podoroot/domain/context"
+	"github.com/podossaem/podoroot/domain/exception"
 	"github.com/podossaem/podoroot/lib/mymail"
 	"github.com/podossaem/podoroot/lib/strgen"
 )
 
 type (
 	EmailVerificationService interface {
+		Consume(
+			ctx context.APIContext,
+			id string,
+		) (
+			EmailVerification,
+			error,
+		)
+
 		RequestCode(
 			ctx context.APIContext,
 			email string,
@@ -28,9 +37,24 @@ type (
 	}
 
 	service struct {
-		repository EmailVerificationRepository
+		emailVerificationRepository EmailVerificationRepository
 	}
 )
+
+func (s *service) Consume(
+	ctx context.APIContext,
+	id string,
+) (EmailVerification, error) {
+	verification, err := s.emailVerificationRepository.FindOneById(ctx, id)
+	if err != nil {
+		return EmailVerification{}, err
+	}
+	if verification.IsConsumed {
+		return EmailVerification{}, exception.ErrAlreadyConsumed
+	}
+
+	return s.emailVerificationRepository.UpdateOne_isConsumed(ctx, id, true)
+}
 
 func (s *service) RequestCode(
 	ctx context.APIContext,
@@ -57,7 +81,7 @@ func (s *service) RequestCode(
 		return EmailVerification{}, err
 	}
 
-	return s.repository.InsertOne(ctx, verification)
+	return s.emailVerificationRepository.InsertOne(ctx, verification)
 }
 
 func (s *service) VerifyCode(
@@ -68,18 +92,18 @@ func (s *service) VerifyCode(
 	EmailVerification,
 	error,
 ) {
-	emailVerification, err := s.repository.FindOneByEmail(ctx, email)
+	emailVerification, err := s.emailVerificationRepository.FindOneByEmail(ctx, email)
 	if err != nil {
 		return EmailVerification{}, err
 	}
 	if emailVerification.Code != code {
-		return EmailVerification{}, ErrInvalidCode
+		return EmailVerification{}, exception.ErrInvalidVerificationCode
 	}
 	if emailVerification.IsVerified {
-		return EmailVerification{}, ErrAlreadyVerified
+		return EmailVerification{}, exception.ErrAlreadyVerified
 	}
 
-	return s.repository.UpdateOne_IsVerified(
+	return s.emailVerificationRepository.UpdateOne_IsVerified(
 		ctx,
 		emailVerification.ID,
 		true,
@@ -103,9 +127,9 @@ func makeRequestCodeBody(code string) string {
 }
 
 func NewEmailVerificationService(
-	repository EmailVerificationRepository,
+	emailVerificationRepository EmailVerificationRepository,
 ) EmailVerificationService {
 	return &service{
-		repository: repository,
+		emailVerificationRepository: emailVerificationRepository,
 	}
 }

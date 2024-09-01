@@ -4,7 +4,6 @@ import (
 	"github.com/podossaem/podoroot/application/api/controller"
 	"github.com/podossaem/podoroot/application/api/response"
 	"github.com/podossaem/podoroot/domain/context"
-	"github.com/podossaem/podoroot/domain/exception"
 	"github.com/podossaem/podoroot/domain/verification"
 )
 
@@ -22,7 +21,7 @@ type (
 	}
 
 	emailVerificationController struct {
-		service verification.EmailVerificationService
+		emailVerificationService verification.EmailVerificationService
 	}
 )
 
@@ -33,20 +32,14 @@ func (c *emailVerificationController) RequestCode() controller.HandlerFunc {
 		}
 
 		if err := ctx.Bind(&dto); err != nil {
-			return ctx.SendError(response.ErrorResponse{
-				Status:  response.Status_InternalServerError,
-				Message: response.Message_ErrorNormal,
-			})
+			return ctx.SendError(err)
 		}
 
 		apiCtx, cancel := context.NewAPIContext()
 		defer cancel()
 
-		if _, err := c.service.RequestCode(apiCtx, dto.Email); err != nil {
-			return ctx.SendError(response.ErrorResponse{
-				Status:  response.Status_InternalServerError,
-				Message: response.Message_ErrorNormal,
-			})
+		if _, err := c.emailVerificationService.RequestCode(apiCtx, dto.Email); err != nil {
+			return ctx.SendError(err)
 		}
 
 		return ctx.SendJSON(response.JSONResponse{
@@ -64,32 +57,15 @@ func (c *emailVerificationController) VerifyCode() controller.HandlerFunc {
 		}
 
 		if err := ctx.Bind(&dto); err != nil {
-			return ctx.SendError(response.ErrorResponse{
-				Status:  response.Status_InternalServerError,
-				Message: response.Message_ErrorNormal,
-			})
+			return ctx.SendError(err)
 		}
 
 		apiCtx, cancel := context.NewAPIContext()
 		defer cancel()
 
-		emailVerification, err := c.service.VerifyCode(apiCtx, dto.Email, dto.Code)
+		emailVerification, err := c.emailVerificationService.VerifyCode(apiCtx, dto.Email, dto.Code)
 		if err != nil {
-			status := response.Status_InternalServerError
-
-			switch err {
-			case verification.ErrInvalidCode:
-				status = response.Status_BadRequest
-			case verification.ErrAlreadyVerified:
-				status = response.Status_BadRequest
-			case exception.ErrNoDocuments:
-				status = response.Status_BadRequest
-			}
-
-			return ctx.SendError(response.ErrorResponse{
-				Status:  status,
-				Message: err.Error(),
-			})
+			return ctx.SendError(err)
 		}
 
 		responseData := struct {
@@ -99,16 +75,15 @@ func (c *emailVerificationController) VerifyCode() controller.HandlerFunc {
 		}
 
 		return ctx.SendJSON(response.JSONResponse{
-			Status: response.Status_Ok,
-			Data:   responseData,
+			Data: responseData,
 		})
 	}
 }
 
 func NewEmailVerificationController(
-	service verification.EmailVerificationService,
+	emailVerificationService verification.EmailVerificationService,
 ) EmailVerificationController {
 	return &emailVerificationController{
-		service: service,
+		emailVerificationService: emailVerificationService,
 	}
 }

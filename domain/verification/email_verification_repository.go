@@ -12,6 +12,14 @@ type (
 			error,
 		)
 
+		FindOneById(
+			ctx context.APIContext,
+			id string,
+		) (
+			EmailVerification,
+			error,
+		)
+
 		FindOneByEmail(
 			ctx context.APIContext,
 			email string,
@@ -24,6 +32,15 @@ type (
 			ctx context.APIContext,
 			id string,
 			isVerified bool,
+		) (
+			EmailVerification,
+			error,
+		)
+
+		UpdateOne_isConsumed(
+			ctx context.APIContext,
+			id string,
+			isConsumed bool,
 		) (
 			EmailVerification,
 			error,

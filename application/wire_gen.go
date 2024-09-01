@@ -12,8 +12,11 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/podossaem/podoroot/application/api"
 	"github.com/podossaem/podoroot/application/config"
+	"github.com/podossaem/podoroot/domain/user"
+	"github.com/podossaem/podoroot/domain/user/app"
+	persist2 "github.com/podossaem/podoroot/domain/user/persist"
 	"github.com/podossaem/podoroot/domain/verification"
-	"github.com/podossaem/podoroot/domain/verification/app"
+	app2 "github.com/podossaem/podoroot/domain/verification/app"
 	"github.com/podossaem/podoroot/domain/verification/persist"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/mymongo"
@@ -25,10 +28,14 @@ func Start() error {
 	client := mymongo.NewClient()
 	emailVerificationRepository := persist.NewEmailVerificationRepository(client)
 	emailVerificationService := verification.NewEmailVerificationService(emailVerificationRepository)
-	emailVerificationController := app.NewEmailVerificationController(emailVerificationService)
-	router := app.NewRouter(emailVerificationController)
-	apiRouter := api.NewRouter(router)
-	error2 := StartApplication(apiRouter, client)
+	userRepository := persist2.NewUserRepository(client)
+	userService := user.NewUserService(emailVerificationService, userRepository)
+	userController := app.NewUserController(userService)
+	userRouter := app.NewUserRouter(userController)
+	emailVerificationController := app2.NewEmailVerificationController(emailVerificationService)
+	verificationRouter := app2.NewVerificationRouter(emailVerificationController)
+	router := api.NewRouter(userRouter, verificationRouter)
+	error2 := StartApplication(router, client)
 	return error2
 }
 
@@ -41,12 +48,12 @@ func StartApplication(
 	if err := database.Init(mymongoClient); err != nil {
 		return err
 	}
-	app2 := echo.New()
-	app2.
+	app3 := echo.New()
+	app3.
 		Use(middleware.Logger())
-	router.Attach(app2)
+	router.Attach(app3)
 
-	if err := app2.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
+	if err := app3.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
 		return err
 	}
 

@@ -15,6 +15,7 @@ import (
 
 const (
 	Collection_EmailVerification = "email_verifications"
+	Collection_User              = "users"
 )
 
 type (

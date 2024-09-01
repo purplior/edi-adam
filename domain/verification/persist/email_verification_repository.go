@@ -10,12 +10,12 @@ import (
 )
 
 type (
-	repository struct {
+	emailVerificationRepository struct {
 		mongoClient *mymongo.Client
 	}
 )
 
-func (r *repository) InsertOne(
+func (r *emailVerificationRepository) InsertOne(
 	ctx context.APIContext,
 	emailVerification verification.EmailVerification,
 ) (
@@ -34,7 +34,37 @@ func (r *repository) InsertOne(
 	return createdEmailVerification, nil
 }
 
-func (r *repository) FindOneByEmail(
+func (r *emailVerificationRepository) FindOneById(
+	ctx context.APIContext,
+	id string,
+) (
+	verification.EmailVerification,
+	error,
+) {
+	oid, _ := primitive.ObjectIDFromHex(id)
+
+	var entity EmailVerification
+	err := r.
+		baseCollection().
+		FindOne(
+			ctx,
+			bson.M{
+				"_id": oid,
+			},
+			options.
+				FindOne().
+				SetSort(bson.M{"_id": -1}),
+		).
+		Decode(&entity)
+
+	if err != nil {
+		return verification.EmailVerification{}, err
+	}
+
+	return entity.ToModel(), nil
+}
+
+func (r *emailVerificationRepository) FindOneByEmail(
 	ctx context.APIContext,
 	email string,
 ) (
@@ -62,7 +92,7 @@ func (r *repository) FindOneByEmail(
 	return entity.ToModel(), nil
 }
 
-func (r *repository) UpdateOne_IsVerified(
+func (r *emailVerificationRepository) UpdateOne_IsVerified(
 	ctx context.APIContext,
 	id string,
 	isVerified bool,
@@ -98,14 +128,50 @@ func (r *repository) UpdateOne_IsVerified(
 	return entity.ToModel(), err
 }
 
-func (r *repository) baseCollection() *mymongo.MyMongoCollection {
+func (r *emailVerificationRepository) UpdateOne_isConsumed(
+	ctx context.APIContext,
+	id string,
+	isConsumed bool,
+) (
+	verification.EmailVerification,
+	error,
+) {
+	oid, _ := primitive.ObjectIDFromHex(id)
+
+	var entity EmailVerification
+	err := r.
+		baseCollection().
+		FindOneAndUpdate(
+			ctx,
+			bson.M{
+				"_id": oid,
+			},
+			bson.M{
+				"$set": bson.M{
+					"is_consumed": isConsumed,
+				},
+			},
+			options.
+				FindOneAndUpdate().
+				SetReturnDocument(options.After),
+		).
+		Decode(&entity)
+
+	if err != nil {
+		return verification.EmailVerification{}, err
+	}
+
+	return entity.ToModel(), err
+}
+
+func (r *emailVerificationRepository) baseCollection() *mymongo.MyMongoCollection {
 	return r.mongoClient.MyCollection(mymongo.Collection_EmailVerification)
 }
 
 func NewEmailVerificationRepository(
 	mongoClient *mymongo.Client,
 ) verification.EmailVerificationRepository {
-	return &repository{
+	return &emailVerificationRepository{
 		mongoClient: mongoClient,
 	}
 }

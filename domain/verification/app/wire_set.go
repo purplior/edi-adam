@@ -8,7 +8,7 @@ import (
 
 var New = wire.NewSet(
 	NewEmailVerificationController,
-	NewRouter,
+	NewVerificationRouter,
 	persist.NewEmailVerificationRepository,
 	verification.NewEmailVerificationService,
 )
