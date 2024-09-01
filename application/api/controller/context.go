@@ -22,6 +22,7 @@ func (ctx Context) SendJSON(jsonResponse response.JSONResponse) error {
 
 func (ctx Context) SendError(err error) error {
 	status := response.Status_InternalServerError
+	message := "internal server error"
 
 	switch err {
 	case exception.ErrBadRequest:
@@ -32,10 +33,25 @@ func (ctx Context) SendError(err error) error {
 		status = response.Status_BadRequest
 	case exception.ErrAlreadyVerified:
 		status = response.Status_BadRequest
+	case exception.ErrNotAcceptable:
+		status = response.Status_NotAcceptable
+	case exception.ErrAlreadySignedUp:
+		status = response.Status_NotAcceptable
+	case exception.ErrUnauthorized:
+		status = response.Status_Unauthorized
+	}
+
+	switch status {
+	case response.Status_BadRequest:
+		message = err.Error()
+	case response.Status_NotAcceptable:
+		message = err.Error()
+	case response.Status_Unauthorized:
+		message = err.Error()
 	}
 
 	return ctx.JSON(status, response.ErrorResponse{
 		Status:  status,
-		Message: err.Error(),
+		Message: message,
 	})
 }

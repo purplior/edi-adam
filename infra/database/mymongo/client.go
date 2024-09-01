@@ -13,11 +13,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
-const (
-	Collection_EmailVerification = "email_verifications"
-	Collection_User              = "users"
-)
-
 type (
 	ConstructorOption struct {
 		Phase         constant.Phase

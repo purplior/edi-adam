@@ -16,6 +16,10 @@ func Init(
 	if err := mymongoClient.Connect(ctx); err != nil {
 		return err
 	}
+	if err := mymongo.InitIndexes(ctx, mymongoClient); err != nil {
+		return err
+	}
+
 	if err := myredisClient.Connect(ctx); err != nil {
 		return err
 	}
