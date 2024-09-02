@@ -10,8 +10,9 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/podossaem/podoroot/application/api"
 	"github.com/podossaem/podoroot/application/config"
+	middleware2 "github.com/podossaem/podoroot/application/middleware"
+	"github.com/podossaem/podoroot/application/router"
 	"github.com/podossaem/podoroot/domain/auth"
 	"github.com/podossaem/podoroot/domain/auth/app"
 	"github.com/podossaem/podoroot/domain/user"
@@ -29,6 +30,7 @@ import (
 
 func Start() error {
 	client := mymongo.NewClient()
+	myredisClient := myredis.NewClient()
 	emailVerificationRepository := persist.NewEmailVerificationRepository(client)
 	emailVerificationService := verification.NewEmailVerificationService(emailVerificationRepository)
 	userRepository := persist2.NewUserRepository(client)
@@ -40,18 +42,17 @@ func Start() error {
 	userRouter := app2.NewUserRouter(userController)
 	emailVerificationController := app3.NewEmailVerificationController(emailVerificationService)
 	verificationRouter := app3.NewVerificationRouter(emailVerificationController)
-	router := api.NewRouter(authRouter, userRouter, verificationRouter)
-	myredisClient := myredis.NewClient()
-	error2 := StartApplication(router, client, myredisClient)
+	routerRouter := router.New(authRouter, userRouter, verificationRouter)
+	error2 := StartApplication(client, myredisClient, routerRouter)
 	return error2
 }
 
 // app.go:
 
 func StartApplication(
-	router api.Router,
 	mymongoClient *mymongo.Client,
-	myredisClient *myredis.Client,
+	myredisClient *myredis.Client, router2 router.Router,
+
 ) error {
 	if err := database.Init(
 		mymongoClient,
@@ -62,7 +63,10 @@ func StartApplication(
 	app4 := echo.New()
 	app4.
 		Use(middleware.Logger())
-	router.Attach(app4)
+	app4.
+		Use(middleware2.New())
+	router2.
+		Attach(app4)
 
 	if err := app4.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
 		return err

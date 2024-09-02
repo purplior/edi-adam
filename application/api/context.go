@@ -1,14 +1,16 @@
-package controller
+package api
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/podossaem/podoroot/application/api/response"
+	"github.com/podossaem/podoroot/application/response"
+	"github.com/podossaem/podoroot/domain/auth"
 	"github.com/podossaem/podoroot/domain/exception"
 )
 
 type (
 	Context struct {
 		echo.Context
+		Identity *auth.Identity
 	}
 )
 

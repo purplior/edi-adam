@@ -8,9 +8,10 @@ import (
 
 	"github.com/google/wire"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/podossaem/podoroot/application/api"
+	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/podossaem/podoroot/application/config"
+	"github.com/podossaem/podoroot/application/middleware"
+	"github.com/podossaem/podoroot/application/router"
 	"github.com/podossaem/podoroot/domain"
 	"github.com/podossaem/podoroot/infra"
 	"github.com/podossaem/podoroot/infra/database"
@@ -19,9 +20,9 @@ import (
 )
 
 func StartApplication(
-	router api.Router,
 	mymongoClient *mymongo.Client,
 	myredisClient *myredis.Client,
+	router router.Router,
 ) error {
 	if err := database.Init(
 		mymongoClient,
@@ -32,7 +33,9 @@ func StartApplication(
 
 	app := echo.New()
 
-	app.Use(middleware.Logger())
+	app.Use(echoMiddleware.Logger())
+	app.Use(middleware.New())
+
 	router.Attach(app)
 
 	if err := app.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
@@ -52,7 +55,7 @@ func Start() error {
 	panic(
 		wire.Build(
 			StartApplication,
-			api.NewRouter,
+			router.New,
 			domain.New,
 			infra.New,
 		),

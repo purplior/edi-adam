@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/podossaem/podoroot/application/api/controller"
+	"github.com/podossaem/podoroot/application/api"
 )
 
 type (
@@ -22,14 +22,14 @@ func (r *authRouter) Attach(router *echo.Group) {
 
 	authRouterGroup.POST(
 		"/sign-in-by-email",
-		controller.Handler(
+		api.Handler(
 			r.authController.SignInByEmailVerification(),
 		),
 	)
 
 	authRouterGroup.POST(
 		"/sign-up-by-email",
-		controller.Handler(
+		api.Handler(
 			r.authController.SignUpByEmailVerification(),
 		),
 	)

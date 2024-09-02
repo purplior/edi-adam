@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/podossaem/podoroot/application/api/controller"
+	"github.com/podossaem/podoroot/application/api"
 )
 
 type (
@@ -22,13 +22,13 @@ func (r *verificationRouter) Attach(router *echo.Group) {
 
 	emailVerificationRouter.POST(
 		"/request-code",
-		controller.Handler(
+		api.Handler(
 			r.emailVerificationController.RequestCode(),
 		),
 	)
 	emailVerificationRouter.POST(
 		"/verify-code",
-		controller.Handler(
+		api.Handler(
 			r.emailVerificationController.VerifyCode(),
 		),
 	)

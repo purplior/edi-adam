@@ -1,4 +1,4 @@
-package api
+package router
 
 import (
 	"github.com/labstack/echo/v4"
@@ -27,7 +27,7 @@ func (r *router) Attach(app *echo.Echo) {
 	r.verificationRouter.Attach(api)
 }
 
-func NewRouter(
+func New(
 	authRouter auth.AuthRouter,
 	userRouter user.UserRouter,
 	verificationRouter verification.VerificationRouter,

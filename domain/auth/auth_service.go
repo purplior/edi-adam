@@ -123,8 +123,8 @@ func (s *authService) makeToken(
 		return IdentityToken{}, err
 	}
 
-	// 유효 기간: 15분
-	atExpires := time.Now().Add(time.Minute * 15).Unix()
+	// 유효 기간: 1시간
+	atExpires := time.Now().Add(time.Hour).Unix()
 	at, err := myjwt.SignWithHS256(
 		payload,
 		atExpires,
@@ -134,10 +134,12 @@ func (s *authService) makeToken(
 		return IdentityToken{}, err
 	}
 
-	// 유효 기간: 365일
-	rtExpires := time.Now().Add(time.Hour * 24 * 365).Unix()
+	// 유효 기간: 6개월
+	rtExpires := time.Now().Add(time.Hour * 24 * 180).Unix()
 	rt, err := myjwt.SignWithHS256(
-		payload,
+		map[string]interface{}{
+			"version": "v1",
+		},
 		rtExpires,
 		jwtSecretKey,
 	)

@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/podossaem/podoroot/application/api/controller"
-	"github.com/podossaem/podoroot/application/api/response"
+	"github.com/podossaem/podoroot/application/api"
+	"github.com/podossaem/podoroot/application/response"
 	"github.com/podossaem/podoroot/domain/context"
 	domain "github.com/podossaem/podoroot/domain/verification"
 )
@@ -12,12 +12,12 @@ type (
 		/**
 		 * 인증코드 요청
 		 */
-		RequestCode() controller.HandlerFunc
+		RequestCode() api.HandlerFunc
 
 		/**
 		 * 인증코드 인증
 		 */
-		VerifyCode() controller.HandlerFunc
+		VerifyCode() api.HandlerFunc
 	}
 )
 
@@ -27,8 +27,8 @@ type (
 	}
 )
 
-func (c *emailVerificationController) RequestCode() controller.HandlerFunc {
-	return func(ctx *controller.Context) error {
+func (c *emailVerificationController) RequestCode() api.HandlerFunc {
+	return func(ctx *api.Context) error {
 		var dto struct {
 			Email string `json:"email"`
 		}
@@ -51,8 +51,8 @@ func (c *emailVerificationController) RequestCode() controller.HandlerFunc {
 	}
 }
 
-func (c *emailVerificationController) VerifyCode() controller.HandlerFunc {
-	return func(ctx *controller.Context) error {
+func (c *emailVerificationController) VerifyCode() api.HandlerFunc {
+	return func(ctx *api.Context) error {
 		var dto struct {
 			Email string `json:"email"`
 			Code  string `json:"code"`

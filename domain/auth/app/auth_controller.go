@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/podossaem/podoroot/application/api/controller"
-	"github.com/podossaem/podoroot/application/api/response"
+	"github.com/podossaem/podoroot/application/api"
+	"github.com/podossaem/podoroot/application/response"
 	domain "github.com/podossaem/podoroot/domain/auth"
 	"github.com/podossaem/podoroot/domain/context"
 )
@@ -12,12 +12,12 @@ type (
 		/**
 		 * 이메일로 로그인
 		 */
-		SignInByEmailVerification() controller.HandlerFunc
+		SignInByEmailVerification() api.HandlerFunc
 
 		/**
 		* 이메일로 회원가입
 		 */
-		SignUpByEmailVerification() controller.HandlerFunc
+		SignUpByEmailVerification() api.HandlerFunc
 	}
 )
 
@@ -27,8 +27,8 @@ type (
 	}
 )
 
-func (c *authController) SignInByEmailVerification() controller.HandlerFunc {
-	return func(ctx *controller.Context) error {
+func (c *authController) SignInByEmailVerification() api.HandlerFunc {
+	return func(ctx *api.Context) error {
 		var dto domain.SignInByEmailVerificationRequest
 
 		if err := ctx.Bind(&dto); err != nil {
@@ -56,8 +56,8 @@ func (c *authController) SignInByEmailVerification() controller.HandlerFunc {
 	}
 }
 
-func (c *authController) SignUpByEmailVerification() controller.HandlerFunc {
-	return func(ctx *controller.Context) error {
+func (c *authController) SignUpByEmailVerification() api.HandlerFunc {
+	return func(ctx *api.Context) error {
 		var dto domain.SignUpByEmailVerificationRequest
 
 		if err := ctx.Bind(&dto); err != nil {
