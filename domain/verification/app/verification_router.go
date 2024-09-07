@@ -18,16 +18,16 @@ type (
 )
 
 func (r *verificationRouter) Attach(router *echo.Group) {
-	emailVerificationRouter := router.Group("/email-verifications")
+	emailVerificationRouter := router.Group("/verifications")
 
 	emailVerificationRouter.POST(
-		"/request-code",
+		"/email/request-code",
 		api.Handler(
 			r.emailVerificationController.RequestCode(),
 		),
 	)
 	emailVerificationRouter.POST(
-		"/verify-code",
+		"/email/verify-code",
 		api.Handler(
 			r.emailVerificationController.VerifyCode(),
 		),
