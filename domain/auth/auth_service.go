@@ -111,22 +111,28 @@ func (s *authService) makeToken(
 	IdentityToken,
 	error,
 ) {
+	version := "v1"
 	identity := Identity{
-		Version:   "v1",
-		AccountID: user.AccountID,
-		Nickname:  user.Nickname,
-		Role:      user.Role,
+		Version:    version,
+		ID:         user.ID,
+		JoinMethod: user.JoinMethod,
+		AccountID:  user.AccountID,
+		Nickname:   user.Nickname,
+		Role:       user.Role,
 	}
 
-	payload, err := identity.ToMap()
+	atPayload, err := identity.ToMap()
 	if err != nil {
 		return IdentityToken{}, err
 	}
 
 	// 유효 기간: 1시간
-	atExpires := time.Now().Add(time.Hour).Unix()
+	// atExpires := time.Now().Add(time.Hour).Unix()
+
+	// 임시 10초
+	atExpires := time.Now().Add(time.Second * 10).Unix()
 	at, err := myjwt.SignWithHS256(
-		payload,
+		atPayload,
 		atExpires,
 		jwtSecretKey,
 	)
@@ -134,12 +140,19 @@ func (s *authService) makeToken(
 		return IdentityToken{}, err
 	}
 
+	refreshTokenPayload := RefreshTokenPayload{
+		Version: version,
+		ID:      user.ID,
+	}
+	rtPayload, err := refreshTokenPayload.ToMap()
+	if err != nil {
+		return IdentityToken{}, err
+	}
+
 	// 유효 기간: 6개월
 	rtExpires := time.Now().Add(time.Hour * 24 * 180).Unix()
 	rt, err := myjwt.SignWithHS256(
-		map[string]interface{}{
-			"version": "v1",
-		},
+		rtPayload,
 		rtExpires,
 		jwtSecretKey,
 	)

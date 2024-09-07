@@ -15,11 +15,13 @@ import (
 	"github.com/podossaem/podoroot/application/router"
 	"github.com/podossaem/podoroot/domain/auth"
 	"github.com/podossaem/podoroot/domain/auth/app"
+	"github.com/podossaem/podoroot/domain/me"
+	app2 "github.com/podossaem/podoroot/domain/me/app"
 	"github.com/podossaem/podoroot/domain/user"
-	app2 "github.com/podossaem/podoroot/domain/user/app"
+	app3 "github.com/podossaem/podoroot/domain/user/app"
 	persist2 "github.com/podossaem/podoroot/domain/user/persist"
 	"github.com/podossaem/podoroot/domain/verification"
-	app3 "github.com/podossaem/podoroot/domain/verification/app"
+	app4 "github.com/podossaem/podoroot/domain/verification/app"
 	"github.com/podossaem/podoroot/domain/verification/persist"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/mymongo"
@@ -38,11 +40,14 @@ func Start() error {
 	authService := auth.NewAuthService(emailVerificationService, userService)
 	authController := app.NewAuthController(authService)
 	authRouter := app.NewAuthRouter(authController)
-	userController := app2.NewUserController()
-	userRouter := app2.NewUserRouter(userController)
-	emailVerificationController := app3.NewEmailVerificationController(emailVerificationService)
-	verificationRouter := app3.NewVerificationRouter(emailVerificationController)
-	routerRouter := router.New(authRouter, userRouter, verificationRouter)
+	meService := me.NewMeService(userRepository)
+	meController := app2.NewMeController(meService)
+	meRouter := app2.NewMeRouter(meController)
+	userController := app3.NewUserController()
+	userRouter := app3.NewUserRouter(userController)
+	emailVerificationController := app4.NewEmailVerificationController(emailVerificationService)
+	verificationRouter := app4.NewVerificationRouter(emailVerificationController)
+	routerRouter := router.New(authRouter, meRouter, userRouter, verificationRouter)
 	error2 := StartApplication(client, myredisClient, routerRouter)
 	return error2
 }
@@ -60,15 +65,15 @@ func StartApplication(
 	); err != nil {
 		return err
 	}
-	app4 := echo.New()
-	app4.
+	app5 := echo.New()
+	app5.
 		Use(middleware.Logger())
-	app4.
+	app5.
 		Use(middleware2.New())
 	router2.
-		Attach(app4)
+		Attach(app5)
 
-	if err := app4.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
+	if err := app5.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
 		return err
 	}
 

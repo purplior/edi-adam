@@ -24,6 +24,13 @@ type (
 		CreatedAt       time.Time `json:"createdAt"`
 	}
 
+	UserInfo struct {
+		JoinMethod string    `json:"joinMethod"`
+		AccountID  string    `json:"accountId"`
+		Nickname   string    `json:"string"`
+		CreatedAt  time.Time `json:"createdAt"`
+	}
+
 	hashConfig struct {
 		memory      uint32
 		iterations  uint32

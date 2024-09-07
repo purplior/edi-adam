@@ -5,8 +5,7 @@ import (
 )
 
 type (
-	UserController interface {
-	}
+	UserController interface{}
 )
 
 type (
