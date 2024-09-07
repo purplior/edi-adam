@@ -29,7 +29,6 @@ type (
 			ctx context.APIContext,
 			request SignUpByEmailVerificationRequest,
 		) (
-			identityToken IdentityToken,
 			err error,
 		)
 
@@ -79,19 +78,16 @@ func (s *authService) SignInByEmailVerification(
 func (s *authService) SignUpByEmailVerification(
 	ctx context.APIContext,
 	request SignUpByEmailVerificationRequest,
-) (
-	IdentityToken,
-	error,
-) {
+) error {
 	verification, err := s.emailVerificationService.Consume(
 		ctx,
 		request.VerificationID,
 	)
 	if err != nil {
-		return IdentityToken{}, err
+		return err
 	}
 
-	newUser, err := s.userService.CreateOne(
+	_, err = s.userService.CreateOne(
 		ctx,
 		user.User{
 			JoinMethod:      user.JoinMethod_Email,
@@ -101,16 +97,8 @@ func (s *authService) SignUpByEmailVerification(
 			Role:            user.Role_User,
 		},
 	)
-	if err != nil {
-		return IdentityToken{}, err
-	}
 
-	identityToken, err := s.makeToken(newUser)
-	if err != nil {
-		return IdentityToken{}, err
-	}
-
-	return identityToken, nil
+	return err
 }
 
 func (s *authService) RefreshIdentityToken(
