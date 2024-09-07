@@ -26,7 +26,7 @@ var (
 			Type:   Type_AllChildren,
 			Method: Method_All,
 		},
-		"email-verifications": {
+		"verifications": {
 			Type:   Type_AllChildren,
 			Method: Method_All,
 		},
