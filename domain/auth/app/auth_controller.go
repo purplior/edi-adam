@@ -15,9 +15,14 @@ type (
 		SignInByEmailVerification() api.HandlerFunc
 
 		/**
-		* 이메일로 회원가입
+		 * 이메일로 회원가입
 		 */
 		SignUpByEmailVerification() api.HandlerFunc
+
+		/**
+		 * 토큰 재발급
+		 */
+		RefreshIdentityToken() api.HandlerFunc
 	}
 )
 
@@ -30,7 +35,6 @@ type (
 func (c *authController) SignInByEmailVerification() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		var dto domain.SignInByEmailVerificationRequest
-
 		if err := ctx.Bind(&dto); err != nil {
 			return ctx.SendError(err)
 		}
@@ -59,7 +63,6 @@ func (c *authController) SignInByEmailVerification() api.HandlerFunc {
 func (c *authController) SignUpByEmailVerification() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		var dto domain.SignUpByEmailVerificationRequest
-
 		if err := ctx.Bind(&dto); err != nil {
 			return ctx.SendError(err)
 		}
@@ -81,6 +84,28 @@ func (c *authController) SignUpByEmailVerification() api.HandlerFunc {
 			}{
 				Token: token,
 			},
+		})
+	}
+}
+
+func (c *authController) RefreshIdentityToken() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		var dto domain.IdentityToken
+		if err := ctx.Bind(&dto); err != nil {
+			return ctx.SendError(err)
+		}
+
+		apiCtx, cancel := context.NewAPIContext()
+		defer cancel()
+
+		newIdentityToken, err := c.authService.RefreshIdentityToken(apiCtx, dto)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Status: response.Status_Ok,
+			Data:   newIdentityToken,
 		})
 	}
 }

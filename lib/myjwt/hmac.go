@@ -1,6 +1,10 @@
 package myjwt
 
 import (
+	"encoding/base64"
+	"encoding/json"
+	"strings"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/podossaem/podoroot/domain/exception"
 )
@@ -39,4 +43,24 @@ func ParseWithHMAC(tokenString string, secret []byte) (map[string]interface{}, e
 	}
 
 	return nil, exception.ErrUnauthorized
+}
+
+func ParseWithHMACWithoutVerify(tokenString string) (map[string]interface{}, error) {
+	parts := strings.Split(tokenString, ".")
+	if len(parts) != 3 {
+		return nil, exception.ErrUnauthorized
+	}
+
+	payload, err := base64.RawURLEncoding.DecodeString(parts[1])
+	if err != nil {
+		return nil, exception.ErrUnauthorized
+	}
+
+	// 페이로드를 JSON으로 변환합니다.
+	var payloadMap map[string]interface{}
+	if err := json.Unmarshal(payload, &payloadMap); err != nil {
+		return nil, exception.ErrUnauthorized
+	}
+
+	return payloadMap, nil
 }

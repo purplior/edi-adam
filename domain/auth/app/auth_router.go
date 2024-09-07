@@ -21,14 +21,21 @@ func (r *authRouter) Attach(router *echo.Group) {
 	authRouterGroup := router.Group("/auth")
 
 	authRouterGroup.POST(
-		"/sign-in-by-email",
+		"/identity/refresh",
+		api.Handler(
+			r.authController.RefreshIdentityToken(),
+		),
+	)
+
+	authRouterGroup.POST(
+		"/email/sign-in",
 		api.Handler(
 			r.authController.SignInByEmailVerification(),
 		),
 	)
 
 	authRouterGroup.POST(
-		"/sign-up-by-email",
+		"/email/sign-up",
 		api.Handler(
 			r.authController.SignUpByEmailVerification(),
 		),

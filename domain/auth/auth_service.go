@@ -32,6 +32,14 @@ type (
 			identityToken IdentityToken,
 			err error,
 		)
+
+		RefreshIdentityToken(
+			ctx context.APIContext,
+			identityToken IdentityToken,
+		) (
+			refreshedIdentityToken IdentityToken,
+			err error,
+		)
 	}
 
 	authService struct {
@@ -105,6 +113,79 @@ func (s *authService) SignUpByEmailVerification(
 	return identityToken, nil
 }
 
+func (s *authService) RefreshIdentityToken(
+	ctx context.APIContext,
+	identityToken IdentityToken,
+) (
+	IdentityToken,
+	error,
+) {
+	rtPayload, err := s.getRefreshTokenPayload(identityToken.RefreshToken)
+	if err != nil {
+		return IdentityToken{}, exception.ErrUnauthorized
+	}
+
+	identity, newAt, err := s.getIdentityAndNewAccessTokenWithoutVerify(identityToken.AccessToken)
+	if err != nil {
+		return IdentityToken{}, exception.ErrUnauthorized
+	}
+
+	if rtPayload.ID != identity.ID || rtPayload.Version != identity.Version {
+		return IdentityToken{}, exception.ErrUnauthorized
+	}
+
+	return IdentityToken{
+		AccessToken:  newAt,
+		RefreshToken: identityToken.RefreshToken,
+	}, nil
+}
+
+func (s *authService) makeAccessToken(
+	payload map[string]interface{},
+) (
+	string,
+	error,
+) {
+	// 유효 기간: 1시간
+	// atExpires := time.Now().Add(time.Hour).Unix()
+
+	// 임시 10초
+	atExpires := time.Now().Add(time.Second * 10).Unix()
+	at, err := myjwt.SignWithHS256(
+		payload,
+		atExpires,
+		jwtSecretKey,
+	)
+	if err != nil {
+		return "", err
+	}
+
+	return at, nil
+}
+
+func (s *authService) makeRefreshToken(
+	payload map[string]interface{},
+) (
+	string,
+	error,
+) {
+	// 유효 기간: 6개월
+	// rtExpires := time.Now().Add(time.Hour * 24 * 180).Unix()
+
+	// 유효 기간: 1분
+	rtExpires := time.Now().Add(time.Minute).Unix()
+	rt, err := myjwt.SignWithHS256(
+		payload,
+		rtExpires,
+		jwtSecretKey,
+	)
+	if err != nil {
+		return "", err
+	}
+
+	return rt, nil
+}
+
 func (s *authService) makeToken(
 	user user.User,
 ) (
@@ -126,16 +207,7 @@ func (s *authService) makeToken(
 		return IdentityToken{}, err
 	}
 
-	// 유효 기간: 1시간
-	// atExpires := time.Now().Add(time.Hour).Unix()
-
-	// 임시 10초
-	atExpires := time.Now().Add(time.Second * 10).Unix()
-	at, err := myjwt.SignWithHS256(
-		atPayload,
-		atExpires,
-		jwtSecretKey,
-	)
+	at, err := s.makeAccessToken(atPayload)
 	if err != nil {
 		return IdentityToken{}, err
 	}
@@ -149,13 +221,7 @@ func (s *authService) makeToken(
 		return IdentityToken{}, err
 	}
 
-	// 유효 기간: 6개월
-	rtExpires := time.Now().Add(time.Hour * 24 * 180).Unix()
-	rt, err := myjwt.SignWithHS256(
-		rtPayload,
-		rtExpires,
-		jwtSecretKey,
-	)
+	rt, err := s.makeRefreshToken(rtPayload)
 	if err != nil {
 		return IdentityToken{}, err
 	}
@@ -164,6 +230,45 @@ func (s *authService) makeToken(
 		AccessToken:  at,
 		RefreshToken: rt,
 	}, nil
+}
+
+func (s *authService) getIdentityAndNewAccessTokenWithoutVerify(
+	accessToken string,
+) (
+	Identity,
+	string,
+	error,
+) {
+	atPayload, _ := myjwt.ParseWithHMACWithoutVerify(accessToken)
+
+	print(atPayload["version"])
+
+	var identity Identity
+	identity.SyncWith(atPayload)
+
+	newAccessToken, err := s.makeAccessToken(atPayload)
+	if err != nil {
+		return Identity{}, "", err
+	}
+
+	return identity, newAccessToken, nil
+}
+
+func (s *authService) getRefreshTokenPayload(
+	refreshToken string,
+) (
+	RefreshTokenPayload,
+	error,
+) {
+	payload, err := myjwt.ParseWithHMAC(refreshToken, jwtSecretKey)
+	if err != nil {
+		return RefreshTokenPayload{}, err
+	}
+
+	var rtPayload RefreshTokenPayload
+	rtPayload.SyncWith(payload)
+
+	return rtPayload, nil
 }
 
 func NewAuthService(
