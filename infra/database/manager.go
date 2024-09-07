@@ -20,9 +20,10 @@ func Init(
 		return err
 	}
 
-	if err := myredisClient.Connect(ctx); err != nil {
-		return err
-	}
+	// 현재 Redis 사용하는 곳이 없어서 주석
+	// if err := myredisClient.Connect(ctx); err != nil {
+	// 	return err
+	// }
 
 	return nil
 }
