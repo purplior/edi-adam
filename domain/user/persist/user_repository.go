@@ -1,8 +1,6 @@
 package persist
 
 import (
-	"log"
-
 	"github.com/podossaem/podoroot/domain/context"
 	"github.com/podossaem/podoroot/domain/exception"
 	domain "github.com/podossaem/podoroot/domain/user"
@@ -55,7 +53,6 @@ func (r *userRepository) InsertOne(
 	result, err := r.baseCollection().InsertOne(ctx, entity)
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
-			log.Println("here..")
 			return domain.User{}, exception.ErrAlreadySignedUp
 		}
 		return domain.User{}, err

@@ -3,8 +3,8 @@ package exception
 import "errors"
 
 var (
-	ErrInvalidVerificationCode = errors.New("invalid code")
-	ErrAlreadyVerified         = errors.New("already verified")
-	ErrAlreadyConsumed         = errors.New("already consumed")
-	ErrAlreadySignedUp         = errors.New("already sign up")
+	ErrInvalidVerificationCode = errors.New("잘못된 인증코드 입니다")
+	ErrAlreadyVerified         = errors.New("이미 인증이 완료 되었습니다")
+	ErrAlreadyConsumed         = errors.New("이미 인증 되었습니다")
+	ErrAlreadySignedUp         = errors.New("이미 회원가입이 완료된 계정입니다")
 )
