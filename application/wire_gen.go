@@ -9,9 +9,8 @@ package application
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/podossaem/podoroot/application/config"
-	middleware2 "github.com/podossaem/podoroot/application/middleware"
+	"github.com/podossaem/podoroot/application/middleware"
 	"github.com/podossaem/podoroot/application/router"
 	"github.com/podossaem/podoroot/domain/auth"
 	"github.com/podossaem/podoroot/domain/auth/app"
@@ -67,9 +66,7 @@ func StartApplication(
 	}
 	app5 := echo.New()
 	app5.
-		Use(middleware.Logger())
-	app5.
-		Use(middleware2.New())
+		Use(middleware.New()...)
 	router2.
 		Attach(app5)
 

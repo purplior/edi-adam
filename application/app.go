@@ -8,7 +8,6 @@ import (
 
 	"github.com/google/wire"
 	"github.com/labstack/echo/v4"
-	echoMiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/podossaem/podoroot/application/config"
 	"github.com/podossaem/podoroot/application/middleware"
 	"github.com/podossaem/podoroot/application/router"
@@ -33,8 +32,7 @@ func StartApplication(
 
 	app := echo.New()
 
-	app.Use(echoMiddleware.Logger())
-	app.Use(middleware.New())
+	app.Use(middleware.New()...)
 
 	router.Attach(app)
 
