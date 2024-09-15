@@ -22,6 +22,7 @@ type (
 			request SignInByEmailVerificationRequest,
 		) (
 			identityToken IdentityToken,
+			identity Identity,
 			err error,
 		)
 
@@ -52,6 +53,7 @@ func (s *authService) SignInByEmailVerification(
 	request SignInByEmailVerificationRequest,
 ) (
 	IdentityToken,
+	Identity,
 	error,
 ) {
 	existedUser, err := s.userService.GetByAccount(
@@ -60,19 +62,19 @@ func (s *authService) SignInByEmailVerification(
 		request.AccountID,
 	)
 	if err != nil {
-		return IdentityToken{}, exception.ErrUnauthorized
+		return IdentityToken{}, Identity{}, exception.ErrUnauthorized
 	}
 
 	if err := existedUser.ComparePassword(request.Password); err != nil {
-		return IdentityToken{}, exception.ErrUnauthorized
+		return IdentityToken{}, Identity{}, exception.ErrUnauthorized
 	}
 
-	identityToken, err := s.makeToken(existedUser)
+	identityToken, identity, err := s.makeToken(existedUser)
 	if err != nil {
-		return IdentityToken{}, exception.ErrUnauthorized
+		return IdentityToken{}, Identity{}, exception.ErrUnauthorized
 	}
 
-	return identityToken, nil
+	return identityToken, identity, nil
 }
 
 func (s *authService) SignUpByEmailVerification(
@@ -178,6 +180,7 @@ func (s *authService) makeToken(
 	user user.User,
 ) (
 	IdentityToken,
+	Identity,
 	error,
 ) {
 	version := "v1"
@@ -192,12 +195,12 @@ func (s *authService) makeToken(
 
 	atPayload, err := identity.ToMap()
 	if err != nil {
-		return IdentityToken{}, err
+		return IdentityToken{}, Identity{}, err
 	}
 
 	at, err := s.makeAccessToken(atPayload)
 	if err != nil {
-		return IdentityToken{}, err
+		return IdentityToken{}, Identity{}, err
 	}
 
 	refreshTokenPayload := RefreshTokenPayload{
@@ -206,18 +209,18 @@ func (s *authService) makeToken(
 	}
 	rtPayload, err := refreshTokenPayload.ToMap()
 	if err != nil {
-		return IdentityToken{}, err
+		return IdentityToken{}, Identity{}, err
 	}
 
 	rt, err := s.makeRefreshToken(rtPayload)
 	if err != nil {
-		return IdentityToken{}, err
+		return IdentityToken{}, Identity{}, err
 	}
 
 	return IdentityToken{
 		AccessToken:  at,
 		RefreshToken: rt,
-	}, nil
+	}, identity, nil
 }
 
 func (s *authService) getIdentityAndNewAccessTokenWithoutVerify(

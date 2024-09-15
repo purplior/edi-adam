@@ -42,7 +42,7 @@ func (c *authController) SignInByEmailVerification() api.HandlerFunc {
 		apiCtx, cancel := context.NewAPIContext()
 		defer cancel()
 
-		token, err := c.authService.SignInByEmailVerification(
+		identityToken, identity, err := c.authService.SignInByEmailVerification(
 			apiCtx,
 			dto,
 		)
@@ -52,9 +52,11 @@ func (c *authController) SignInByEmailVerification() api.HandlerFunc {
 
 		return ctx.SendJSON(response.JSONResponse{
 			Data: struct {
-				Token domain.IdentityToken `json:"token"`
+				Token    domain.IdentityToken `json:"token"`
+				Identity domain.Identity      `json:"identity"`
 			}{
-				Token: token,
+				Token:    identityToken,
+				Identity: identity,
 			},
 		})
 	}
@@ -86,6 +88,7 @@ func (c *authController) RefreshIdentityToken() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		var dto domain.IdentityToken
 		if err := ctx.Bind(&dto); err != nil {
+			print(err)
 			return ctx.SendError(err)
 		}
 
