@@ -32,6 +32,7 @@ func (c *emailVerificationController) RequestCode() api.HandlerFunc {
 		var dto struct {
 			Email string `json:"email"`
 		}
+		isTestMode := len(ctx.QueryParam("test")) > 0
 
 		if err := ctx.Bind(&dto); err != nil {
 			return ctx.SendError(err)
@@ -40,13 +41,24 @@ func (c *emailVerificationController) RequestCode() api.HandlerFunc {
 		apiCtx, cancel := context.NewAPIContext()
 		defer cancel()
 
-		if _, err := c.emailVerificationService.RequestCode(apiCtx, dto.Email); err != nil {
+		emailVerification, err := c.emailVerificationService.RequestCode(
+			apiCtx,
+			dto.Email,
+			isTestMode,
+		)
+		if err != nil {
 			return ctx.SendError(err)
+		}
+
+		responseData := struct {
+			ID string `json:"id"`
+		}{
+			ID: emailVerification.ID,
 		}
 
 		return ctx.SendJSON(response.JSONResponse{
 			Status: response.Status_Created,
-			Data:   nil,
+			Data:   responseData,
 		})
 	}
 }

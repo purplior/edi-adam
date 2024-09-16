@@ -4,36 +4,23 @@ import (
 	"time"
 
 	domain "github.com/podossaem/podoroot/domain/user"
-	"github.com/podossaem/podoroot/lib/mydate"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/podossaem/podoroot/lib/dt"
 )
 
 type (
 	User struct {
-		ID              primitive.ObjectID `bson:"_id,omitempty"`
-		JoinMethod      string             `bson:"join_method"`
-		AccountID       string             `bson:"account_id"`
-		AccountPassword string             `bson:"account_password"`
-		Nickname        string             `bson:"nickname"`
-		Role            int                `bson:"role"`
-		CreatedAt       time.Time          `bson:"created_at"`
+		ID              uint      `gorm:"primaryKey;autoIncrement"`
+		JoinMethod      string    `gorm:"type:varchar(255);uniqueIndex:idx_join_method_account"`
+		AccountID       string    `gorm:"type:varchar(255);not null;uniqueIndex:idx_join_method_account"`
+		AccountPassword string    `gorm:"type:varchar(255);not null"`
+		Nickname        string    `gorm:"type:varchar(100)"`
+		Role            int       `gorm:"default:100"`
+		CreatedAt       time.Time `gorm:"autoCreateTime"`
 	}
 )
 
-func (e User) BeforeInsert() User {
-	e.CreatedAt = mydate.Now()
-
-	return e
-}
-
 func (e User) ToModel() domain.User {
-	id := ""
-	if !e.ID.IsZero() {
-		id = e.ID.Hex()
-	}
-
-	return domain.User{
-		ID:              id,
+	model := domain.User{
 		JoinMethod:      e.JoinMethod,
 		AccountID:       e.AccountID,
 		AccountPassword: e.AccountPassword,
@@ -41,13 +28,16 @@ func (e User) ToModel() domain.User {
 		Role:            e.Role,
 		CreatedAt:       e.CreatedAt,
 	}
+
+	if e.ID > 0 {
+		model.ID = dt.Str(e.ID)
+	}
+
+	return model
 }
 
 func MakeUser(m domain.User) User {
-	oid, _ := primitive.ObjectIDFromHex(m.ID)
-
-	return User{
-		ID:              oid,
+	entity := User{
 		JoinMethod:      m.JoinMethod,
 		AccountID:       m.AccountID,
 		AccountPassword: m.AccountPassword,
@@ -55,4 +45,10 @@ func MakeUser(m domain.User) User {
 		Role:            m.Role,
 		CreatedAt:       m.CreatedAt,
 	}
+
+	if len(m.ID) > 0 {
+		entity.ID = dt.UInt(m.ID)
+	}
+
+	return entity
 }

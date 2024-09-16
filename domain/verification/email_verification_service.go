@@ -24,6 +24,7 @@ type (
 		RequestCode(
 			ctx context.APIContext,
 			email string,
+			isTestMode bool,
 		) (
 			EmailVerification,
 			error,
@@ -52,6 +53,9 @@ func (s *service) Consume(
 	if err != nil {
 		return EmailVerification{}, err
 	}
+	if !emailVerification.IsVerified {
+		return EmailVerification{}, exception.ErrNotConsumed
+	}
 	if emailVerification.IsConsumed {
 		return EmailVerification{}, exception.ErrAlreadyConsumed
 	}
@@ -69,6 +73,7 @@ func (s *service) Consume(
 func (s *service) RequestCode(
 	ctx context.APIContext,
 	email string,
+	isTestMode bool,
 ) (EmailVerification, error) {
 	code := strgen.RandomNumber(6)
 	verification := EmailVerification{
@@ -87,14 +92,16 @@ func (s *service) RequestCode(
 		return EmailVerification{}, err
 	}
 
-	if err := mymail.SendGmail(mymail.SendGmailRequest{
-		To:           email,
-		From:         config.CsEmail(),
-		FromPassword: config.CsEmailPassword(),
-		Subject:      subject,
-		Body:         body,
-	}); err != nil {
-		return EmailVerification{}, err
+	if !isTestMode {
+		if err := mymail.SendGmail(mymail.SendGmailRequest{
+			To:           email,
+			From:         config.CsEmail(),
+			FromPassword: config.CsEmailPassword(),
+			Subject:      subject,
+			Body:         body,
+		}); err != nil {
+			return EmailVerification{}, err
+		}
 	}
 
 	return ver, nil

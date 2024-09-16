@@ -31,6 +31,8 @@ func (ctx Context) SendError(err error) error {
 		status = response.Status_BadRequest
 	case exception.ErrAlreadyConsumed:
 		status = response.Status_BadRequest
+	case exception.ErrNotConsumed:
+		status = response.Status_BadRequest
 	case exception.ErrInvalidVerificationCode:
 		status = response.Status_BadRequest
 	case exception.ErrAlreadyVerified:

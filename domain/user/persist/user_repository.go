@@ -2,17 +2,14 @@ package persist
 
 import (
 	"github.com/podossaem/podoroot/domain/context"
-	"github.com/podossaem/podoroot/domain/exception"
 	domain "github.com/podossaem/podoroot/domain/user"
-	"github.com/podossaem/podoroot/infra/database/mymongo"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
+	"github.com/podossaem/podoroot/infra/database"
+	"github.com/podossaem/podoroot/infra/database/podosql"
 )
 
 type (
 	userRepository struct {
-		mongoClient *mymongo.Client
+		client *podosql.Client
 	}
 )
 
@@ -25,17 +22,12 @@ func (r *userRepository) FindByAccount(
 	error,
 ) {
 	var entity User
-	if err := r.
-		baseCollection().
-		FindOne(
-			ctx,
-			bson.M{
-				"join_method": joinMethod,
-				"account_id":  accountID,
-			},
-		).
-		Decode(&entity); err != nil {
-		return domain.User{}, err
+	result := r.client.DB.WithContext(ctx).
+		Where("join_method = ?", joinMethod).
+		Where("account_id = ?", accountID).
+		First(&entity)
+	if result.Error != nil {
+		return domain.User{}, database.ToDomainError(result.Error)
 	}
 
 	return entity.ToModel(), nil
@@ -48,29 +40,25 @@ func (r *userRepository) InsertOne(
 	domain.User,
 	error,
 ) {
-	entity := MakeUser(user).BeforeInsert()
+	entity := MakeUser(user)
+	result := r.client.DB.WithContext(ctx).
+		Create(&entity)
 
-	result, err := r.baseCollection().InsertOne(ctx, entity)
-	if err != nil {
-		if mongo.IsDuplicateKeyError(err) {
-			return domain.User{}, exception.ErrAlreadySignedUp
-		}
-		return domain.User{}, err
+	if result.Error != nil {
+		return domain.User{}, database.ToDomainError(result.Error)
 	}
 
-	entity.ID = result.InsertedID.(primitive.ObjectID)
+	model := entity.ToModel()
 
-	return entity.ToModel(), nil
-}
-
-func (r *userRepository) baseCollection() *mymongo.MyMongoCollection {
-	return r.mongoClient.MyCollection(mymongo.Collection_User)
+	return model, nil
 }
 
 func NewUserRepository(
-	mongoClient *mymongo.Client,
+	client *podosql.Client,
 ) domain.UserRepository {
+	client.AddModel(&User{})
+
 	return &userRepository{
-		mongoClient: mongoClient,
+		client: client,
 	}
 }

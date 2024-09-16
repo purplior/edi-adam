@@ -24,7 +24,6 @@ import (
 	app4 "github.com/podossaem/podoroot/domain/verification/app"
 	"github.com/podossaem/podoroot/domain/verification/persist"
 	"github.com/podossaem/podoroot/infra/database"
-	"github.com/podossaem/podoroot/infra/database/mymongo"
 	"github.com/podossaem/podoroot/infra/database/podosql"
 	"log"
 	"os"
@@ -40,8 +39,7 @@ func Start() error {
 	databaseManager := database.NewDatabaseManager(client)
 	emailVerificationRepository := persist.NewEmailVerificationRepository(client)
 	emailVerificationService := verification.NewEmailVerificationService(emailVerificationRepository)
-	mymongoClient := mymongo.NewClient()
-	userRepository := persist2.NewUserRepository(mymongoClient)
+	userRepository := persist2.NewUserRepository(client)
 	userService := user.NewUserService(userRepository)
 	authService := auth.NewAuthService(emailVerificationService, userService)
 	authController := app.NewAuthController(authService)

@@ -23,7 +23,8 @@ func (r *emailVerificationRepository) InsertOne(
 ) {
 	entity := MakeEmailVerification(emailVerification)
 
-	result := r.client.DB.WithContext(ctx).Create(&entity)
+	result := r.client.DB.WithContext(ctx).
+		Create(&entity)
 	if result.Error != nil {
 		return domain.EmailVerification{}, database.ToDomainError(result.Error)
 	}
@@ -41,7 +42,8 @@ func (r *emailVerificationRepository) FindOneById(
 	eid := dt.UInt(id)
 
 	var entity EmailVerification
-	result := r.client.DB.First(&entity, eid)
+	result := r.client.DB.WithContext(ctx).
+		First(&entity, eid)
 	if result.Error != nil {
 		return domain.EmailVerification{}, database.ToDomainError(result.Error)
 	}
@@ -77,7 +79,8 @@ func (r *emailVerificationRepository) UpdateOne_IsVerified(
 ) error {
 	eid := dt.UInt(id)
 
-	result := r.client.DB.Model(&EmailVerification{}).
+	result := r.client.DB.WithContext(ctx).
+		Model(&EmailVerification{}).
 		Where("id = ?", eid).
 		Update("is_verified", isVerified)
 	if result.Error != nil {
@@ -94,7 +97,8 @@ func (r *emailVerificationRepository) UpdateOne_isConsumed(
 ) error {
 	eid := dt.UInt(id)
 
-	result := r.client.DB.Model(&EmailVerification{}).
+	result := r.client.DB.WithContext(ctx).
+		Model(&EmailVerification{}).
 		Where("id = ?", eid).
 		Update("is_consumed", isConsumed)
 	if result.Error != nil {
