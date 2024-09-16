@@ -13,7 +13,7 @@ import (
 func Init() error {
 	phase := Phase()
 
-	log.Printf("# [config] phase: %s\n", convertPhaseEnumToDisplay((phase)))
+	log.Printf("[#] PHASE: %s\n", convertPhaseEnumToDisplay((phase)))
 	var envFilePath string
 	switch phase {
 	case constant.Phase_Local:
@@ -45,6 +45,10 @@ func Phase() constant.Phase {
 	}
 
 	return convertPhaseStringToEnum(phase)
+}
+
+func MySqlDSN() string {
+	return os.Getenv("MYSQL_DB_DSN")
 }
 
 func MongoDbURI() string {

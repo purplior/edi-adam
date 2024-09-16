@@ -1,9 +1,12 @@
 package verification
 
 import (
+	"time"
+
 	"github.com/podossaem/podoroot/application/config"
 	"github.com/podossaem/podoroot/domain/context"
 	"github.com/podossaem/podoroot/domain/exception"
+	"github.com/podossaem/podoroot/lib/mydate"
 	"github.com/podossaem/podoroot/lib/mymail"
 	"github.com/podossaem/podoroot/lib/strgen"
 )
@@ -45,15 +48,22 @@ func (s *service) Consume(
 	ctx context.APIContext,
 	id string,
 ) (EmailVerification, error) {
-	verification, err := s.emailVerificationRepository.FindOneById(ctx, id)
+	emailVerification, err := s.emailVerificationRepository.FindOneById(ctx, id)
 	if err != nil {
 		return EmailVerification{}, err
 	}
-	if verification.IsConsumed {
+	if emailVerification.IsConsumed {
 		return EmailVerification{}, exception.ErrAlreadyConsumed
 	}
 
-	return s.emailVerificationRepository.UpdateOne_isConsumed(ctx, id, true)
+	err = s.emailVerificationRepository.UpdateOne_isConsumed(ctx, id, true)
+	if err != nil {
+		return EmailVerification{}, err
+	}
+
+	emailVerification.IsConsumed = true
+
+	return emailVerification, nil
 }
 
 func (s *service) RequestCode(
@@ -64,12 +74,18 @@ func (s *service) RequestCode(
 	verification := EmailVerification{
 		Email:      email,
 		Code:       code,
-		IsConsumed: false,
 		IsVerified: false,
+		IsConsumed: false,
+		ExpiredAt:  mydate.After(time.Duration(5 * time.Minute)),
 	}
 
-	subject := "[포도쌤] 이메일 인증"
+	subject := "[포도쌤] 이메일 인증요청이 왔어요"
 	body := makeRequestCodeBody(code)
+
+	ver, err := s.emailVerificationRepository.InsertOne(ctx, verification)
+	if err != nil {
+		return EmailVerification{}, err
+	}
 
 	if err := mymail.SendGmail(mymail.SendGmailRequest{
 		To:           email,
@@ -81,7 +97,7 @@ func (s *service) RequestCode(
 		return EmailVerification{}, err
 	}
 
-	return s.emailVerificationRepository.InsertOne(ctx, verification)
+	return ver, nil
 }
 
 func (s *service) VerifyCode(
@@ -92,10 +108,11 @@ func (s *service) VerifyCode(
 	EmailVerification,
 	error,
 ) {
-	emailVerification, err := s.emailVerificationRepository.FindOneByEmail(ctx, email)
+	emailVerification, err := s.emailVerificationRepository.FindRecentOneByEmail(ctx, email)
 	if err != nil {
 		return EmailVerification{}, err
 	}
+
 	if emailVerification.Code != code {
 		return EmailVerification{}, exception.ErrInvalidVerificationCode
 	}
@@ -103,11 +120,18 @@ func (s *service) VerifyCode(
 		return EmailVerification{}, exception.ErrAlreadyVerified
 	}
 
-	return s.emailVerificationRepository.UpdateOne_IsVerified(
+	err = s.emailVerificationRepository.UpdateOne_IsVerified(
 		ctx,
 		emailVerification.ID,
 		true,
 	)
+	if err != nil {
+		return EmailVerification{}, nil
+	}
+
+	emailVerification.IsVerified = true
+
+	return emailVerification, nil
 }
 
 func makeRequestCodeBody(code string) string {

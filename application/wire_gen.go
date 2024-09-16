@@ -7,6 +7,7 @@
 package application
 
 import (
+	"context"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/podossaem/podoroot/application/config"
@@ -24,17 +25,23 @@ import (
 	"github.com/podossaem/podoroot/domain/verification/persist"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/mymongo"
-	"github.com/podossaem/podoroot/infra/database/myredis"
+	"github.com/podossaem/podoroot/infra/database/podosql"
+	"log"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 )
 
 // Injectors from app.go:
 
 func Start() error {
-	client := mymongo.NewClient()
-	myredisClient := myredis.NewClient()
+	client := podosql.NewClient()
+	databaseManager := database.NewDatabaseManager(client)
 	emailVerificationRepository := persist.NewEmailVerificationRepository(client)
 	emailVerificationService := verification.NewEmailVerificationService(emailVerificationRepository)
-	userRepository := persist2.NewUserRepository(client)
+	mymongoClient := mymongo.NewClient()
+	userRepository := persist2.NewUserRepository(mymongoClient)
 	userService := user.NewUserService(userRepository)
 	authService := auth.NewAuthService(emailVerificationService, userService)
 	authController := app.NewAuthController(authService)
@@ -47,21 +54,19 @@ func Start() error {
 	emailVerificationController := app4.NewEmailVerificationController(emailVerificationService)
 	verificationRouter := app4.NewVerificationRouter(emailVerificationController)
 	routerRouter := router.New(authRouter, meRouter, userRouter, verificationRouter)
-	error2 := StartApplication(client, myredisClient, routerRouter)
+	error2 := StartApplication(databaseManager, routerRouter)
 	return error2
 }
 
 // app.go:
 
 func StartApplication(
-	mymongoClient *mymongo.Client,
-	myredisClient *myredis.Client, router2 router.Router,
+	databaseManager database.DatabaseManager, router2 router.Router,
 
 ) error {
-	if err := database.Init(
-		mymongoClient,
-		myredisClient,
-	); err != nil {
+
+	if err := databaseManager.Init(); err != nil {
+		log.Println("[#] 데이터베이스를 초기화 하는데 실패 했어요")
 		return err
 	}
 	app5 := echo.New()
@@ -70,15 +75,35 @@ func StartApplication(
 	router2.
 		Attach(app5)
 
-	if err := app5.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
-		return err
-	}
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	defer func() {
-		if err := database.Dispose(mymongoClient); err != nil {
+	go func() {
+		if err := app5.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
+			log.Println("[#] 서버를 시작 하는데 실패 했어요")
 			panic(err)
 		}
 	}()
+
+	go func() {
+		databaseManager.Monitor()
+	}()
+
+	sig := <-sigChan
+	log.Println("[#] 종료 시그널을 받았어요: ", sig)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := app5.Shutdown(ctx); err != nil {
+		log.Println("[#] 서버를 종료 하는데 실패 했어요")
+		return err
+	}
+
+	if err := databaseManager.Dispose(); err != nil {
+		log.Println("[#] 데이터베이스를 종료 하는데 실패 했어요")
+		return err
+	}
 
 	return nil
 }

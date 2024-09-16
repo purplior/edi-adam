@@ -49,7 +49,7 @@ func (c *Client) Connect(ctx context.Context) error {
 	return nil
 }
 
-func (c *Client) Disconnect(
+func (c *Client) Dispose(
 	ctx context.Context,
 ) error {
 	return c.Client.Disconnect(ctx)

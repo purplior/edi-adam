@@ -4,36 +4,23 @@ import (
 	"time"
 
 	domain "github.com/podossaem/podoroot/domain/verification"
-	"github.com/podossaem/podoroot/lib/mydate"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/podossaem/podoroot/lib/dt"
 )
 
 type (
 	EmailVerification struct {
-		ID         primitive.ObjectID `bson:"_id,omitempty"`
-		Email      string             `bson:"email"`
-		Code       string             `bson:"code"`
-		IsVerified bool               `bson:"is_verified"`
-		IsConsumed bool               `bson:"is_consumed"`
-		ExpiredAt  time.Time          `bson:"expired_at"`
-		CreatedAt  time.Time          `bson:"created_at"`
+		ID         uint      `gorm:"primaryKey;autoIncrement"`
+		Email      string    `gorm:"type:varchar(100);not null"`
+		Code       string    `gorm:"type:varchar(6);not null"`
+		IsVerified bool      `gorm:"not null"`
+		IsConsumed bool      `gorm:"not null"`
+		ExpiredAt  time.Time `gorm:"not null"`
+		CreatedAt  time.Time `gorm:"autoCreateTime"`
 	}
 )
 
-func (e EmailVerification) BeforeInsert() EmailVerification {
-	e.CreatedAt = mydate.Now()
-
-	return e
-}
-
 func (e EmailVerification) ToModel() domain.EmailVerification {
-	id := ""
-	if !e.ID.IsZero() {
-		id = e.ID.Hex()
-	}
-
-	return domain.EmailVerification{
-		ID:         id,
+	model := domain.EmailVerification{
 		Email:      e.Email,
 		Code:       e.Code,
 		IsVerified: e.IsVerified,
@@ -41,13 +28,16 @@ func (e EmailVerification) ToModel() domain.EmailVerification {
 		ExpiredAt:  e.ExpiredAt,
 		CreatedAt:  e.CreatedAt,
 	}
+
+	if e.ID > 0 {
+		model.ID = dt.Str(e.ID)
+	}
+
+	return model
 }
 
 func MakeEmailVerification(m domain.EmailVerification) EmailVerification {
-	oid, _ := primitive.ObjectIDFromHex(m.ID)
-
-	return EmailVerification{
-		ID:         oid,
+	entity := EmailVerification{
 		Email:      m.Email,
 		Code:       m.Code,
 		IsVerified: m.IsVerified,
@@ -55,4 +45,10 @@ func MakeEmailVerification(m domain.EmailVerification) EmailVerification {
 		ExpiredAt:  m.ExpiredAt,
 		CreatedAt:  m.CreatedAt,
 	}
+
+	if len(m.ID) > 0 {
+		entity.ID = dt.UInt(m.ID)
+	}
+
+	return entity
 }

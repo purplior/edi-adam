@@ -3,15 +3,14 @@ package persist
 import (
 	"github.com/podossaem/podoroot/domain/context"
 	domain "github.com/podossaem/podoroot/domain/verification"
-	"github.com/podossaem/podoroot/infra/database/mymongo"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/podossaem/podoroot/infra/database"
+	"github.com/podossaem/podoroot/infra/database/podosql"
+	"github.com/podossaem/podoroot/lib/dt"
 )
 
 type (
 	emailVerificationRepository struct {
-		mongoClient *mymongo.Client
+		client *podosql.Client
 	}
 )
 
@@ -19,19 +18,17 @@ func (r *emailVerificationRepository) InsertOne(
 	ctx context.APIContext,
 	emailVerification domain.EmailVerification,
 ) (
-	createdEmailVerification domain.EmailVerification,
-	err error,
+	domain.EmailVerification,
+	error,
 ) {
-	entity := MakeEmailVerification(emailVerification).BeforeInsert()
+	entity := MakeEmailVerification(emailVerification)
 
-	if result, err := r.baseCollection().InsertOne(ctx, entity); err != nil {
-		return createdEmailVerification, err
-	} else {
-		entity.ID = result.InsertedID.(primitive.ObjectID)
-		createdEmailVerification = entity.ToModel()
+	result := r.client.DB.WithContext(ctx).Create(&entity)
+	if result.Error != nil {
+		return domain.EmailVerification{}, database.ToDomainError(result.Error)
 	}
 
-	return createdEmailVerification, nil
+	return entity.ToModel(), nil
 }
 
 func (r *emailVerificationRepository) FindOneById(
@@ -41,30 +38,18 @@ func (r *emailVerificationRepository) FindOneById(
 	domain.EmailVerification,
 	error,
 ) {
-	oid, _ := primitive.ObjectIDFromHex(id)
+	eid := dt.UInt(id)
 
 	var entity EmailVerification
-	err := r.
-		baseCollection().
-		FindOne(
-			ctx,
-			bson.M{
-				"_id": oid,
-			},
-			options.
-				FindOne().
-				SetSort(bson.M{"_id": -1}),
-		).
-		Decode(&entity)
-
-	if err != nil {
-		return domain.EmailVerification{}, err
+	result := r.client.DB.First(&entity, eid)
+	if result.Error != nil {
+		return domain.EmailVerification{}, database.ToDomainError(result.Error)
 	}
 
 	return entity.ToModel(), nil
 }
 
-func (r *emailVerificationRepository) FindOneByEmail(
+func (r *emailVerificationRepository) FindRecentOneByEmail(
 	ctx context.APIContext,
 	email string,
 ) (
@@ -72,21 +57,14 @@ func (r *emailVerificationRepository) FindOneByEmail(
 	error,
 ) {
 	var entity EmailVerification
-	err := r.
-		baseCollection().
-		FindOne(
-			ctx,
-			bson.M{
-				"email": email,
-			},
-			options.
-				FindOne().
-				SetSort(bson.M{"_id": -1}),
-		).
-		Decode(&entity)
 
-	if err != nil {
-		return domain.EmailVerification{}, err
+	result := r.client.DB.WithContext(ctx).
+		Where("email = ?", email).
+		Order("created_at DESC").
+		First(&entity)
+
+	if result.Error != nil {
+		return domain.EmailVerification{}, database.ToDomainError(result.Error)
 	}
 
 	return entity.ToModel(), nil
@@ -96,82 +74,42 @@ func (r *emailVerificationRepository) UpdateOne_IsVerified(
 	ctx context.APIContext,
 	id string,
 	isVerified bool,
-) (
-	domain.EmailVerification,
-	error,
-) {
-	oid, _ := primitive.ObjectIDFromHex(id)
+) error {
+	eid := dt.UInt(id)
 
-	var entity EmailVerification
-	err := r.
-		baseCollection().
-		FindOneAndUpdate(
-			ctx,
-			bson.M{
-				"_id": oid,
-			},
-			bson.M{
-				"$set": bson.M{
-					"is_verified": isVerified,
-				},
-			},
-			options.
-				FindOneAndUpdate().
-				SetReturnDocument(options.After),
-		).
-		Decode(&entity)
-
-	if err != nil {
-		return domain.EmailVerification{}, err
+	result := r.client.DB.Model(&EmailVerification{}).
+		Where("id = ?", eid).
+		Update("is_verified", isVerified)
+	if result.Error != nil {
+		return database.ToDomainError(result.Error)
 	}
 
-	return entity.ToModel(), err
+	return nil
 }
 
 func (r *emailVerificationRepository) UpdateOne_isConsumed(
 	ctx context.APIContext,
 	id string,
 	isConsumed bool,
-) (
-	domain.EmailVerification,
-	error,
-) {
-	oid, _ := primitive.ObjectIDFromHex(id)
+) error {
+	eid := dt.UInt(id)
 
-	var entity EmailVerification
-	err := r.
-		baseCollection().
-		FindOneAndUpdate(
-			ctx,
-			bson.M{
-				"_id": oid,
-			},
-			bson.M{
-				"$set": bson.M{
-					"is_consumed": isConsumed,
-				},
-			},
-			options.
-				FindOneAndUpdate().
-				SetReturnDocument(options.After),
-		).
-		Decode(&entity)
-
-	if err != nil {
-		return domain.EmailVerification{}, err
+	result := r.client.DB.Model(&EmailVerification{}).
+		Where("id = ?", eid).
+		Update("is_consumed", isConsumed)
+	if result.Error != nil {
+		return database.ToDomainError(result.Error)
 	}
 
-	return entity.ToModel(), err
-}
-
-func (r *emailVerificationRepository) baseCollection() *mymongo.MyMongoCollection {
-	return r.mongoClient.MyCollection(mymongo.Collection_EmailVerification)
+	return nil
 }
 
 func NewEmailVerificationRepository(
-	mongoClient *mymongo.Client,
+	client *podosql.Client,
 ) domain.EmailVerificationRepository {
+	client.AddModel(&EmailVerification{})
+
 	return &emailVerificationRepository{
-		mongoClient: mongoClient,
+		client: client,
 	}
 }

@@ -20,7 +20,7 @@ type (
 			error,
 		)
 
-		FindOneByEmail(
+		FindRecentOneByEmail(
 			ctx context.APIContext,
 			email string,
 		) (
@@ -32,18 +32,12 @@ type (
 			ctx context.APIContext,
 			id string,
 			isVerified bool,
-		) (
-			EmailVerification,
-			error,
-		)
+		) error
 
 		UpdateOne_isConsumed(
 			ctx context.APIContext,
 			id string,
 			isConsumed bool,
-		) (
-			EmailVerification,
-			error,
-		)
+		) error
 	}
 )

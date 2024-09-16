@@ -1,8 +1,11 @@
 {
   "cSpell.words": [
+    "gorm",
+    "varchar",
     "podossaem",
     "podotree",
     "podoroot",
+    "podosql",
     "podo",
     "bson",
     "mydate",
@@ -11,6 +14,6 @@
     "mymail",
     "myredis",
     "strgen",
-    "readpref"
+    "readpref",
   ]
 }

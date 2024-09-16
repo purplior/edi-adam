@@ -1,33 +1,58 @@
 package database
 
 import (
-	"context"
+	"time"
 
-	"github.com/podossaem/podoroot/infra/database/mymongo"
-	"github.com/podossaem/podoroot/infra/database/myredis"
+	"github.com/podossaem/podoroot/infra/database/podosql"
 )
 
-func Init(
-	mymongoClient *mymongo.Client,
-	myredisClient *myredis.Client,
-) error {
-	ctx := context.Background()
+type (
+	DatabaseManager interface {
+		Init() error
 
-	if err := mymongoClient.Connect(ctx); err != nil {
+		Monitor() error
+
+		Dispose() error
+	}
+)
+
+type (
+	databaseManager struct {
+		podosqlClient *podosql.Client
+	}
+)
+
+func (m *databaseManager) Init() error {
+	if err := m.podosqlClient.ConnectDB(); err != nil {
 		return err
 	}
-	if err := mymongo.InitIndexes(ctx, mymongoClient); err != nil {
+	if err := m.podosqlClient.MigrateDB(); err != nil {
 		return err
 	}
-
-	// 현재 Redis 사용하는 곳이 없어서 주석
-	// if err := myredisClient.Connect(ctx); err != nil {
-	// 	return err
-	// }
 
 	return nil
 }
 
-func Dispose(client *mymongo.Client) error {
-	return client.Disconnect(context.Background())
+func (m *databaseManager) Monitor() error {
+	for {
+		err := m.podosqlClient.PingDB()
+		if err != nil {
+			// - 최대 5번의 재연결 시도
+			// - 지수 백오프 시작 시간 2초
+			m.podosqlClient.ReconnectDB(5, 2*time.Second)
+		}
+		time.Sleep(30 * time.Second) // 30초마다 연결 상태 확인
+	}
+}
+
+func (m *databaseManager) Dispose() error {
+	return m.podosqlClient.Dispose()
+}
+
+func NewDatabaseManager(
+	podosqlClient *podosql.Client,
+) DatabaseManager {
+	return &databaseManager{
+		podosqlClient: podosqlClient,
+	}
 }

@@ -95,6 +95,50 @@ func Int(in any) (out int) {
 	return out
 }
 
+func UInt(in any) (out uint) {
+	out = 0
+
+	switch in := in.(type) {
+	case nil:
+		out = 0
+	case uint:
+		out = in
+	case uint8:
+		out = uint(in)
+	case uint16:
+		out = uint(in)
+	case uint32:
+		out = uint(in)
+	case uint64:
+		out = uint(in)
+	case int:
+		out = uint(in)
+	case int8:
+		out = uint(in)
+	case int16:
+		out = uint(in)
+	case int32:
+		out = uint(in)
+	case int64:
+		out = uint(in)
+	case float32:
+		out = uint(math.Floor(float64(in)))
+	case float64:
+		out = uint(math.Floor(in))
+	case bool:
+		if in {
+			out = 1
+		}
+	case string:
+		intOut, _ := strconv.Atoi(in)
+		out = UInt(intOut)
+	default:
+		out = 1
+	}
+
+	return out
+}
+
 func Float(in any) (out float64) {
 	out = 0.0
 
