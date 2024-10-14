@@ -10,7 +10,7 @@ import (
 type (
 	User struct {
 		ID              uint      `gorm:"primaryKey;autoIncrement"`
-		JoinMethod      string    `gorm:"type:varchar(255);uniqueIndex:idx_join_method_account"`
+		JoinMethod      string    `gorm:"type:varchar(255);not null;uniqueIndex:idx_join_method_account"`
 		AccountID       string    `gorm:"type:varchar(255);not null;uniqueIndex:idx_join_method_account"`
 		AccountPassword string    `gorm:"type:varchar(255);not null"`
 		Nickname        string    `gorm:"type:varchar(100)"`

@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/labstack/echo/v4"
+	assistant "github.com/podossaem/podoroot/domain/assistant/app"
 	auth "github.com/podossaem/podoroot/domain/auth/app"
 	me "github.com/podossaem/podoroot/domain/me/app"
 	user "github.com/podossaem/podoroot/domain/user/app"
@@ -14,6 +15,7 @@ type (
 	}
 
 	router struct {
+		assistantRouter    assistant.AssistantRouter
 		authRouter         auth.AuthRouter
 		meRouter           me.MeRouter
 		userRouter         user.UserRouter
@@ -24,6 +26,7 @@ type (
 func (r *router) Attach(app *echo.Echo) {
 	api := app.Group("/api/:version")
 
+	r.assistantRouter.Attach(api)
 	r.authRouter.Attach(api)
 	r.meRouter.Attach(api)
 	r.userRouter.Attach(api)
@@ -31,12 +34,14 @@ func (r *router) Attach(app *echo.Echo) {
 }
 
 func New(
+	assistantRouter assistant.AssistantRouter,
 	authRouter auth.AuthRouter,
 	meRouter me.MeRouter,
 	userRouter user.UserRouter,
 	verificationRouter verification.VerificationRouter,
 ) Router {
 	return &router{
+		assistantRouter:    assistantRouter,
 		authRouter:         authRouter,
 		meRouter:           meRouter,
 		userRouter:         userRouter,

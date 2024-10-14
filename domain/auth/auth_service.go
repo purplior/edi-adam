@@ -89,7 +89,7 @@ func (s *authService) SignUpByEmailVerification(
 		return err
 	}
 
-	_, err = s.userService.CreateOne(
+	_, err = s.userService.RegisterOne(
 		ctx,
 		user.User{
 			JoinMethod:      user.JoinMethod_Email,
@@ -137,10 +137,10 @@ func (s *authService) makeAccessToken(
 	error,
 ) {
 	// 유효 기간: 1시간
-	// atExpires := time.Now().Add(time.Hour).Unix()
+	atExpires := time.Now().Add(time.Hour).Unix()
 
 	// 임시 10초
-	atExpires := time.Now().Add(time.Second * 10).Unix()
+	// atExpires := time.Now().Add(time.Second * 10).Unix()
 	at, err := myjwt.SignWithHS256(
 		payload,
 		atExpires,
@@ -160,10 +160,10 @@ func (s *authService) makeRefreshToken(
 	error,
 ) {
 	// 유효 기간: 6개월
-	// rtExpires := time.Now().Add(time.Hour * 24 * 180).Unix()
+	rtExpires := time.Now().Add(time.Hour * 24 * 180).Unix()
 
 	// 유효 기간: 1분
-	rtExpires := time.Now().Add(time.Minute).Unix()
+	// rtExpires := time.Now().Add(time.Minute).Unix()
 	rt, err := myjwt.SignWithHS256(
 		payload,
 		rtExpires,

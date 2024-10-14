@@ -13,7 +13,7 @@ type (
 			error,
 		)
 
-		CreateOne(
+		RegisterOne(
 			ctx context.APIContext,
 			user User,
 		) (
@@ -42,7 +42,7 @@ func (s *userService) GetByAccount(
 	)
 }
 
-func (s *userService) CreateOne(
+func (s *userService) RegisterOne(
 	ctx context.APIContext,
 	user User,
 ) (
