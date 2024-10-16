@@ -130,6 +130,9 @@ func (e *User) decodeHash(password string) (hc *hashConfig, salt, hash []byte, e
 
 const (
 	JoinMethod_Email = "email"
-	Role_User        = 100
-	Role_Master      = 10000
+
+	Role_User   = 100
+	Role_Master = 10000
+
+	ID_Podo = "3"
 )

@@ -26,6 +26,13 @@ func (r *assistantRouter) Attach(router *echo.Group) {
 			r.assistantController.RegisterOne(),
 		),
 	)
+
+	assistantRouterGroup.GET(
+		"/podo",
+		api.Handler(
+			r.assistantController.GetPodoList(),
+		),
+	)
 }
 
 func NewAssistantRouter(

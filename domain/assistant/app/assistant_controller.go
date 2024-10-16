@@ -5,14 +5,20 @@ import (
 	"github.com/podossaem/podoroot/application/response"
 	domain "github.com/podossaem/podoroot/domain/assistant"
 	"github.com/podossaem/podoroot/domain/context"
+	"github.com/podossaem/podoroot/domain/user"
 )
 
 type (
 	AssistantController interface {
 		/**
-		 * 신규 어시스턴트 등록
+		 * 신규 쌤비서 등록
 		 */
 		RegisterOne() api.HandlerFunc
+
+		/**
+		 * 포도쌤의 쌤비서 가져오기
+		 */
+		GetPodoList() api.HandlerFunc
 	}
 )
 
@@ -46,6 +52,29 @@ func (c *assistantController) RegisterOne() api.HandlerFunc {
 				Assistant domain.Assistant `json:"assistant"`
 			}{
 				Assistant: assistant,
+			},
+		})
+	}
+}
+
+func (c *assistantController) GetPodoList() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		apiCtx, cancel := context.NewAPIContext()
+		defer cancel()
+
+		assistants, err := c.assistantService.GetList(
+			apiCtx,
+			user.ID_Podo,
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				Assistants []domain.Assistant `json:"assistants"`
+			}{
+				Assistants: assistants,
 			},
 		})
 	}

@@ -11,5 +11,13 @@ type (
 			Assistant,
 			error,
 		)
+
+		FindListByAuthorID(
+			ctx context.APIContext,
+			authorID string,
+		) (
+			[]Assistant,
+			error,
+		)
 	}
 )

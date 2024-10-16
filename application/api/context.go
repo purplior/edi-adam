@@ -1,6 +1,8 @@
 package api
 
 import (
+	"log"
+
 	"github.com/labstack/echo/v4"
 	"github.com/podossaem/podoroot/application/response"
 	"github.com/podossaem/podoroot/domain/auth"
@@ -52,6 +54,8 @@ func (ctx Context) SendError(err error) error {
 		message = err.Error()
 	case response.Status_Unauthorized:
 		message = err.Error()
+	case response.Status_InternalServerError:
+		log.Println(err.Error())
 	}
 
 	return ctx.JSON(status, response.ErrorResponse{

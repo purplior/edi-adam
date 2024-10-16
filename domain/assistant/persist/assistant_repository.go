@@ -25,11 +25,34 @@ func (r *assistantRepository) InsertOne(
 		Create(&entity)
 
 	if result.Error != nil {
-		print(result.Error)
 		return domain.Assistant{}, database.ToDomainError(result.Error)
 	}
 
 	return entity.ToModel(), nil
+}
+
+func (r *assistantRepository) FindListByAuthorID(
+	ctx context.APIContext,
+	authorID string,
+) (
+	[]domain.Assistant,
+	error,
+) {
+	var entities []Assistant
+	result := r.client.DB.
+		Where("author_id = ? AND is_public = ?", authorID, true).
+		Order("created_at asc").
+		Find(&entities)
+	if result.Error != nil {
+		return []domain.Assistant{}, database.ToDomainError(result.Error)
+	}
+
+	assistants := make([]domain.Assistant, len(entities))
+	for i, entity := range entities {
+		assistants[i] = entity.ToModel()
+	}
+
+	return assistants, nil
 }
 
 func NewAssistantRepository(

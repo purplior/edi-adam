@@ -12,6 +12,14 @@ type (
 			Assistant,
 			error,
 		)
+
+		GetList(
+			ctx context.APIContext,
+			authorID string,
+		) (
+			[]Assistant,
+			error,
+		)
 	}
 )
 
@@ -30,16 +38,28 @@ func (s *assistantService) RegisterOne(
 	error,
 ) {
 	assistant := Assistant{
-		AuthorID:     authorID,
-		Title:        request.Title,
-		Description:  request.Description,
-		VersionLabel: request.VersionLabel,
-		IsPublic:     request.IsPublic,
+		AuthorID:    authorID,
+		Title:       request.Title,
+		Description: request.Description,
+		IsPublic:    request.IsPublic,
 	}
 
 	return s.assistantRepository.InsertOne(
 		ctx,
 		assistant,
+	)
+}
+
+func (s *assistantService) GetList(
+	ctx context.APIContext,
+	authorID string,
+) (
+	[]Assistant,
+	error,
+) {
+	return s.assistantRepository.FindListByAuthorID(
+		ctx,
+		authorID,
 	)
 }
 
