@@ -65,16 +65,22 @@ func (c *assistantController) GetPodoList() api.HandlerFunc {
 		assistants, err := c.assistantService.GetList(
 			apiCtx,
 			user.ID_Podo,
+			true,
 		)
 		if err != nil {
 			return ctx.SendError(err)
 		}
 
+		assistantInfos := make([]domain.AssistantInfo, len(assistants))
+		for i, assistant := range assistants {
+			assistantInfos[i] = assistant.ToInfo()
+		}
+
 		return ctx.SendJSON(response.JSONResponse{
 			Data: struct {
-				Assistants []domain.Assistant `json:"assistants"`
+				AssistantInfos []domain.AssistantInfo `json:"assistantInfos"`
 			}{
-				Assistants: assistants,
+				AssistantInfos: assistantInfos,
 			},
 		})
 	}

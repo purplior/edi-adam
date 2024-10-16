@@ -16,6 +16,7 @@ type (
 		GetList(
 			ctx context.APIContext,
 			authorID string,
+			withAuthorInfo bool,
 		) (
 			[]Assistant,
 			error,
@@ -53,6 +54,7 @@ func (s *assistantService) RegisterOne(
 func (s *assistantService) GetList(
 	ctx context.APIContext,
 	authorID string,
+	withAuthorInfo bool,
 ) (
 	[]Assistant,
 	error,
@@ -60,6 +62,7 @@ func (s *assistantService) GetList(
 	return s.assistantRepository.FindListByAuthorID(
 		ctx,
 		authorID,
+		withAuthorInfo,
 	)
 }
 

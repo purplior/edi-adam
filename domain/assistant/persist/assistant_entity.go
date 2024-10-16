@@ -33,6 +33,7 @@ func (e Assistant) ToModel() domain.Assistant {
 	}
 	if e.AuthorID > 0 {
 		model.AuthorID = dt.Str(e.AuthorID)
+		model.Author = e.Author.ToModel()
 	}
 
 	return model

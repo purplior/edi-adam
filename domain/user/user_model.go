@@ -25,10 +25,8 @@ type (
 	}
 
 	UserInfo struct {
-		JoinMethod string    `json:"joinMethod"`
-		AccountID  string    `json:"accountId"`
-		Nickname   string    `json:"string"`
-		CreatedAt  time.Time `json:"createdAt"`
+		ID       string `json:"id"`
+		Nickname string `json:"nickname"`
 	}
 
 	hashConfig struct {
@@ -39,6 +37,13 @@ type (
 		keyLength   uint32
 	}
 )
+
+func (m *User) ToInfo() UserInfo {
+	return UserInfo{
+		ID:       m.ID,
+		Nickname: m.Nickname,
+	}
+}
 
 func (e *User) ComparePassword(password string) error {
 	hc, salt, hash, err := e.decodeHash(e.AccountPassword)

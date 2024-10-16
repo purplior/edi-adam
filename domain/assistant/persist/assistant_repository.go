@@ -34,6 +34,7 @@ func (r *assistantRepository) InsertOne(
 func (r *assistantRepository) FindListByAuthorID(
 	ctx context.APIContext,
 	authorID string,
+	withAuthorInfo bool,
 ) (
 	[]domain.Assistant,
 	error,
@@ -42,6 +43,7 @@ func (r *assistantRepository) FindListByAuthorID(
 	result := r.client.DB.
 		Where("author_id = ? AND is_public = ?", authorID, true).
 		Order("created_at asc").
+		Preload("Author").
 		Find(&entities)
 	if result.Error != nil {
 		return []domain.Assistant{}, database.ToDomainError(result.Error)
