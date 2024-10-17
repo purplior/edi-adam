@@ -15,19 +15,17 @@ import (
 	"github.com/podossaem/podoroot/application/router"
 	"github.com/podossaem/podoroot/domain/assistant"
 	"github.com/podossaem/podoroot/domain/assistant/app"
-	"github.com/podossaem/podoroot/domain/assistant/persist"
 	"github.com/podossaem/podoroot/domain/auth"
 	app2 "github.com/podossaem/podoroot/domain/auth/app"
 	"github.com/podossaem/podoroot/domain/me"
 	app3 "github.com/podossaem/podoroot/domain/me/app"
 	"github.com/podossaem/podoroot/domain/user"
 	app4 "github.com/podossaem/podoroot/domain/user/app"
-	persist3 "github.com/podossaem/podoroot/domain/user/persist"
 	"github.com/podossaem/podoroot/domain/verification"
 	app5 "github.com/podossaem/podoroot/domain/verification/app"
-	persist2 "github.com/podossaem/podoroot/domain/verification/persist"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podosql"
+	"github.com/podossaem/podoroot/infra/repository"
 	"log"
 	"os"
 	"os/signal"
@@ -40,13 +38,13 @@ import (
 func Start() error {
 	client := podosql.NewClient()
 	databaseManager := database.NewDatabaseManager(client)
-	assistantRepository := persist.NewAssistantRepository(client)
+	assistantRepository := repository.NewAssistantRepository(client)
 	assistantService := assistant.NewAssistantService(assistantRepository)
 	assistantController := app.NewAssistantController(assistantService)
 	assistantRouter := app.NewAssistantRouter(assistantController)
-	emailVerificationRepository := persist2.NewEmailVerificationRepository(client)
+	emailVerificationRepository := repository.NewEmailVerificationRepository(client)
 	emailVerificationService := verification.NewEmailVerificationService(emailVerificationRepository)
-	userRepository := persist3.NewUserRepository(client)
+	userRepository := repository.NewUserRepository(client)
 	userService := user.NewUserService(userRepository)
 	authService := auth.NewAuthService(emailVerificationService, userService)
 	authController := app2.NewAuthController(authService)

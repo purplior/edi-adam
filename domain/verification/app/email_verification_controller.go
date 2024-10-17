@@ -3,7 +3,7 @@ package app
 import (
 	"github.com/podossaem/podoroot/application/api"
 	"github.com/podossaem/podoroot/application/response"
-	"github.com/podossaem/podoroot/domain/context"
+	"github.com/podossaem/podoroot/domain/shared/context"
 	domain "github.com/podossaem/podoroot/domain/verification"
 )
 

@@ -4,7 +4,7 @@ import (
 	"github.com/podossaem/podoroot/application/api"
 	"github.com/podossaem/podoroot/application/response"
 	domain "github.com/podossaem/podoroot/domain/auth"
-	"github.com/podossaem/podoroot/domain/context"
+	"github.com/podossaem/podoroot/domain/shared/context"
 )
 
 type (

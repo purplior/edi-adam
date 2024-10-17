@@ -1,6 +1,6 @@
 package user
 
-import "github.com/podossaem/podoroot/domain/context"
+import "github.com/podossaem/podoroot/domain/shared/context"
 
 type (
 	UserService interface {

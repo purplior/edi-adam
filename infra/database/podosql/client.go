@@ -5,7 +5,8 @@ import (
 	"time"
 
 	"github.com/podossaem/podoroot/application/config"
-	"github.com/podossaem/podoroot/domain/constant"
+	"github.com/podossaem/podoroot/domain/shared/constant"
+	"github.com/podossaem/podoroot/infra/entity"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -19,8 +20,7 @@ type (
 
 	Client struct {
 		*gorm.DB
-		opt    ConstructorOption
-		models []interface{}
+		opt ConstructorOption
 	}
 )
 
@@ -52,13 +52,12 @@ func (c *Client) ConnectDB() error {
 	return nil
 }
 
-func (c *Client) AddModel(model interface{}) {
-	c.models = append(c.models, model)
-}
-
 func (c *Client) MigrateDB() error {
 	return c.DB.AutoMigrate(
-		c.models...,
+		entity.User{},
+		entity.EmailVerification{},
+		entity.Assistant{},
+		entity.Assister{},
 	)
 }
 
@@ -122,8 +121,7 @@ func NewClient() *Client {
 	}
 
 	client := &Client{
-		opt:    opt,
-		models: []interface{}{},
+		opt: opt,
 	}
 
 	return client

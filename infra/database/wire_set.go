@@ -9,7 +9,7 @@ import (
 
 var New = wire.NewSet(
 	NewDatabaseManager,
-	podosql.NewClient,
 	mymongo.NewClient,
 	myredis.NewClient,
+	podosql.NewClient,
 )

@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/joho/godotenv"
-	"github.com/podossaem/podoroot/domain/constant"
+	"github.com/podossaem/podoroot/domain/shared/constant"
 )
 
 func Init() error {

@@ -6,7 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/podossaem/podoroot/application/response"
 	"github.com/podossaem/podoroot/domain/auth"
-	"github.com/podossaem/podoroot/domain/exception"
+	"github.com/podossaem/podoroot/domain/shared/exception"
 )
 
 type (

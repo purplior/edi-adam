@@ -1,6 +1,6 @@
 package assistant
 
-import "github.com/podossaem/podoroot/domain/context"
+import "github.com/podossaem/podoroot/domain/shared/context"
 
 type (
 	AssistantRepository interface {
@@ -12,10 +12,19 @@ type (
 			error,
 		)
 
+		FindOneByID(
+			ctx context.APIContext,
+			id string,
+			joinOption AssistantJoinOption,
+		) (
+			Assistant,
+			error,
+		)
+
 		FindListByAuthorID(
 			ctx context.APIContext,
 			authorID string,
-			withAuthorInfo bool,
+			joinOption AssistantJoinOption,
 		) (
 			[]Assistant,
 			error,

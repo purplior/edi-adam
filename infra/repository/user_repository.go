@@ -1,10 +1,11 @@
-package persist
+package repository
 
 import (
-	"github.com/podossaem/podoroot/domain/context"
-	domain "github.com/podossaem/podoroot/domain/user"
+	"github.com/podossaem/podoroot/domain/shared/context"
+	"github.com/podossaem/podoroot/domain/user"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podosql"
+	"github.com/podossaem/podoroot/infra/entity"
 )
 
 type (
@@ -18,46 +19,42 @@ func (r *userRepository) FindByAccount(
 	joinMethod string,
 	accountID string,
 ) (
-	domain.User,
+	user.User,
 	error,
 ) {
-	var entity User
+	var e entity.User
 	result := r.client.DB.WithContext(ctx).
 		Where("join_method = ?", joinMethod).
 		Where("account_id = ?", accountID).
-		First(&entity)
+		First(&e)
 	if result.Error != nil {
-		return domain.User{}, database.ToDomainError(result.Error)
+		return user.User{}, database.ToDomainError(result.Error)
 	}
 
-	return entity.ToModel(), nil
+	return e.ToModel(), nil
 }
 
 func (r *userRepository) InsertOne(
 	ctx context.APIContext,
-	user domain.User,
+	userForInsert user.User,
 ) (
-	domain.User,
+	user.User,
 	error,
 ) {
-	entity := MakeUser(user)
+	e := entity.MakeUser(userForInsert)
 	result := r.client.DB.WithContext(ctx).
-		Create(&entity)
+		Create(&e)
 
 	if result.Error != nil {
-		return domain.User{}, database.ToDomainError(result.Error)
+		return user.User{}, database.ToDomainError(result.Error)
 	}
 
-	model := entity.ToModel()
-
-	return model, nil
+	return e.ToModel(), nil
 }
 
 func NewUserRepository(
 	client *podosql.Client,
-) domain.UserRepository {
-	client.AddModel(&User{})
-
+) user.UserRepository {
 	return &userRepository{
 		client: client,
 	}

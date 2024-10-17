@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/podossaem/podoroot/application/config"
-	"github.com/podossaem/podoroot/domain/context"
-	"github.com/podossaem/podoroot/domain/exception"
+	"github.com/podossaem/podoroot/domain/shared/context"
+	"github.com/podossaem/podoroot/domain/shared/exception"
 	"github.com/podossaem/podoroot/lib/mydate"
 	"github.com/podossaem/podoroot/lib/mymail"
 	"github.com/podossaem/podoroot/lib/strgen"

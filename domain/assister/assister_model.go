@@ -1,18 +1,21 @@
 package assister
 
+import "time"
+
 type (
-	AssisterType string
+	AssisterMethod string
 
 	Assister struct {
-		ID          string       `json:"id"`
-		AssistantID string       `json:"assisterId"`
-		Type        AssisterType `json:"type"`
-		AssetURI    string       `json:"assetUri"`
-		Version     string       `json:"version"`
-		CreatedAt   string       `json:"createdAt"`
+		ID                 string         `json:"id"`
+		Method             AssisterMethod `json:"method"`
+		AssetURI           string         `json:"assetUri"`
+		Version            string         `json:"version"`
+		VersionDescription string         `json:"versionDescription"`
+		CreatedAt          time.Time      `json:"createdAt"`
+		AssistantID        string         `json:"assistantId"`
 	}
 )
 
 const (
-	AssisterType_ChatGPT4o AssisterType = "gpt4o"
+	AssisterMethod_ChatGPT4o AssisterMethod = "gpt4o"
 )

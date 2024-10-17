@@ -28,9 +28,16 @@ func (r *assistantRouter) Attach(router *echo.Group) {
 	)
 
 	assistantRouterGroup.GET(
-		"/podo",
+		"/:assistant_id",
 		api.Handler(
-			r.assistantController.GetPodoList(),
+			r.assistantController.GetDetailOne(),
+		),
+	)
+
+	assistantRouterGroup.GET(
+		"/list/podo",
+		api.Handler(
+			r.assistantController.GetPodoInfoList(),
 		),
 	)
 }

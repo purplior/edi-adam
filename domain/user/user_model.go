@@ -3,7 +3,7 @@ package user
 import (
 	"time"
 
-	"github.com/podossaem/podoroot/domain/exception"
+	"github.com/podossaem/podoroot/domain/shared/exception"
 	"golang.org/x/crypto/bcrypt"
 )
 

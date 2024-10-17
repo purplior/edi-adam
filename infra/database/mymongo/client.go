@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/podossaem/podoroot/application/config"
-	"github.com/podossaem/podoroot/domain/constant"
-	domainContext "github.com/podossaem/podoroot/domain/context"
+	"github.com/podossaem/podoroot/domain/shared/constant"
+	domainContext "github.com/podossaem/podoroot/domain/shared/context"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"

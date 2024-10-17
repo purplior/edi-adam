@@ -4,7 +4,8 @@ import (
 	"github.com/podossaem/podoroot/application/api"
 	"github.com/podossaem/podoroot/application/response"
 	domain "github.com/podossaem/podoroot/domain/assistant"
-	"github.com/podossaem/podoroot/domain/context"
+	"github.com/podossaem/podoroot/domain/shared/context"
+	"github.com/podossaem/podoroot/domain/shared/exception"
 	"github.com/podossaem/podoroot/domain/user"
 )
 
@@ -16,9 +17,14 @@ type (
 		RegisterOne() api.HandlerFunc
 
 		/**
+		 * 쌤비서 상세정보 가져오기
+		 */
+		GetDetailOne() api.HandlerFunc
+
+		/**
 		 * 포도쌤의 쌤비서 가져오기
 		 */
-		GetPodoList() api.HandlerFunc
+		GetPodoInfoList() api.HandlerFunc
 	}
 )
 
@@ -57,23 +63,52 @@ func (c *assistantController) RegisterOne() api.HandlerFunc {
 	}
 }
 
-func (c *assistantController) GetPodoList() api.HandlerFunc {
+func (c *assistantController) GetDetailOne() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		apiCtx, cancel := context.NewAPIContext()
 		defer cancel()
 
-		assistants, err := c.assistantService.GetList(
+		assistantID := ctx.Param("assistant_id")
+		if len(assistantID) == 0 {
+			return ctx.SendError(exception.ErrBadRequest)
+		}
+
+		assistantDetail, err := c.assistantService.GetDetailOneByID(
 			apiCtx,
-			user.ID_Podo,
-			true,
+			assistantID,
+			domain.AssistantJoinOption{
+				WithAuthor:   true,
+				WithAssister: true,
+			},
 		)
 		if err != nil {
 			return ctx.SendError(err)
 		}
 
-		assistantInfos := make([]domain.AssistantInfo, len(assistants))
-		for i, assistant := range assistants {
-			assistantInfos[i] = assistant.ToInfo()
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				AssistantDetail domain.AssistantDetail `json:"assistant"`
+			}{
+				AssistantDetail: assistantDetail,
+			},
+		})
+	}
+}
+
+func (c *assistantController) GetPodoInfoList() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		apiCtx, cancel := context.NewAPIContext()
+		defer cancel()
+
+		assistantInfos, err := c.assistantService.GetInfoListByAuthor(
+			apiCtx,
+			user.ID_Podo,
+			domain.AssistantJoinOption{
+				WithAuthor: true,
+			},
+		)
+		if err != nil {
+			return ctx.SendError(err)
 		}
 
 		return ctx.SendJSON(response.JSONResponse{

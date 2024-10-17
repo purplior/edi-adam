@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/podossaem/podoroot/domain/exception"
+	"github.com/podossaem/podoroot/domain/shared/exception"
 )
 
 func SignWithHS256(

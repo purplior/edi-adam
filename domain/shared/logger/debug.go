@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/podossaem/podoroot/application/config"
-	"github.com/podossaem/podoroot/domain/constant"
+	"github.com/podossaem/podoroot/domain/shared/constant"
 )
 
 var (

@@ -1,10 +1,11 @@
-package persist
+package repository
 
 import (
-	"github.com/podossaem/podoroot/domain/context"
-	domain "github.com/podossaem/podoroot/domain/verification"
+	"github.com/podossaem/podoroot/domain/shared/context"
+	"github.com/podossaem/podoroot/domain/verification"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podosql"
+	"github.com/podossaem/podoroot/infra/entity"
 	"github.com/podossaem/podoroot/lib/dt"
 )
 
@@ -16,60 +17,60 @@ type (
 
 func (r *emailVerificationRepository) InsertOne(
 	ctx context.APIContext,
-	emailVerification domain.EmailVerification,
+	emailVerification verification.EmailVerification,
 ) (
-	domain.EmailVerification,
+	verification.EmailVerification,
 	error,
 ) {
-	entity := MakeEmailVerification(emailVerification)
+	e := entity.MakeEmailVerification(emailVerification)
 
 	result := r.client.DB.WithContext(ctx).
-		Create(&entity)
+		Create(&e)
 	if result.Error != nil {
-		return domain.EmailVerification{}, database.ToDomainError(result.Error)
+		return verification.EmailVerification{}, database.ToDomainError(result.Error)
 	}
 
-	return entity.ToModel(), nil
+	return e.ToModel(), nil
 }
 
 func (r *emailVerificationRepository) FindOneById(
 	ctx context.APIContext,
 	id string,
 ) (
-	domain.EmailVerification,
+	verification.EmailVerification,
 	error,
 ) {
 	eid := dt.UInt(id)
 
-	var entity EmailVerification
+	var e entity.EmailVerification
 	result := r.client.DB.WithContext(ctx).
-		First(&entity, eid)
+		First(&e, eid)
 	if result.Error != nil {
-		return domain.EmailVerification{}, database.ToDomainError(result.Error)
+		return verification.EmailVerification{}, database.ToDomainError(result.Error)
 	}
 
-	return entity.ToModel(), nil
+	return e.ToModel(), nil
 }
 
 func (r *emailVerificationRepository) FindRecentOneByEmail(
 	ctx context.APIContext,
 	email string,
 ) (
-	domain.EmailVerification,
+	verification.EmailVerification,
 	error,
 ) {
-	var entity EmailVerification
+	var e entity.EmailVerification
 
 	result := r.client.DB.WithContext(ctx).
 		Where("email = ?", email).
 		Order("created_at DESC").
-		First(&entity)
+		First(&e)
 
 	if result.Error != nil {
-		return domain.EmailVerification{}, database.ToDomainError(result.Error)
+		return verification.EmailVerification{}, database.ToDomainError(result.Error)
 	}
 
-	return entity.ToModel(), nil
+	return e.ToModel(), nil
 }
 
 func (r *emailVerificationRepository) UpdateOne_IsVerified(
@@ -80,7 +81,7 @@ func (r *emailVerificationRepository) UpdateOne_IsVerified(
 	eid := dt.UInt(id)
 
 	result := r.client.DB.WithContext(ctx).
-		Model(&EmailVerification{}).
+		Model(&entity.EmailVerification{}).
 		Where("id = ?", eid).
 		Update("is_verified", isVerified)
 	if result.Error != nil {
@@ -98,7 +99,7 @@ func (r *emailVerificationRepository) UpdateOne_isConsumed(
 	eid := dt.UInt(id)
 
 	result := r.client.DB.WithContext(ctx).
-		Model(&EmailVerification{}).
+		Model(&entity.EmailVerification{}).
 		Where("id = ?", eid).
 		Update("is_consumed", isConsumed)
 	if result.Error != nil {
@@ -110,9 +111,7 @@ func (r *emailVerificationRepository) UpdateOne_isConsumed(
 
 func NewEmailVerificationRepository(
 	client *podosql.Client,
-) domain.EmailVerificationRepository {
-	client.AddModel(&EmailVerification{})
-
+) verification.EmailVerificationRepository {
 	return &emailVerificationRepository{
 		client: client,
 	}

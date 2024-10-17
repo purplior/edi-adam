@@ -1,9 +1,9 @@
-package persist
+package entity
 
 import (
 	"time"
 
-	domain "github.com/podossaem/podoroot/domain/verification"
+	"github.com/podossaem/podoroot/domain/verification"
 	"github.com/podossaem/podoroot/lib/dt"
 )
 
@@ -19,8 +19,8 @@ type (
 	}
 )
 
-func (e EmailVerification) ToModel() domain.EmailVerification {
-	model := domain.EmailVerification{
+func (e EmailVerification) ToModel() verification.EmailVerification {
+	model := verification.EmailVerification{
 		Email:      e.Email,
 		Code:       e.Code,
 		IsVerified: e.IsVerified,
@@ -36,7 +36,7 @@ func (e EmailVerification) ToModel() domain.EmailVerification {
 	return model
 }
 
-func MakeEmailVerification(m domain.EmailVerification) EmailVerification {
+func MakeEmailVerification(m verification.EmailVerification) EmailVerification {
 	entity := EmailVerification{
 		Email:      m.Email,
 		Code:       m.Code,
