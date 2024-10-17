@@ -3,6 +3,7 @@ package mymail
 import (
 	"log"
 
+	"github.com/podossaem/podoroot/domain/shared/logger"
 	"gopkg.in/gomail.v2"
 )
 
@@ -22,6 +23,10 @@ func SendGmail(request SendGmailRequest) error {
 	message.SetHeader("To", request.To)
 	message.SetHeader("Subject", request.Subject)
 	message.SetBody("text/html", request.Body)
+
+	logger.Debug("SendGmail()")
+	logger.Debug("To: %s, From: %s", request.To, request.From)
+	logger.Debug("Subject: %s", request.Subject)
 
 	dialer := gomail.NewDialer(
 		"smtp.gmail.com",
