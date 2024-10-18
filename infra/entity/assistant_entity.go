@@ -10,7 +10,8 @@ import (
 
 type (
 	Assistant struct {
-		ID                uint `gorm:"primaryKey;autoIncrement"`
+		ID                uint   `gorm:"primaryKey;autoIncrement"`
+		ViewID            string `gorm:"type:varchar(36);not null;unique"`
 		AuthorID          uint
 		Author            User
 		Assisters         []Assister `gorm:"foreignKey:AssistantID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
@@ -25,6 +26,7 @@ type (
 
 func (e Assistant) ToModel() assistant.Assistant {
 	model := assistant.Assistant{
+		ViewID:      e.ViewID,
 		Title:       e.Title,
 		Description: e.Description,
 		IsPublic:    e.IsPublic,

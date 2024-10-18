@@ -13,9 +13,9 @@ type (
 			error,
 		)
 
-		GetDetailOneByID(
+		GetDetailOneByViewID(
 			ctx context.APIContext,
-			id string,
+			viewID string,
 			joinOption AssistantJoinOption,
 		) (
 			AssistantDetail,
@@ -60,17 +60,17 @@ func (s *assistantService) RegisterOne(
 	)
 }
 
-func (s *assistantService) GetDetailOneByID(
+func (s *assistantService) GetDetailOneByViewID(
 	ctx context.APIContext,
-	id string,
+	viewID string,
 	joinOption AssistantJoinOption,
 ) (
 	AssistantDetail,
 	error,
 ) {
-	assistant, err := s.assistantRepository.FindOneByID(
+	assistant, err := s.assistantRepository.FindOneByViewID(
 		ctx,
-		id,
+		viewID,
 		joinOption,
 	)
 	if err != nil {

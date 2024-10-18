@@ -12,9 +12,9 @@ type (
 			error,
 		)
 
-		FindOneByID(
+		FindOneByViewID(
 			ctx context.APIContext,
-			id string,
+			viewID string,
 			joinOption AssistantJoinOption,
 		) (
 			Assistant,

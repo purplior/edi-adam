@@ -33,9 +33,9 @@ func (r *assistantRepository) InsertOne(
 	return e.ToModel(), nil
 }
 
-func (r *assistantRepository) FindOneByID(
+func (r *assistantRepository) FindOneByViewID(
 	ctx context.APIContext,
-	id string,
+	viewID string,
 	joinOption assistant.AssistantJoinOption,
 ) (
 	assistant.Assistant,
@@ -43,7 +43,7 @@ func (r *assistantRepository) FindOneByID(
 ) {
 	var e entity.Assistant
 
-	result := r.client.DB.Where("id = ?", id).First(&e)
+	result := r.client.DB.Where("view_id = ?", viewID).First(&e)
 	if result.Error != nil {
 		return assistant.Assistant{}, database.ToDomainError(result.Error)
 	}

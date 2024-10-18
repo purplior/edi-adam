@@ -68,14 +68,14 @@ func (c *assistantController) GetDetailOne() api.HandlerFunc {
 		apiCtx, cancel := context.NewAPIContext()
 		defer cancel()
 
-		assistantID := ctx.Param("assistant_id")
-		if len(assistantID) == 0 {
+		assistantViewID := ctx.Param("assistant_view_id")
+		if len(assistantViewID) == 0 {
 			return ctx.SendError(exception.ErrBadRequest)
 		}
 
-		assistantDetail, err := c.assistantService.GetDetailOneByID(
+		assistantDetail, err := c.assistantService.GetDetailOneByViewID(
 			apiCtx,
-			assistantID,
+			assistantViewID,
 			domain.AssistantJoinOption{
 				WithAuthor:          true,
 				WithDefaultAssister: true,
@@ -87,7 +87,7 @@ func (c *assistantController) GetDetailOne() api.HandlerFunc {
 
 		return ctx.SendJSON(response.JSONResponse{
 			Data: struct {
-				AssistantDetail domain.AssistantDetail `json:"assistant"`
+				AssistantDetail domain.AssistantDetail `json:"assistantDetail"`
 			}{
 				AssistantDetail: assistantDetail,
 			},

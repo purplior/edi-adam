@@ -28,7 +28,7 @@ func (r *assistantRouter) Attach(router *echo.Group) {
 	)
 
 	assistantRouterGroup.GET(
-		"/:assistant_id",
+		"/detail/:assistant_view_id",
 		api.Handler(
 			r.assistantController.GetDetailOne(),
 		),
