@@ -10,14 +10,16 @@ import (
 
 type (
 	Assistant struct {
-		ID          uint `gorm:"primaryKey;autoIncrement"`
-		AuthorID    uint
-		Author      User
-		Assisters   []Assister `gorm:"foreignKey:AssistantID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-		Title       string     `gorm:"type:varchar(80);not null"`  // 20자 이내
-		Description string     `gorm:"type:varchar(255);not null"` // 80자 이내
-		IsPublic    bool       `gorm:"default:false;not null"`
-		CreatedAt   time.Time  `gorm:"autoCreateTime"`
+		ID                uint `gorm:"primaryKey;autoIncrement"`
+		AuthorID          uint
+		Author            User
+		Assisters         []Assister `gorm:"foreignKey:AssistantID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+		Title             string     `gorm:"type:varchar(80);not null"`  // 20자 이내
+		Description       string     `gorm:"type:varchar(255);not null"` // 80자 이내
+		IsPublic          bool       `gorm:"default:false;not null"`
+		DefaultAssisterID uint
+		DefaultAssister   Assister
+		CreatedAt         time.Time `gorm:"autoCreateTime"`
 	}
 )
 
@@ -42,6 +44,10 @@ func (e Assistant) ToModel() assistant.Assistant {
 		assisters[i] = e.ToModel()
 	}
 	model.Assisters = assisters
+
+	if e.DefaultAssisterID > 0 {
+		model.DefaultAssister = e.DefaultAssister.ToModel()
+	}
 
 	return model
 }

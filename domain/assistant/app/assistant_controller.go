@@ -77,8 +77,8 @@ func (c *assistantController) GetDetailOne() api.HandlerFunc {
 			apiCtx,
 			assistantID,
 			domain.AssistantJoinOption{
-				WithAuthor:   true,
-				WithAssister: true,
+				WithAuthor:          true,
+				WithDefaultAssister: true,
 			},
 		)
 		if err != nil {

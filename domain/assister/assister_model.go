@@ -7,12 +7,13 @@ type (
 
 	Assister struct {
 		ID                 string         `json:"id"`
+		AssistantID        string         `json:"assistantId"`
 		Method             AssisterMethod `json:"method"`
 		AssetURI           string         `json:"assetUri"`
 		Version            string         `json:"version"`
 		VersionDescription string         `json:"versionDescription"`
+		Cost               uint           `json:"cost"`
 		CreatedAt          time.Time      `json:"createdAt"`
-		AssistantID        string         `json:"assistantId"`
 	}
 )
 

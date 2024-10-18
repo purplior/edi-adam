@@ -54,7 +54,7 @@ func (r *assistantRepository) FindOneByID(
 		}
 	}
 
-	if joinOption.WithAssister {
+	if joinOption.WithAssisters {
 		var assister entity.Assister
 
 		result := r.client.DB.Where("assistant_id = ?", e.ID).
@@ -72,6 +72,21 @@ func (r *assistantRepository) FindOneByID(
 		}
 
 		e.Assisters = []entity.Assister{assister}
+	}
+
+	if joinOption.WithDefaultAssister {
+		var assister entity.Assister
+
+		result := r.client.DB.Where("id = ?", e.DefaultAssisterID).
+			First(&assister)
+
+		switch result.Error {
+		case nil:
+			e.DefaultAssister = assister
+		case gorm.ErrRecordNotFound:
+		default:
+			return assistant.Assistant{}, database.ToDomainError(result.Error)
+		}
 	}
 
 	return e.ToModel(), nil

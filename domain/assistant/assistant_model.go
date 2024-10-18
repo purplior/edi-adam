@@ -9,19 +9,21 @@ import (
 
 type (
 	Assistant struct {
-		ID          string              `json:"id"`
-		AuthorID    string              `json:"authorId"`
-		Author      user.User           `json:"author"`
-		Assisters   []assister.Assister `json:"assisters"`
-		Title       string              `json:"title"`
-		Description string              `json:"description"`
-		IsPublic    bool                `json:"isPublic"`
-		CreatedAt   time.Time           `json:"createdAt"`
+		ID              string              `json:"id"`
+		AuthorID        string              `json:"authorId"`
+		Author          user.User           `json:"author"`
+		Assisters       []assister.Assister `json:"assisters"`
+		Title           string              `json:"title"`
+		Description     string              `json:"description"`
+		IsPublic        bool                `json:"isPublic"`
+		DefaultAssister assister.Assister   `json:"defaultAssister"`
+		CreatedAt       time.Time           `json:"createdAt"`
 	}
 
 	AssistantJoinOption struct {
-		WithAuthor   bool
-		WithAssister bool
+		WithAuthor          bool
+		WithAssisters       bool
+		WithDefaultAssister bool
 	}
 )
 
@@ -43,12 +45,13 @@ func (m *Assistant) ToDetail() (
 	error,
 ) {
 	return AssistantDetail{
-		ID:          m.ID,
-		AuthorInfo:  m.Author.ToInfo(),
-		Title:       m.Title,
-		Description: m.Description,
-		IsPublic:    m.IsPublic,
-		CreatedAt:   m.CreatedAt,
+		ID:              m.ID,
+		AuthorInfo:      m.Author.ToInfo(),
+		Title:           m.Title,
+		Description:     m.Description,
+		IsPublic:        m.IsPublic,
+		DefaultAssister: m.DefaultAssister,
+		CreatedAt:       m.CreatedAt,
 	}, nil
 }
 
@@ -64,12 +67,13 @@ type (
 
 type (
 	AssistantDetail struct {
-		ID          string        `json:"id"`
-		AuthorInfo  user.UserInfo `json:"authorInfo"`
-		Title       string        `json:"title"`
-		Description string        `json:"description"`
-		IsPublic    bool          `json:"isPublic"`
-		CreatedAt   time.Time     `json:"createdAt"`
+		ID              string            `json:"id"`
+		AuthorInfo      user.UserInfo     `json:"authorInfo"`
+		Title           string            `json:"title"`
+		Description     string            `json:"description"`
+		IsPublic        bool              `json:"isPublic"`
+		DefaultAssister assister.Assister `json:"defaultAssister"`
+		CreatedAt       time.Time         `json:"createdAt"`
 	}
 )
 

@@ -9,12 +9,13 @@ import (
 
 type (
 	Assister struct {
-		ID                 uint `gorm:"primaryKey;autoIncrement"`
-		AssistantID        uint
+		ID                 uint                    `gorm:"primaryKey;autoIncrement"`
+		AssistantID        uint                    `gorm:"uniqueIndex:idx_assistant_version"`
 		Method             assister.AssisterMethod `gorm:"type:varchar(80)"` // 20자 이내
 		AssetURI           string                  `gorm:"type:varchar(255)"`
-		Version            string                  `gorm:"type:varchar(80)"`
+		Version            string                  `gorm:"type:varchar(80);uniqueIndex:idx_assistant_version"`
 		VersionDescription string                  `gorm:"type:varchar(255)"`
+		Cost               uint                    `gorm:"type:tinyint unsigned"`
 		CreatedAt          time.Time               `gorm:"autoCreateTime"`
 	}
 )
