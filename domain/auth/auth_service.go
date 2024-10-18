@@ -136,8 +136,8 @@ func (s *authService) makeAccessToken(
 	string,
 	error,
 ) {
-	// 유효 기간: 1시간
-	atExpires := time.Now().Add(time.Hour).Unix()
+	// 유효 기간: 1년
+	atExpires := time.Now().Add(time.Hour * 24 * 365).Unix()
 
 	// 임시 10초
 	// atExpires := time.Now().Add(time.Second * 10).Unix()
@@ -160,7 +160,7 @@ func (s *authService) makeRefreshToken(
 	error,
 ) {
 	// 유효 기간: 6개월
-	rtExpires := time.Now().Add(time.Hour * 24 * 180).Unix()
+	rtExpires := time.Now().Add(time.Hour * 24 * 365).Unix()
 
 	// 유효 기간: 1분
 	// rtExpires := time.Now().Add(time.Minute).Unix()
@@ -231,8 +231,6 @@ func (s *authService) getIdentityAndNewAccessTokenWithoutVerify(
 	error,
 ) {
 	atPayload, _ := myjwt.ParseWithHMACWithoutVerify(accessToken)
-
-	print(atPayload["version"])
 
 	var identity Identity
 	identity.SyncWith(atPayload)
