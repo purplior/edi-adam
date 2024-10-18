@@ -61,6 +61,20 @@ func isWhiteList(
 		if item.Method == Method_All || item.Method == method {
 			return true
 		}
+		if len(segments) < 5 {
+			return false
+		}
+
+		children := item.Children
+		if len(children) <= 0 {
+			return false
+		}
+
+		if child, isChild := children[segments[4]]; isChild {
+			if child.Method == Method_All || child.Method == method {
+				return true
+			}
+		}
 	}
 
 	return false

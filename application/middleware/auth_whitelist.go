@@ -15,8 +15,9 @@ const (
 
 type (
 	AuthWhiteListItem struct {
-		Type   string
-		Method string
+		Type     string
+		Method   string
+		Children map[string]AuthWhiteListItem
 	}
 )
 
@@ -29,6 +30,18 @@ var (
 		"verifications": {
 			Type:   Type_AllChildren,
 			Method: Method_All,
+		},
+		"assistants": {
+			Children: map[string]AuthWhiteListItem{
+				"detail": {
+					Type:   Type_AllChildren,
+					Method: Method_Get,
+				},
+				"podo-list": {
+					Type:   Type_AllChildren,
+					Method: Method_Get,
+				},
+			},
 		},
 	}
 )
