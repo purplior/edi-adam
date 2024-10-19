@@ -32,11 +32,12 @@ func (m *Assistant) ToInfo() (
 	error,
 ) {
 	return AssistantInfo{
-		ViewID:      m.ViewID,
-		Title:       m.Title,
-		Description: m.Description,
-		AuthorInfo:  m.Author.ToInfo(),
-		CreatedAt:   m.CreatedAt,
+		ViewID:            m.ViewID,
+		Title:             m.Title,
+		Description:       m.Description,
+		AuthorInfo:        m.Author.ToInfo(),
+		DefaultAssisterID: m.DefaultAssisterID,
+		CreatedAt:         m.CreatedAt,
 	}, nil
 }
 
@@ -63,11 +64,12 @@ func (m *Assistant) ToDetail() (
 
 type (
 	AssistantInfo struct {
-		ViewID      string        `json:"viewId"`
-		Title       string        `json:"title"`
-		Description string        `json:"description"`
-		AuthorInfo  user.UserInfo `json:"authorInfo"`
-		CreatedAt   time.Time     `json:"createdAt"`
+		ViewID            string        `json:"viewId"`
+		Title             string        `json:"title"`
+		Description       string        `json:"description"`
+		AuthorInfo        user.UserInfo `json:"authorInfo"`
+		DefaultAssisterID string        `json:"defaultAssisterId"`
+		CreatedAt         time.Time     `json:"createdAt"`
 	}
 )
 
