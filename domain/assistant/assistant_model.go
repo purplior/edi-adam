@@ -9,22 +9,21 @@ import (
 
 type (
 	Assistant struct {
-		ID              string              `json:"id"`
-		ViewID          string              `json:"viewId"`
-		AuthorID        string              `json:"authorId"`
-		Author          user.User           `json:"author"`
-		Assisters       []assister.Assister `json:"assisters"`
-		Title           string              `json:"title"`
-		Description     string              `json:"description"`
-		IsPublic        bool                `json:"isPublic"`
-		DefaultAssister assister.Assister   `json:"defaultAssister"`
-		CreatedAt       time.Time           `json:"createdAt"`
+		ID                string              `json:"id"`
+		ViewID            string              `json:"viewId"`
+		AuthorID          string              `json:"authorId"`
+		Author            user.User           `json:"author"`
+		Assisters         []assister.Assister `json:"assisters"`
+		Title             string              `json:"title"`
+		Description       string              `json:"description"`
+		IsPublic          bool                `json:"isPublic"`
+		DefaultAssisterID string              `json:"defaultAssisterId"`
+		CreatedAt         time.Time           `json:"createdAt"`
 	}
 
 	AssistantJoinOption struct {
-		WithAuthor          bool
-		WithAssisters       bool
-		WithDefaultAssister bool
+		WithAuthor    bool
+		WithAssisters bool
 	}
 )
 
@@ -45,14 +44,20 @@ func (m *Assistant) ToDetail() (
 	AssistantDetail,
 	error,
 ) {
+	assisterInfos := make([]assister.AssisterInfo, len(m.Assisters))
+	for i, assister := range m.Assisters {
+		assisterInfos[i] = assister.ToInfo()
+	}
+
 	return AssistantDetail{
-		ViewID:              m.ViewID,
-		AuthorInfo:          m.Author.ToInfo(),
-		Title:               m.Title,
-		Description:         m.Description,
-		IsPublic:            m.IsPublic,
-		DefaultAssisterInfo: m.DefaultAssister.ToInfo(),
-		CreatedAt:           m.CreatedAt,
+		ViewID:            m.ViewID,
+		AuthorInfo:        m.Author.ToInfo(),
+		Title:             m.Title,
+		Description:       m.Description,
+		IsPublic:          m.IsPublic,
+		DefaultAssisterID: m.DefaultAssisterID,
+		AssisterInfos:     assisterInfos,
+		CreatedAt:         m.CreatedAt,
 	}, nil
 }
 
@@ -68,13 +73,14 @@ type (
 
 type (
 	AssistantDetail struct {
-		ViewID              string                `json:"viewId"`
-		AuthorInfo          user.UserInfo         `json:"authorInfo"`
-		Title               string                `json:"title"`
-		Description         string                `json:"description"`
-		IsPublic            bool                  `json:"isPublic"`
-		DefaultAssisterInfo assister.AssisterInfo `json:"defaultAssisterInfo"`
-		CreatedAt           time.Time             `json:"createdAt"`
+		ViewID            string                  `json:"viewId"`
+		AuthorInfo        user.UserInfo           `json:"authorInfo"`
+		Title             string                  `json:"title"`
+		Description       string                  `json:"description"`
+		IsPublic          bool                    `json:"isPublic"`
+		AssisterInfos     []assister.AssisterInfo `json:"assisterInfos"`
+		DefaultAssisterID string                  `json:"defaultAssisterId"`
+		CreatedAt         time.Time               `json:"createdAt"`
 	}
 )
 

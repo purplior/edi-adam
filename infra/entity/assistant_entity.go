@@ -19,7 +19,6 @@ type (
 		Description       string     `gorm:"type:varchar(255);not null"` // 80자 이내
 		IsPublic          bool       `gorm:"default:false;not null"`
 		DefaultAssisterID uint
-		DefaultAssister   Assister
 		CreatedAt         time.Time `gorm:"autoCreateTime"`
 	}
 )
@@ -48,7 +47,7 @@ func (e Assistant) ToModel() assistant.Assistant {
 	model.Assisters = assisters
 
 	if e.DefaultAssisterID > 0 {
-		model.DefaultAssister = e.DefaultAssister.ToModel()
+		model.DefaultAssisterID = dt.Str(e.DefaultAssisterID)
 	}
 
 	return model

@@ -6,7 +6,6 @@ import (
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podosql"
 	"github.com/podossaem/podoroot/infra/entity"
-	"gorm.io/gorm"
 )
 
 type (
@@ -55,37 +54,8 @@ func (r *assistantRepository) FindOneByViewID(
 	}
 
 	if joinOption.WithAssisters {
-		var assister entity.Assister
-
-		result := r.client.DB.Where("assistant_id = ?", e.ID).
-			Order("created_at DESC").
-			Limit(1).
-			First(&assister)
-
-		switch result.Error {
-		case nil:
-			e.Assisters = []entity.Assister{assister}
-		case gorm.ErrRecordNotFound:
-			e.Assisters = []entity.Assister{}
-		default:
-			return assistant.Assistant{}, database.ToDomainError(result.Error)
-		}
-
-		e.Assisters = []entity.Assister{assister}
-	}
-
-	if joinOption.WithDefaultAssister {
-		var assister entity.Assister
-
-		result := r.client.DB.Where("id = ?", e.DefaultAssisterID).
-			First(&assister)
-
-		switch result.Error {
-		case nil:
-			e.DefaultAssister = assister
-		case gorm.ErrRecordNotFound:
-		default:
-			return assistant.Assistant{}, database.ToDomainError(result.Error)
+		if err := r.client.DB.Preload("Assisters").Find(&e).Error; err != nil {
+			return assistant.Assistant{}, database.ToDomainError(err)
 		}
 	}
 
