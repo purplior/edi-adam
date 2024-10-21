@@ -6,19 +6,23 @@
     "podotree",
     "podoroot",
     "podosql",
+    "podomongo",
     "podo",
     "bson",
     "mydate",
     "myjwt",
-    "mymongo",
     "mymail",
     "myredis",
     "strgen",
-    "readpref"
+    "readpref",
+    "assisterform"
   ],
-  "go.formatTool": "gofmt",
+  "go.formatTool": "goimports",
+  "editor.defaultFormatter": "golang.go",
   "editor.formatOnSave": true,
   "[go]": {
+    "editor.insertSpaces": false,
+    "editor.tabSize": 2,
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit"

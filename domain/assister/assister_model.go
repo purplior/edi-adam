@@ -9,8 +9,8 @@ type (
 		ID                 string         `json:"id"`
 		ViewID             string         `json:"viewId"`
 		AssistantID        string         `json:"assistantId"`
+		AssisterFormID     string         `json:"assisterFormId"`
 		Method             AssisterMethod `json:"method"`
-		AssetURI           string         `json:"assetUri"`
 		Version            string         `json:"version"`
 		VersionDescription string         `json:"versionDescription"`
 		Cost               uint           `json:"cost"`
@@ -19,10 +19,10 @@ type (
 
 	// 구현에 대한 정보는 감추고, 보여줘야하는 정보만 보여준다.
 	AssisterInfo struct {
-		ID                 string `json:"id"`
-		Version            string `json:"version"`
-		VersionDescription string `json:"versionDescription"`
-		CreatedAt          time.Time
+		ID                 string    `json:"id"`
+		Version            string    `json:"version"`
+		VersionDescription string    `json:"versionDescription"`
+		CreatedAt          time.Time `json:"createdAt"`
 	}
 )
 

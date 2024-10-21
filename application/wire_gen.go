@@ -15,15 +15,18 @@ import (
 	"github.com/podossaem/podoroot/application/router"
 	"github.com/podossaem/podoroot/domain/assistant"
 	"github.com/podossaem/podoroot/domain/assistant/app"
+	"github.com/podossaem/podoroot/domain/assisterform"
+	app2 "github.com/podossaem/podoroot/domain/assisterform/app"
 	"github.com/podossaem/podoroot/domain/auth"
-	app2 "github.com/podossaem/podoroot/domain/auth/app"
+	app3 "github.com/podossaem/podoroot/domain/auth/app"
 	"github.com/podossaem/podoroot/domain/me"
-	app3 "github.com/podossaem/podoroot/domain/me/app"
+	app4 "github.com/podossaem/podoroot/domain/me/app"
 	"github.com/podossaem/podoroot/domain/user"
-	app4 "github.com/podossaem/podoroot/domain/user/app"
+	app5 "github.com/podossaem/podoroot/domain/user/app"
 	"github.com/podossaem/podoroot/domain/verification"
-	app5 "github.com/podossaem/podoroot/domain/verification/app"
+	app6 "github.com/podossaem/podoroot/domain/verification/app"
 	"github.com/podossaem/podoroot/infra/database"
+	"github.com/podossaem/podoroot/infra/database/podomongo"
 	"github.com/podossaem/podoroot/infra/database/podosql"
 	"github.com/podossaem/podoroot/infra/repository"
 	"log"
@@ -37,26 +40,31 @@ import (
 
 func Start() error {
 	client := podosql.NewClient()
-	databaseManager := database.NewDatabaseManager(client)
+	podomongoClient := podomongo.NewClient()
+	databaseManager := database.NewDatabaseManager(client, podomongoClient)
 	assistantRepository := repository.NewAssistantRepository(client)
 	assistantService := assistant.NewAssistantService(assistantRepository)
 	assistantController := app.NewAssistantController(assistantService)
 	assistantRouter := app.NewAssistantRouter(assistantController)
+	assisterFormRepository := repository.NewAssisterFormRepository(podomongoClient)
+	assisterFormService := assisterform.NewAssisterFormService(assisterFormRepository)
+	assisterFormController := app2.NewAssisterFormController(assisterFormService)
+	assisterFormRouter := app2.NewAssisterFormRouter(assisterFormController)
 	emailVerificationRepository := repository.NewEmailVerificationRepository(client)
 	emailVerificationService := verification.NewEmailVerificationService(emailVerificationRepository)
 	userRepository := repository.NewUserRepository(client)
 	userService := user.NewUserService(userRepository)
 	authService := auth.NewAuthService(emailVerificationService, userService)
-	authController := app2.NewAuthController(authService)
-	authRouter := app2.NewAuthRouter(authController)
+	authController := app3.NewAuthController(authService)
+	authRouter := app3.NewAuthRouter(authController)
 	meService := me.NewMeService(userRepository)
-	meController := app3.NewMeController(meService)
-	meRouter := app3.NewMeRouter(meController)
-	userController := app4.NewUserController()
-	userRouter := app4.NewUserRouter(userController)
-	emailVerificationController := app5.NewEmailVerificationController(emailVerificationService)
-	verificationRouter := app5.NewVerificationRouter(emailVerificationController)
-	routerRouter := router.New(assistantRouter, authRouter, meRouter, userRouter, verificationRouter)
+	meController := app4.NewMeController(meService)
+	meRouter := app4.NewMeRouter(meController)
+	userController := app5.NewUserController()
+	userRouter := app5.NewUserRouter(userController)
+	emailVerificationController := app6.NewEmailVerificationController(emailVerificationService)
+	verificationRouter := app6.NewVerificationRouter(emailVerificationController)
+	routerRouter := router.New(assistantRouter, assisterFormRouter, authRouter, meRouter, userRouter, verificationRouter)
 	error2 := StartApplication(databaseManager, routerRouter)
 	return error2
 }
@@ -72,17 +80,17 @@ func StartApplication(
 		log.Println("[#] 데이터베이스를 초기화 하는데 실패 했어요")
 		return err
 	}
-	app6 := echo.New()
-	app6.
+	app7 := echo.New()
+	app7.
 		Use(middleware.New()...)
 	router2.
-		Attach(app6)
+		Attach(app7)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		if err := app6.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
+		if err := app7.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
 			log.Println("[#] 서버를 시작 하는데 실패 했어요")
 			panic(err)
 		}
@@ -98,7 +106,7 @@ func StartApplication(
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := app6.Shutdown(ctx); err != nil {
+	if err := app7.Shutdown(ctx); err != nil {
 		log.Println("[#] 서버를 종료 하는데 실패 했어요")
 		return err
 	}

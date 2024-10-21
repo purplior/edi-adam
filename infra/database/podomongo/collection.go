@@ -1,11 +1,6 @@
-package mymongo
+package podomongo
 
 import "go.mongodb.org/mongo-driver/mongo"
-
-const (
-	Collection_EmailVerification = "email_verifications"
-	Collection_User              = "users"
-)
 
 type (
 	MyMongoCollection struct {

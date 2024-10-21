@@ -11,8 +11,8 @@ type (
 	Assister struct {
 		ID                 uint                    `gorm:"primaryKey;autoIncrement"`
 		AssistantID        uint                    `gorm:"uniqueIndex:idx_assistant_version"`
+		AssisterFormID     string                  `gorm:"type:varchar(255)"`
 		Method             assister.AssisterMethod `gorm:"type:varchar(80)"` // 20자 이내
-		AssetURI           string                  `gorm:"type:varchar(255)"`
 		Version            string                  `gorm:"type:varchar(80);uniqueIndex:idx_assistant_version"`
 		VersionDescription string                  `gorm:"type:varchar(255)"`
 		Cost               uint                    `gorm:"type:tinyint unsigned"`
@@ -23,7 +23,7 @@ type (
 func (e *Assister) ToModel() assister.Assister {
 	model := assister.Assister{
 		Method:             e.Method,
-		AssetURI:           e.AssetURI,
+		AssisterFormID:     e.AssisterFormID,
 		Version:            e.Version,
 		VersionDescription: e.VersionDescription,
 		CreatedAt:          e.CreatedAt,

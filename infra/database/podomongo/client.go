@@ -1,4 +1,4 @@
-package mymongo
+package podomongo
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 
 	"github.com/podossaem/podoroot/application/config"
 	"github.com/podossaem/podoroot/domain/shared/constant"
-	domainContext "github.com/podossaem/podoroot/domain/shared/context"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -27,7 +26,9 @@ type (
 	}
 )
 
-func (c *Client) Connect(ctx context.Context) error {
+func (c *Client) Connect() error {
+	ctx := context.Background()
+
 	if client, err := mongo.Connect(ctx, c.clientOptions()); err != nil {
 		return err
 	} else {
@@ -36,7 +37,7 @@ func (c *Client) Connect(ctx context.Context) error {
 
 	defaultDBName := c.opt.DefaultDbName
 	if len(defaultDBName) > 0 {
-		log.Println("# [mymongo] use default db name.")
+		log.Println("[mymongo] use default db name.")
 		c.databaseMap[defaultDBName] = NewDatabase(c.Client.Database(defaultDBName))
 	}
 
@@ -44,7 +45,13 @@ func (c *Client) Connect(ctx context.Context) error {
 		return err
 	}
 
-	log.Println("# [mymongo] is connected.")
+	log.Println("[mymongo] is connected.")
+
+	if err := initIndexes(ctx, c); err != nil {
+		return err
+	}
+
+	log.Println("[mymongo] init indexes.")
 
 	return nil
 }
@@ -77,19 +84,6 @@ func (c *Client) MyCollection(
 	print(db)
 
 	return db.MyCollection(name, opts...)
-}
-
-func (c *Client) InTransaction(
-	task func(ctx context.Context) (interface{}, error),
-) (interface{}, error) {
-	session, err := c.StartSession()
-	if err != nil {
-		return nil, err
-	}
-
-	defer session.EndSession(context.TODO())
-
-	return NewMyMongoTransaction(session).Run(task)
 }
 
 func (c *Client) clientOptions() *options.ClientOptions {
@@ -126,10 +120,6 @@ func NewClient() *Client {
 		opt:         opt,
 		databaseMap: make(map[string]*MyMongoDatabase),
 	}
-
-	domainContext.SetTransactionProcessor(func(task domainContext.Task) (interface{}, error) {
-		return client.InTransaction(task)
-	})
 
 	return client
 }

@@ -3,6 +3,7 @@ package database
 import (
 	"time"
 
+	"github.com/podossaem/podoroot/infra/database/podomongo"
 	"github.com/podossaem/podoroot/infra/database/podosql"
 )
 
@@ -18,11 +19,15 @@ type (
 
 type (
 	databaseManager struct {
-		podosqlClient *podosql.Client
+		podosqlClient   *podosql.Client
+		podomongoClient *podomongo.Client
 	}
 )
 
 func (m *databaseManager) Init() error {
+	if err := m.podomongoClient.Connect(); err != nil {
+		return err
+	}
 	if err := m.podosqlClient.ConnectDB(); err != nil {
 		return err
 	}
@@ -51,8 +56,10 @@ func (m *databaseManager) Dispose() error {
 
 func NewDatabaseManager(
 	podosqlClient *podosql.Client,
+	podomongoClient *podomongo.Client,
 ) DatabaseManager {
 	return &databaseManager{
-		podosqlClient: podosqlClient,
+		podosqlClient:   podosqlClient,
+		podomongoClient: podomongoClient,
 	}
 }

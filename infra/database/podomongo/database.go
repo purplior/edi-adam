@@ -1,4 +1,4 @@
-package mymongo
+package podomongo
 
 import (
 	"go.mongodb.org/mongo-driver/mongo"
