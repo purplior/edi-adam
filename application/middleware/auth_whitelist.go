@@ -43,5 +43,9 @@ var (
 				},
 			},
 		},
+		"assisterforms": {
+			Type:   Type_AllChildren,
+			Method: Method_Get,
+		},
 	}
 )

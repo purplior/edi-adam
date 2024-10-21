@@ -15,7 +15,8 @@
     "myredis",
     "strgen",
     "readpref",
-    "assisterform"
+    "assisterform",
+    "assisterforms"
   ],
   "go.formatTool": "goimports",
   "editor.defaultFormatter": "golang.go",

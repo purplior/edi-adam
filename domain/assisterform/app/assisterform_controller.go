@@ -9,7 +9,15 @@ import (
 
 type (
 	AssisterFormController interface {
+		/**
+		 * 쌤비서 폼 등록하기
+		 */
 		RegisterOne() api.HandlerFunc
+
+		/**
+		 * 쌤비서 폼 가져오기
+		 */
+		GetOneByID() api.HandlerFunc
 	}
 )
 
@@ -33,6 +41,29 @@ func (c *assisterFormController) RegisterOne() api.HandlerFunc {
 			apiCtx,
 			dto,
 		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Status: response.Status_Created,
+			Data: struct {
+				AssisterForm domain.AssisterForm `json:"assisterForm"`
+			}{
+				AssisterForm: assisterForm,
+			},
+		})
+	}
+}
+
+func (c *assisterFormController) GetOneByID() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		id := ctx.Param("assisterform_id")
+
+		apiCtx, cancel := context.NewAPIContext()
+		defer cancel()
+
+		assisterForm, err := c.assisterFormService.GetOneByID(apiCtx, id)
 		if err != nil {
 			return ctx.SendError(err)
 		}

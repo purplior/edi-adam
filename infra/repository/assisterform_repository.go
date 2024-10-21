@@ -6,6 +6,7 @@ import (
 	"github.com/podossaem/podoroot/infra/database/podomongo"
 	"github.com/podossaem/podoroot/infra/entity"
 	"github.com/podossaem/podoroot/lib/mydate"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -31,6 +32,28 @@ func (r *assisterFormRepository) InsertOne(
 	}
 
 	e.ID = result.InsertedID.(primitive.ObjectID)
+
+	return e.ToModel(), nil
+}
+
+func (r *assisterFormRepository) FindOneByID(
+	ctx context.APIContext,
+	id string,
+) (
+	domain.AssisterForm,
+	error,
+) {
+	oid, _ := primitive.ObjectIDFromHex(id)
+
+	var e entity.AssisterForm
+	if err := r.client.MyCollection(podomongo.Collection_AssisterForm).FindOne(
+		ctx,
+		bson.M{
+			"_id": oid,
+		},
+	).Decode(&e); err != nil {
+		return domain.AssisterForm{}, err
+	}
 
 	return e.ToModel(), nil
 }
