@@ -20,6 +20,7 @@ type (
 	// 구현에 대한 정보는 감추고, 보여줘야하는 정보만 보여준다.
 	AssisterInfo struct {
 		ID                 string    `json:"id"`
+		AssisterFormID     string    `json:"assisterFormId"`
 		Version            string    `json:"version"`
 		VersionDescription string    `json:"versionDescription"`
 		CreatedAt          time.Time `json:"createdAt"`
@@ -29,6 +30,7 @@ type (
 func (m Assister) ToInfo() AssisterInfo {
 	return AssisterInfo{
 		ID:                 m.ID,
+		AssisterFormID:     m.AssisterFormID,
 		Version:            m.Version,
 		VersionDescription: m.VersionDescription,
 		CreatedAt:          m.CreatedAt,
