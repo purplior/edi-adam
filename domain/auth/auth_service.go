@@ -40,6 +40,14 @@ type (
 			refreshedIdentityToken IdentityToken,
 			err error,
 		)
+
+		GetTempAccessToken(
+			ctx context.APIContext,
+			identity Identity,
+		) (
+			accessToken string,
+			err error,
+		)
 	}
 
 	authService struct {
@@ -130,14 +138,32 @@ func (s *authService) RefreshIdentityToken(
 	}, nil
 }
 
+func (s *authService) GetTempAccessToken(
+	ctx context.APIContext,
+	identity Identity,
+) (
+	string,
+	error,
+) {
+	atPayload, err := identity.ToMap()
+	if err != nil {
+		return "", err
+	}
+
+	atExpires := time.Now().Add(time.Hour).Unix()
+
+	return s.makeAccessToken(atPayload, atExpires)
+}
+
 func (s *authService) makeAccessToken(
 	payload map[string]interface{},
+	atExpires int64,
 ) (
 	string,
 	error,
 ) {
 	// 유효 기간: 1년
-	atExpires := time.Now().Add(time.Hour * 24 * 365).Unix()
+	// atExpires := time.Now().Add(time.Hour * 24 * 365).Unix()
 
 	// 임시 10초
 	// atExpires := time.Now().Add(time.Second * 10).Unix()
@@ -198,7 +224,8 @@ func (s *authService) makeToken(
 		return IdentityToken{}, Identity{}, err
 	}
 
-	at, err := s.makeAccessToken(atPayload)
+	atExpires := time.Now().Add(time.Hour * 24 * 365).Unix()
+	at, err := s.makeAccessToken(atPayload, atExpires)
 	if err != nil {
 		return IdentityToken{}, Identity{}, err
 	}
@@ -235,7 +262,9 @@ func (s *authService) getIdentityAndNewAccessTokenWithoutVerify(
 	var identity Identity
 	identity.SyncWith(atPayload)
 
-	newAccessToken, err := s.makeAccessToken(atPayload)
+	// 유효 기간: 1년
+	atExpires := time.Now().Add(time.Hour * 24 * 365).Unix()
+	newAccessToken, err := s.makeAccessToken(atPayload, atExpires)
 	if err != nil {
 		return Identity{}, "", err
 	}

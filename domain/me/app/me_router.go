@@ -24,6 +24,13 @@ func (r *meRouter) Attach(router *echo.Group) {
 			r.meController.GetMyIdentity(),
 		),
 	)
+
+	meRouterGroup.GET(
+		"/temp/at",
+		api.Handler(
+			r.meController.GetTempAccessToken(),
+		),
+	)
 }
 
 func NewMeRouter(
