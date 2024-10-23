@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/labstack/echo/v4"
 	assistant "github.com/podossaem/podoroot/domain/assistant/app"
+	assister "github.com/podossaem/podoroot/domain/assister/app"
 	assisterform "github.com/podossaem/podoroot/domain/assisterform/app"
 	auth "github.com/podossaem/podoroot/domain/auth/app"
 	me "github.com/podossaem/podoroot/domain/me/app"
@@ -17,6 +18,7 @@ type (
 
 	router struct {
 		assistantRouter    assistant.AssistantRouter
+		assisterRouter     assister.AssisterRouter
 		assisterFormRouter assisterform.AssisterFormRouter
 		authRouter         auth.AuthRouter
 		meRouter           me.MeRouter
@@ -29,6 +31,7 @@ func (r *router) Attach(app *echo.Echo) {
 	api := app.Group("/api/:version")
 
 	r.assistantRouter.Attach(api)
+	r.assisterRouter.Attach(api)
 	r.assisterFormRouter.Attach(api)
 	r.authRouter.Attach(api)
 	r.meRouter.Attach(api)
@@ -38,6 +41,7 @@ func (r *router) Attach(app *echo.Echo) {
 
 func New(
 	assistantRouter assistant.AssistantRouter,
+	assisterRouter assister.AssisterRouter,
 	assisterFormRouter assisterform.AssisterFormRouter,
 	authRouter auth.AuthRouter,
 	meRouter me.MeRouter,
@@ -46,6 +50,7 @@ func New(
 ) Router {
 	return &router{
 		assistantRouter:    assistantRouter,
+		assisterRouter:     assisterRouter,
 		assisterFormRouter: assisterFormRouter,
 		authRouter:         authRouter,
 		meRouter:           meRouter,

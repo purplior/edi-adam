@@ -9,9 +9,10 @@ import (
 
 type (
 	AssisterForm struct {
-		ID        primitive.ObjectID `bson:"_id,omitempty"`
-		Fields    []AssisterField    `bson:"_fields"`
-		CreatedAt time.Time          `bson:"created_at"`
+		ID         primitive.ObjectID `bson:"_id,omitempty"`
+		AssisterID uint               `json:"assisterId"`
+		Fields     []AssisterField    `bson:"_fields"`
+		CreatedAt  time.Time          `bson:"created_at"`
 	}
 )
 

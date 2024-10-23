@@ -71,6 +71,18 @@ func JwtSecretKey() string {
 	return os.Getenv("JWT_SECRET_KEY")
 }
 
+func OpenAiServiceAccountApiKey() string {
+	return os.Getenv("OPENAI_SA_API_KEY")
+}
+
+func OpenAiOrganizationID() string {
+	return os.Getenv("OPENAI_ORGANIZATION_ID")
+}
+
+func OpenAiProjectID() string {
+	return os.Getenv("OPENAI_PROJECT_ID")
+}
+
 func IsEnvLoaded() bool {
 	return isEnvLoaded
 }

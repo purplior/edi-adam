@@ -5,6 +5,7 @@ import (
 	"github.com/podossaem/podoroot/application/response"
 	domain "github.com/podossaem/podoroot/domain/assisterform"
 	"github.com/podossaem/podoroot/domain/shared/context"
+	"github.com/podossaem/podoroot/domain/shared/exception"
 )
 
 type (
@@ -17,7 +18,7 @@ type (
 		/**
 		 * 쌤비서 폼 가져오기
 		 */
-		GetOneByID() api.HandlerFunc
+		GetOne() api.HandlerFunc
 	}
 )
 
@@ -56,16 +57,24 @@ func (c *assisterFormController) RegisterOne() api.HandlerFunc {
 	}
 }
 
-func (c *assisterFormController) GetOneByID() api.HandlerFunc {
+func (c *assisterFormController) GetOne() api.HandlerFunc {
 	return func(ctx *api.Context) error {
-		id := ctx.Param("assisterform_id")
+		assisterID := ctx.QueryParam("assister_id")
 
 		apiCtx, cancel := context.NewAPIContext()
 		defer cancel()
 
-		assisterForm, err := c.assisterFormService.GetOneByID(apiCtx, id)
-		if err != nil {
-			return ctx.SendError(err)
+		var assisterForm domain.AssisterForm
+		var err error = exception.ErrNotFound
+
+		if len(assisterID) > 0 {
+			assisterForm, err = c.assisterFormService.GetOneByAssisterID(
+				apiCtx,
+				assisterID,
+			)
+			if err != nil {
+				return ctx.SendError(err)
+			}
 		}
 
 		return ctx.SendJSON(response.JSONResponse{

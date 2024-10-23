@@ -7,6 +7,7 @@
     "podoroot",
     "podosql",
     "podomongo",
+    "podoopenai",
     "podo",
     "bson",
     "mydate",
@@ -16,7 +17,8 @@
     "strgen",
     "readpref",
     "assisterform",
-    "assisterforms"
+    "assisterforms",
+    "openai"
   ],
   "go.formatTool": "goimports",
   "editor.defaultFormatter": "golang.go",

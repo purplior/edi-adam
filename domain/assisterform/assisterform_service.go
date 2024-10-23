@@ -19,6 +19,14 @@ type (
 			AssisterForm,
 			error,
 		)
+
+		GetOneByAssisterID(
+			ctx context.APIContext,
+			assistantID string,
+		) (
+			AssisterForm,
+			error,
+		)
 	}
 )
 
@@ -35,9 +43,12 @@ func (r *assisterFormService) RegisterOne(
 	AssisterForm,
 	error,
 ) {
-	return r.assisterFormRepository.InsertOne(ctx, AssisterForm{
-		Fields: request.Fields,
-	})
+	return r.assisterFormRepository.InsertOne(
+		ctx,
+		AssisterForm{
+			Fields: request.Fields,
+		},
+	)
 }
 
 func (r *assisterFormService) GetOneByID(
@@ -47,7 +58,23 @@ func (r *assisterFormService) GetOneByID(
 	AssisterForm,
 	error,
 ) {
-	return r.assisterFormRepository.FindOneByID(ctx, id)
+	return r.assisterFormRepository.FindOneByID(
+		ctx,
+		id,
+	)
+}
+
+func (r *assisterFormService) GetOneByAssisterID(
+	ctx context.APIContext,
+	assisterID string,
+) (
+	AssisterForm,
+	error,
+) {
+	return r.assisterFormRepository.FindOneByAssisterID(
+		ctx,
+		assisterID,
+	)
 }
 
 func NewAssisterFormService(

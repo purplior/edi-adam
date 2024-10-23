@@ -15,19 +15,22 @@ import (
 	"github.com/podossaem/podoroot/application/router"
 	"github.com/podossaem/podoroot/domain/assistant"
 	"github.com/podossaem/podoroot/domain/assistant/app"
+	"github.com/podossaem/podoroot/domain/assister"
+	app2 "github.com/podossaem/podoroot/domain/assister/app"
 	"github.com/podossaem/podoroot/domain/assisterform"
-	app2 "github.com/podossaem/podoroot/domain/assisterform/app"
+	app3 "github.com/podossaem/podoroot/domain/assisterform/app"
 	"github.com/podossaem/podoroot/domain/auth"
-	app3 "github.com/podossaem/podoroot/domain/auth/app"
+	app4 "github.com/podossaem/podoroot/domain/auth/app"
 	"github.com/podossaem/podoroot/domain/me"
-	app4 "github.com/podossaem/podoroot/domain/me/app"
+	app5 "github.com/podossaem/podoroot/domain/me/app"
 	"github.com/podossaem/podoroot/domain/user"
-	app5 "github.com/podossaem/podoroot/domain/user/app"
+	app6 "github.com/podossaem/podoroot/domain/user/app"
 	"github.com/podossaem/podoroot/domain/verification"
-	app6 "github.com/podossaem/podoroot/domain/verification/app"
+	app7 "github.com/podossaem/podoroot/domain/verification/app"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podomongo"
 	"github.com/podossaem/podoroot/infra/database/podosql"
+	"github.com/podossaem/podoroot/infra/port/podoopenai"
 	"github.com/podossaem/podoroot/infra/repository"
 	"log"
 	"os"
@@ -46,25 +49,29 @@ func Start() error {
 	assistantService := assistant.NewAssistantService(assistantRepository)
 	assistantController := app.NewAssistantController(assistantService)
 	assistantRouter := app.NewAssistantRouter(assistantController)
+	podoopenaiClient := podoopenai.NewClient()
 	assisterFormRepository := repository.NewAssisterFormRepository(podomongoClient)
 	assisterFormService := assisterform.NewAssisterFormService(assisterFormRepository)
-	assisterFormController := app2.NewAssisterFormController(assisterFormService)
-	assisterFormRouter := app2.NewAssisterFormRouter(assisterFormController)
+	assisterService := assister.NewAssisterService(podoopenaiClient, assisterFormService)
+	assisterController := app2.NewAssisterController(assisterService)
+	assisterRouter := app2.NewAssisterRouter(assisterController)
+	assisterFormController := app3.NewAssisterFormController(assisterFormService)
+	assisterFormRouter := app3.NewAssisterFormRouter(assisterFormController)
 	emailVerificationRepository := repository.NewEmailVerificationRepository(client)
 	emailVerificationService := verification.NewEmailVerificationService(emailVerificationRepository)
 	userRepository := repository.NewUserRepository(client)
 	userService := user.NewUserService(userRepository)
 	authService := auth.NewAuthService(emailVerificationService, userService)
-	authController := app3.NewAuthController(authService)
-	authRouter := app3.NewAuthRouter(authController)
+	authController := app4.NewAuthController(authService)
+	authRouter := app4.NewAuthRouter(authController)
 	meService := me.NewMeService(userRepository)
-	meController := app4.NewMeController(meService, authService)
-	meRouter := app4.NewMeRouter(meController)
-	userController := app5.NewUserController()
-	userRouter := app5.NewUserRouter(userController)
-	emailVerificationController := app6.NewEmailVerificationController(emailVerificationService)
-	verificationRouter := app6.NewVerificationRouter(emailVerificationController)
-	routerRouter := router.New(assistantRouter, assisterFormRouter, authRouter, meRouter, userRouter, verificationRouter)
+	meController := app5.NewMeController(meService, authService)
+	meRouter := app5.NewMeRouter(meController)
+	userController := app6.NewUserController()
+	userRouter := app6.NewUserRouter(userController)
+	emailVerificationController := app7.NewEmailVerificationController(emailVerificationService)
+	verificationRouter := app7.NewVerificationRouter(emailVerificationController)
+	routerRouter := router.New(assistantRouter, assisterRouter, assisterFormRouter, authRouter, meRouter, userRouter, verificationRouter)
 	error2 := StartApplication(databaseManager, routerRouter)
 	return error2
 }
@@ -80,17 +87,17 @@ func StartApplication(
 		log.Println("[#] 데이터베이스를 초기화 하는데 실패 했어요")
 		return err
 	}
-	app7 := echo.New()
-	app7.
+	app8 := echo.New()
+	app8.
 		Use(middleware.New()...)
 	router2.
-		Attach(app7)
+		Attach(app8)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		if err := app7.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
+		if err := app8.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
 			log.Println("[#] 서버를 시작 하는데 실패 했어요")
 			panic(err)
 		}
@@ -106,7 +113,7 @@ func StartApplication(
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := app7.Shutdown(ctx); err != nil {
+	if err := app8.Shutdown(ctx); err != nil {
 		log.Println("[#] 서버를 종료 하는데 실패 했어요")
 		return err
 	}

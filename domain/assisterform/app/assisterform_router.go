@@ -28,9 +28,9 @@ func (r *assisterFormRouter) Attach(router *echo.Group) {
 	)
 
 	assisterFormRouterGroup.GET(
-		"/:assisterform_id",
+		"/one",
 		api.Handler(
-			r.assisterFormController.GetOneByID(),
+			r.assisterFormController.GetOne(),
 		),
 	)
 }

@@ -19,5 +19,13 @@ type (
 			AssisterForm,
 			error,
 		)
+
+		FindOneByAssisterID(
+			ctx context.APIContext,
+			assisterID string,
+		) (
+			AssisterForm,
+			error,
+		)
 	}
 )

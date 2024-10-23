@@ -5,6 +5,7 @@ import (
 	"github.com/podossaem/podoroot/domain/shared/context"
 	"github.com/podossaem/podoroot/infra/database/podomongo"
 	"github.com/podossaem/podoroot/infra/entity"
+	"github.com/podossaem/podoroot/lib/dt"
 	"github.com/podossaem/podoroot/lib/mydate"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -50,6 +51,28 @@ func (r *assisterFormRepository) FindOneByID(
 		ctx,
 		bson.M{
 			"_id": oid,
+		},
+	).Decode(&e); err != nil {
+		return domain.AssisterForm{}, err
+	}
+
+	return e.ToModel(), nil
+}
+
+func (r *assisterFormRepository) FindOneByAssisterID(
+	ctx context.APIContext,
+	assisterID string,
+) (
+	domain.AssisterForm,
+	error,
+) {
+	assisterEntityID := dt.UInt(assisterID)
+
+	var e entity.AssisterForm
+	if err := r.client.MyCollection(podomongo.Collection_AssisterForm).FindOne(
+		ctx,
+		bson.M{
+			"assisterId": assisterEntityID,
 		},
 	).Decode(&e); err != nil {
 		return domain.AssisterForm{}, err
