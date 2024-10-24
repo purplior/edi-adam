@@ -12,9 +12,11 @@ type (
 	AssisterFieldType string
 
 	AssisterForm struct {
-		ID        string          `json:"id"`
-		Fields    []AssisterField `json:"fields"`
-		CreatedAt time.Time       `json:"createdAt"`
+		ID         string          `json:"id"`
+		AssisterID string          `json:"assisterId"`
+		Fields     []AssisterField `json:"fields"`
+		SubmitText string          `json:"submitText"`
+		CreatedAt  time.Time       `json:"createdAt"`
 	}
 
 	AssisterField struct {

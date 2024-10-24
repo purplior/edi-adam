@@ -4,52 +4,63 @@ import (
 	"time"
 
 	domain "github.com/podossaem/podoroot/domain/assisterform"
+	"github.com/podossaem/podoroot/lib/dt"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type (
 	AssisterForm struct {
 		ID         primitive.ObjectID `bson:"_id,omitempty"`
-		AssisterID uint               `json:"assisterId"`
-		Fields     []AssisterField    `bson:"_fields"`
+		AssisterID int                `bson:"assisterId"`
+		Fields     []AssisterField    `bson:"fields"`
+		SubmitText string             `bson:"submitText"`
 		CreatedAt  time.Time          `bson:"created_at"`
 	}
 )
 
 func (e AssisterForm) ToModel() domain.AssisterForm {
-	id := ""
+	model := domain.AssisterForm{
+		SubmitText: e.SubmitText,
+		CreatedAt:  e.CreatedAt,
+	}
+
 	if !e.ID.IsZero() {
-		id = e.ID.Hex()
+		model.ID = e.ID.Hex()
 	}
 
-	fields := make([]domain.AssisterField, len(e.Fields))
+	if e.AssisterID > 0 {
+		model.AssisterID = dt.Str(e.AssisterID)
+	}
+
+	model.Fields = make([]domain.AssisterField, len(e.Fields))
 	for i, field := range e.Fields {
-		fields[i] = field.ToModel()
+		model.Fields[i] = field.ToModel()
 	}
 
-	return domain.AssisterForm{
-		ID:        id,
-		Fields:    fields,
-		CreatedAt: e.CreatedAt,
-	}
+	return model
 }
 
 func MakeAssisterForm(m domain.AssisterForm) AssisterForm {
-	var id primitive.ObjectID
-	if len(m.ID) == 0 {
-		id, _ = primitive.ObjectIDFromHex(m.ID)
+	entity := AssisterForm{
+		SubmitText: m.SubmitText,
+		CreatedAt:  m.CreatedAt,
 	}
 
-	fields := make([]AssisterField, len(m.Fields))
+	if len(m.ID) > 0 {
+		id, _ := primitive.ObjectIDFromHex(m.ID)
+		entity.ID = id
+	}
+
+	if len(m.AssisterID) > 0 {
+		entity.AssisterID = dt.Int(m.AssisterID)
+	}
+
+	entity.Fields = make([]AssisterField, len(m.Fields))
 	for i, field := range m.Fields {
-		fields[i] = MakeAssisterField(field)
+		entity.Fields[i] = MakeAssisterField(field)
 	}
 
-	return AssisterForm{
-		ID:        id,
-		Fields:    fields,
-		CreatedAt: m.CreatedAt,
-	}
+	return entity
 }
 
 type (
