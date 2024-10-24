@@ -3,19 +3,14 @@ package assister
 import "time"
 
 type (
-	AssisterOrigin string
-	AssisterModel  string
-
 	Assister struct {
-		ID                 string         `json:"id"`
-		ViewID             string         `json:"viewId"`
-		AssistantID        string         `json:"assistantId"`
-		Origin             AssisterOrigin `json:"origin"`
-		Model              AssisterModel  `json:"model"`
-		Version            string         `json:"version"`
-		VersionDescription string         `json:"versionDescription"`
-		Cost               uint           `json:"cost"`
-		CreatedAt          time.Time      `json:"createdAt"`
+		ID                 string    `json:"id"`
+		ViewID             string    `json:"viewId"`
+		AssistantID        string    `json:"assistantId"`
+		Version            string    `json:"version"`
+		VersionDescription string    `json:"versionDescription"`
+		Cost               uint      `json:"cost"`
+		CreatedAt          time.Time `json:"createdAt"`
 	}
 
 	// 구현에 대한 정보는 감추고, 보여줘야하는 정보만 보여준다.
@@ -35,10 +30,3 @@ func (m Assister) ToInfo() AssisterInfo {
 		CreatedAt:          m.CreatedAt,
 	}
 }
-
-const (
-	AssisterOrigin_OpenAI               AssisterOrigin = "openai"
-	AssisterModel_OpenAI_ChatGPT35Turbo AssisterModel  = "gpt-3.5-turbo"
-	AssisterModel_OpenAI_ChatGPT4o      AssisterModel  = "gpt-4o"
-	AssisterModel_OpenAI_O1Preview      AssisterModel  = "o1-preview"
-)

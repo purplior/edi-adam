@@ -1,11 +1,10 @@
 package assister
 
 import (
-	"log"
-
 	"github.com/podossaem/podoroot/domain/assisterform"
 	"github.com/podossaem/podoroot/domain/shared/context"
 	"github.com/podossaem/podoroot/infra/port/podoopenai"
+	"github.com/podossaem/podoroot/lib/dt"
 )
 
 type (
@@ -13,7 +12,7 @@ type (
 		RequestStream(
 			ctx context.APIContext,
 			id string,
-			inputs map[string]interface{},
+			inputs []assisterform.AssisterInput,
 			onInit func() error,
 			onReceiveMessage func(msg string) error,
 		) error
@@ -30,7 +29,7 @@ type (
 func (s *assisterService) RequestStream(
 	ctx context.APIContext,
 	id string,
-	inputs map[string]interface{},
+	inputs []assisterform.AssisterInput,
 	onInit func() error,
 	onReceiveMessage func(msg string) error,
 ) error {
@@ -39,21 +38,96 @@ func (s *assisterService) RequestStream(
 		return err
 	}
 
-	// 요청문장 가공
-	log.Println(assisterForm.CreatedAt)
-	messages := []map[string]string{
-		{"role": "user", "content": "선생님들이 겪는 어려움에 대해 1000자로 정리해줘"},
+	info := s.createQueryInformation(assisterForm.QueryInfoHeading, inputs)
+	messageLen := len(assisterForm.QueryMessages)
+	messages := make([]map[string]string, messageLen)
+
+	print("info:\n")
+	print(info)
+	for i, message := range assisterForm.QueryMessages {
+		if i == messageLen-1 {
+			message.Content += "\n\n" + info
+		}
+		messages[i] = message.CreatePayload()
 	}
 
 	return s.openaiClient.RequestChatCompletionsStream(
 		ctx,
 		podoopenai.ChatCompletionRequest{
-			Model:    string(AssisterModel_OpenAI_ChatGPT4o),
+			Model:    string(assisterForm.Model),
 			Messages: messages,
 		},
 		onInit,
 		onReceiveMessage,
 	)
+}
+
+func (s *assisterService) createQueryInformation(
+	queryInfoHeading string,
+	inputs []assisterform.AssisterInput,
+) string {
+	content := "## "
+	if len(queryInfoHeading) == 0 {
+		content += "정보"
+	} else {
+		content += queryInfoHeading
+	}
+
+	for _, input := range inputs {
+		content += "\n\n### " + input.Name
+
+		for i, v := range input.Values {
+			switch input.Type {
+			case assisterform.AssisterFieldType_Keyword:
+				{
+					value := v.(string)
+					if len(value) == 0 {
+						continue
+					}
+
+					if i > 0 {
+						content += ","
+					} else {
+						content += "\n"
+					}
+					content += value
+				}
+			case assisterform.AssisterFieldType_Paragraph:
+				{
+					value := v.(string)
+					if len(value) == 0 {
+						continue
+					}
+
+					content += "\n" + dt.Str(i+1) + ". " + value
+				}
+			case assisterform.AssisterFieldType_ParagraphGroup:
+				{
+					vIObjects := v.([]interface{})
+					vIObjectsLen := len(vIObjects)
+					if vIObjectsLen == 0 {
+						continue
+					}
+
+					content += "\n" + dt.Str(i+1) + ". " + input.ItemName
+					for _, vIObj := range vIObjects {
+						vObj := vIObj.(map[string]interface{})
+						childName := dt.Str(vObj["name"])
+						childValue := dt.Str(vObj["value"])
+
+						if len(childValue) == 0 {
+							continue
+						}
+
+						content += "\n\t- " + childName + ": " + childValue
+					}
+				}
+			}
+		}
+
+	}
+
+	return content
 }
 
 func NewAssisterService(

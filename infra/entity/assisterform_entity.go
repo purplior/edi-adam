@@ -10,18 +10,25 @@ import (
 
 type (
 	AssisterForm struct {
-		ID         primitive.ObjectID `bson:"_id,omitempty"`
-		AssisterID int                `bson:"assisterId"`
-		Fields     []AssisterField    `bson:"fields"`
-		SubmitText string             `bson:"submitText"`
-		CreatedAt  time.Time          `bson:"created_at"`
+		ID               primitive.ObjectID     `bson:"_id,omitempty"`
+		AssisterID       int                    `bson:"assisterId"`
+		Origin           domain.AssisterOrigin  `bson:"origin"`
+		Model            domain.AssisterModel   `bson:"model"`
+		Fields           []AssisterField        `bson:"fields"`
+		SubmitText       string                 `bson:"submitText"`
+		QueryMessages    []AssisterQueryMessage `bson:"queryMessages"`
+		QueryInfoHeading string                 `bson:"queryInfoHeading"`
+		CreatedAt        time.Time              `bson:"created_at"`
 	}
 )
 
 func (e AssisterForm) ToModel() domain.AssisterForm {
 	model := domain.AssisterForm{
-		SubmitText: e.SubmitText,
-		CreatedAt:  e.CreatedAt,
+		Origin:           e.Origin,
+		Model:            e.Model,
+		SubmitText:       e.SubmitText,
+		QueryInfoHeading: e.QueryInfoHeading,
+		CreatedAt:        e.CreatedAt,
 	}
 
 	if !e.ID.IsZero() {
@@ -37,13 +44,21 @@ func (e AssisterForm) ToModel() domain.AssisterForm {
 		model.Fields[i] = field.ToModel()
 	}
 
+	model.QueryMessages = make([]domain.AssisterQueryMessage, len(e.QueryMessages))
+	for i, queryMessage := range e.QueryMessages {
+		model.QueryMessages[i] = queryMessage.ToModel()
+	}
+
 	return model
 }
 
 func MakeAssisterForm(m domain.AssisterForm) AssisterForm {
 	entity := AssisterForm{
-		SubmitText: m.SubmitText,
-		CreatedAt:  m.CreatedAt,
+		Origin:           m.Origin,
+		Model:            m.Model,
+		SubmitText:       m.SubmitText,
+		QueryInfoHeading: m.QueryInfoHeading,
+		CreatedAt:        m.CreatedAt,
 	}
 
 	if len(m.ID) > 0 {
@@ -60,29 +75,58 @@ func MakeAssisterForm(m domain.AssisterForm) AssisterForm {
 		entity.Fields[i] = MakeAssisterField(field)
 	}
 
+	entity.QueryMessages = make([]AssisterQueryMessage, len(m.QueryMessages))
+	for i, queryMessage := range m.QueryMessages {
+		entity.QueryMessages[i] = MakeAssisterQueryMessage(queryMessage)
+	}
+
 	return entity
 }
 
 type (
 	AssisterField struct {
-		Name   string                   `bson:"name"`
-		Type   domain.AssisterFieldType `bson:"type"`
-		Option map[string]interface{}   `bson:"option"`
+		Name     string                   `bson:"name"`
+		Type     domain.AssisterFieldType `bson:"type"`
+		ItemName string                   `bson:"itemName"`
+		Option   map[string]interface{}   `bson:"option"`
 	}
 )
 
 func (e AssisterField) ToModel() domain.AssisterField {
 	return domain.AssisterField{
-		Name:   e.Name,
-		Type:   e.Type,
-		Option: e.Option,
+		Name:     e.Name,
+		Type:     e.Type,
+		ItemName: e.ItemName,
+		Option:   e.Option,
 	}
 }
 
 func MakeAssisterField(m domain.AssisterField) AssisterField {
 	return AssisterField{
-		Name:   m.Name,
-		Type:   m.Type,
-		Option: m.Option,
+		Name:     m.Name,
+		Type:     m.Type,
+		ItemName: m.ItemName,
+		Option:   m.Option,
+	}
+}
+
+type (
+	AssisterQueryMessage struct {
+		Role    domain.AssisterQueryMessageRole `bson:"role"`
+		Content string                          `bson:"content"`
+	}
+)
+
+func (e AssisterQueryMessage) ToModel() domain.AssisterQueryMessage {
+	return domain.AssisterQueryMessage{
+		Role:    e.Role,
+		Content: e.Content,
+	}
+}
+
+func MakeAssisterQueryMessage(m domain.AssisterQueryMessage) AssisterQueryMessage {
+	return AssisterQueryMessage{
+		Role:    m.Role,
+		Content: m.Content,
 	}
 }

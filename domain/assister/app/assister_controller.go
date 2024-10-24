@@ -8,6 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/podossaem/podoroot/application/api"
 	domain "github.com/podossaem/podoroot/domain/assister"
+	"github.com/podossaem/podoroot/domain/assisterform"
 	"github.com/podossaem/podoroot/domain/shared/exception"
 	"github.com/podossaem/podoroot/infra/port/podoopenai"
 )
@@ -36,7 +37,7 @@ func (c *assisterController) Execute() api.HandlerFunc {
 		}
 
 		var dto struct {
-			Inputs map[string]interface{} `json:"inputs"`
+			Inputs []assisterform.AssisterInput `json:"inputs"`
 		}
 		if err := ctx.Bind(&dto); err != nil {
 			return ctx.String(http.StatusBadRequest, exception.ErrBadRequest.Error())
