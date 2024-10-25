@@ -26,6 +26,13 @@ func (r *meRouter) Attach(router *echo.Group) {
 	)
 
 	meRouterGroup.GET(
+		"/detail",
+		api.Handler(
+			r.meController.GetMyDetail(),
+		),
+	)
+
+	meRouterGroup.GET(
 		"/temp/at",
 		api.Handler(
 			r.meController.GetTempAccessToken(),

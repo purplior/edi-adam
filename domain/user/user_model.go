@@ -22,16 +22,34 @@ type (
 		ID       string `json:"id"`
 		Nickname string `json:"nickname"`
 	}
+
+	UserDetail struct {
+		ID         string    `json:"id"`
+		JoinMethod string    `json:"joinMethod"`
+		AccountID  string    `json:"accountId"`
+		Nickname   string    `json:"nickname"`
+		CreatedAt  time.Time `json:"createdAt"`
+	}
 )
 
-func (m *User) ToInfo() UserInfo {
+func (m User) ToInfo() UserInfo {
 	return UserInfo{
 		ID:       m.ID,
 		Nickname: m.Nickname,
 	}
 }
 
-func (e *User) ComparePassword(password string) error {
+func (m User) ToDetail() UserDetail {
+	return UserDetail{
+		ID:         m.ID,
+		JoinMethod: m.JoinMethod,
+		AccountID:  m.AccountID,
+		Nickname:   m.Nickname,
+		CreatedAt:  m.CreatedAt,
+	}
+}
+
+func (e User) ComparePassword(password string) error {
 	if err := bcrypt.CompareHashAndPassword([]byte(e.AccountPassword), []byte(password)); err != nil {
 		return exception.ErrUnauthorized
 	}

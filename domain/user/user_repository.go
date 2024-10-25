@@ -4,7 +4,15 @@ import "github.com/podossaem/podoroot/domain/shared/context"
 
 type (
 	UserRepository interface {
-		FindByAccount(
+		FindOneByID(
+			ctx context.APIContext,
+			id string,
+		) (
+			User,
+			error,
+		)
+
+		FindOneByAccount(
 			ctx context.APIContext,
 			joinMethod string,
 			accountID string,

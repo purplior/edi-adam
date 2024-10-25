@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/podossaem/podoroot/domain/shared/context"
-	"github.com/podossaem/podoroot/domain/user"
+	domain "github.com/podossaem/podoroot/domain/user"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podosql"
 	"github.com/podossaem/podoroot/infra/entity"
@@ -14,12 +14,30 @@ type (
 	}
 )
 
-func (r *userRepository) FindByAccount(
+func (r *userRepository) FindOneByID(
+	ctx context.APIContext,
+	id string,
+) (
+	domain.User,
+	error,
+) {
+	var e entity.User
+	result := r.client.DB.WithContext(ctx).
+		Where("id = ?", id).
+		First(&e)
+	if result.Error != nil {
+		return domain.User{}, database.ToDomainError(result.Error)
+	}
+
+	return e.ToModel(), nil
+}
+
+func (r *userRepository) FindOneByAccount(
 	ctx context.APIContext,
 	joinMethod string,
 	accountID string,
 ) (
-	user.User,
+	domain.User,
 	error,
 ) {
 	var e entity.User
@@ -28,7 +46,7 @@ func (r *userRepository) FindByAccount(
 		Where("account_id = ?", accountID).
 		First(&e)
 	if result.Error != nil {
-		return user.User{}, database.ToDomainError(result.Error)
+		return domain.User{}, database.ToDomainError(result.Error)
 	}
 
 	return e.ToModel(), nil
@@ -36,9 +54,9 @@ func (r *userRepository) FindByAccount(
 
 func (r *userRepository) InsertOne(
 	ctx context.APIContext,
-	userForInsert user.User,
+	userForInsert domain.User,
 ) (
-	user.User,
+	domain.User,
 	error,
 ) {
 	e := entity.MakeUser(userForInsert)
@@ -46,7 +64,7 @@ func (r *userRepository) InsertOne(
 		Create(&e)
 
 	if result.Error != nil {
-		return user.User{}, database.ToDomainError(result.Error)
+		return domain.User{}, database.ToDomainError(result.Error)
 	}
 
 	return e.ToModel(), nil
@@ -54,7 +72,7 @@ func (r *userRepository) InsertOne(
 
 func NewUserRepository(
 	client *podosql.Client,
-) user.UserRepository {
+) domain.UserRepository {
 	return &userRepository{
 		client: client,
 	}

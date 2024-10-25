@@ -7,14 +7,20 @@ import (
 	domain "github.com/podossaem/podoroot/domain/me"
 	"github.com/podossaem/podoroot/domain/shared/context"
 	"github.com/podossaem/podoroot/domain/shared/exception"
+	"github.com/podossaem/podoroot/domain/user"
 )
 
 type (
 	MeController interface {
 		/**
-		 * 내 정보 가져오기
+		 * 내 정보(인증에 포함된 간단한 식별정보) 가져오기
 		 */
 		GetMyIdentity() api.HandlerFunc
+
+		/**
+		 * 내 정보 가져오기
+		 */
+		GetMyDetail() api.HandlerFunc
 
 		/**
 		 * 나의 임시 액세스 토큰 발급하기 (유효기간 1시간)
@@ -27,6 +33,7 @@ type (
 	meController struct {
 		meService   domain.MeService
 		authService auth.AuthService
+		userService user.UserService
 	}
 )
 
@@ -37,6 +44,29 @@ func (c *meController) GetMyIdentity() api.HandlerFunc {
 		return ctx.SendJSON(response.JSONResponse{
 			Status: response.Status_Ok,
 			Data:   identity,
+		})
+	}
+}
+
+func (c *meController) GetMyDetail() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		apiCtx, cancel := context.NewAPIContext()
+		defer cancel()
+
+		userDetail, err := c.userService.GetDetailOneByID(
+			apiCtx,
+			ctx.Identity.ID,
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				UserDetail user.UserDetail `json:"userDetail"`
+			}{
+				UserDetail: userDetail,
+			},
 		})
 	}
 }
@@ -68,9 +98,11 @@ func (c *meController) GetTempAccessToken() api.HandlerFunc {
 func NewMeController(
 	meService domain.MeService,
 	authService auth.AuthService,
+	userService user.UserService,
 ) MeController {
 	return &meController{
 		meService:   meService,
 		authService: authService,
+		userService: userService,
 	}
 }

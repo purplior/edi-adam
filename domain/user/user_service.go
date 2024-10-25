@@ -4,12 +4,20 @@ import "github.com/podossaem/podoroot/domain/shared/context"
 
 type (
 	UserService interface {
-		GetByAccount(
+		GetOneByAccount(
 			ctx context.APIContext,
 			joinMethod string,
 			accountID string,
 		) (
 			User,
+			error,
+		)
+
+		GetDetailOneByID(
+			ctx context.APIContext,
+			id string,
+		) (
+			UserDetail,
 			error,
 		)
 
@@ -27,7 +35,7 @@ type (
 	}
 )
 
-func (s *userService) GetByAccount(
+func (s *userService) GetOneByAccount(
 	ctx context.APIContext,
 	joinMethod string,
 	accountID string,
@@ -35,11 +43,26 @@ func (s *userService) GetByAccount(
 	User,
 	error,
 ) {
-	return s.userRepository.FindByAccount(
+	return s.userRepository.FindOneByAccount(
 		ctx,
 		joinMethod,
 		accountID,
 	)
+}
+
+func (s *userService) GetDetailOneByID(
+	ctx context.APIContext,
+	id string,
+) (
+	UserDetail,
+	error,
+) {
+	user, err := s.userRepository.FindOneByID(ctx, id)
+	if err != nil {
+		return UserDetail{}, err
+	}
+
+	return user.ToDetail(), nil
 }
 
 func (s *userService) RegisterOne(

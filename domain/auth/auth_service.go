@@ -64,7 +64,7 @@ func (s *authService) SignInByEmailVerification(
 	Identity,
 	error,
 ) {
-	existedUser, err := s.userService.GetByAccount(
+	existedUser, err := s.userService.GetOneByAccount(
 		ctx,
 		user.JoinMethod_Email,
 		request.AccountID,

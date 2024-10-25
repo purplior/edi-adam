@@ -65,7 +65,7 @@ func Start() error {
 	authController := app4.NewAuthController(authService)
 	authRouter := app4.NewAuthRouter(authController)
 	meService := me.NewMeService(userRepository)
-	meController := app5.NewMeController(meService, authService)
+	meController := app5.NewMeController(meService, authService, userService)
 	meRouter := app5.NewMeRouter(meController)
 	userController := app6.NewUserController()
 	userRouter := app6.NewUserRouter(userController)
