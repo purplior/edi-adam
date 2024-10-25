@@ -78,8 +78,15 @@ func (c *assisterController) Execute() api.HandlerFunc {
 				},
 			)
 
-			if err != nil && err != podoopenai.ErrOnStream {
-				return nil
+			if err != nil {
+				switch err {
+				case podoopenai.ErrOnStream:
+					return nil
+				case exception.ErrBadRequest:
+					return ctx.String(http.StatusBadRequest, "입력폼을 다시 확인해주세요")
+				default:
+					return ctx.String(http.StatusInternalServerError, "일시적인 서버 오류가 발생했어요")
+				}
 			}
 
 			return nil

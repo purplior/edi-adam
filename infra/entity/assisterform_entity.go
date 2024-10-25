@@ -88,6 +88,7 @@ type (
 		Name     string                   `bson:"name"`
 		Type     domain.AssisterFieldType `bson:"type"`
 		ItemName string                   `bson:"itemName"`
+		Required bool                     `bson:"required"`
 		Option   map[string]interface{}   `bson:"option"`
 	}
 )
@@ -97,6 +98,7 @@ func (e AssisterField) ToModel() domain.AssisterField {
 		Name:     e.Name,
 		Type:     e.Type,
 		ItemName: e.ItemName,
+		Required: e.Required,
 		Option:   e.Option,
 	}
 }
@@ -106,6 +108,7 @@ func MakeAssisterField(m domain.AssisterField) AssisterField {
 		Name:     m.Name,
 		Type:     m.Type,
 		ItemName: m.ItemName,
+		Required: m.Required,
 		Option:   m.Option,
 	}
 }

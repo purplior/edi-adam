@@ -3,6 +3,7 @@ package assister
 import (
 	"github.com/podossaem/podoroot/domain/assisterform"
 	"github.com/podossaem/podoroot/domain/shared/context"
+	"github.com/podossaem/podoroot/domain/shared/exception"
 	"github.com/podossaem/podoroot/infra/port/podoopenai"
 	"github.com/podossaem/podoroot/lib/dt"
 )
@@ -33,18 +34,25 @@ func (s *assisterService) RequestStream(
 	onInit func() error,
 	onReceiveMessage func(msg string) error,
 ) error {
-	assisterForm, err := s.assisterFormService.GetOneByAssisterID(ctx, id)
+	form, err := s.assisterFormService.GetOneByAssisterID(ctx, id)
 	if err != nil {
 		return err
 	}
 
-	info := s.createQueryInformation(assisterForm.QueryInfoHeading, inputs)
-	messageLen := len(assisterForm.QueryMessages)
+	info, err := s.createQueryInformation(
+		form,
+		inputs,
+	)
+	if err != nil {
+		return err
+	}
+
+	messageLen := len(form.QueryMessages)
 	messages := make([]map[string]string, messageLen)
 
 	print("info:\n")
 	print(info)
-	for i, message := range assisterForm.QueryMessages {
+	for i, message := range form.QueryMessages {
 		if i == messageLen-1 {
 			message.Content += "\n\n" + info
 		}
@@ -54,7 +62,7 @@ func (s *assisterService) RequestStream(
 	return s.openaiClient.RequestChatCompletionsStream(
 		ctx,
 		podoopenai.ChatCompletionRequest{
-			Model:    string(assisterForm.Model),
+			Model:    string(form.Model),
 			Messages: messages,
 		},
 		onInit,
@@ -63,26 +71,35 @@ func (s *assisterService) RequestStream(
 }
 
 func (s *assisterService) createQueryInformation(
-	queryInfoHeading string,
+	form assisterform.AssisterForm,
 	inputs []assisterform.AssisterInput,
-) string {
+) (string, error) {
 	content := "## "
-	if len(queryInfoHeading) == 0 {
+	if len(form.QueryInfoHeading) == 0 {
 		content += "정보"
 	} else {
-		content += queryInfoHeading
+		content += form.QueryInfoHeading
 	}
 
 	for _, input := range inputs {
 		content += "\n\n### " + input.Name
 
 		for i, v := range input.Values {
-			switch input.Type {
+			field, ok := form.FindField(input.Name)
+			if !ok {
+				continue
+			}
+
+			switch field.Type {
 			case assisterform.AssisterFieldType_Keyword:
 				{
 					value := v.(string)
 					if len(value) == 0 {
-						continue
+						if field.Required {
+							return "", exception.ErrBadRequest
+						} else {
+							continue
+						}
 					}
 
 					if i > 0 {
@@ -96,7 +113,11 @@ func (s *assisterService) createQueryInformation(
 				{
 					value := v.(string)
 					if len(value) == 0 {
-						continue
+						if field.Required {
+							return "", exception.ErrBadRequest
+						} else {
+							continue
+						}
 					}
 
 					content += "\n" + dt.Str(i+1) + ". " + value
@@ -106,17 +127,25 @@ func (s *assisterService) createQueryInformation(
 					vIObjects := v.([]interface{})
 					vIObjectsLen := len(vIObjects)
 					if vIObjectsLen == 0 {
-						continue
+						if field.Required {
+							return "", exception.ErrBadRequest
+						} else {
+							continue
+						}
 					}
 
-					content += "\n" + dt.Str(i+1) + ". " + input.ItemName
+					content += "\n" + dt.Str(i+1) + ". " + field.ItemName
 					for _, vIObj := range vIObjects {
 						vObj := vIObj.(map[string]interface{})
 						childName := dt.Str(vObj["name"])
 						childValue := dt.Str(vObj["value"])
 
 						if len(childValue) == 0 {
-							continue
+							if field.Required {
+								return "", exception.ErrBadRequest
+							} else {
+								continue
+							}
 						}
 
 						content += "\n\t- " + childName + ": " + childValue
@@ -124,10 +153,9 @@ func (s *assisterService) createQueryInformation(
 				}
 			}
 		}
-
 	}
 
-	return content
+	return content, nil
 }
 
 func NewAssisterService(
