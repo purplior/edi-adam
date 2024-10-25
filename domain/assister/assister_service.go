@@ -50,8 +50,6 @@ func (s *assisterService) RequestStream(
 	messageLen := len(form.QueryMessages)
 	messages := make([]map[string]string, messageLen)
 
-	print("info:\n")
-	print(info)
 	for i, message := range form.QueryMessages {
 		if i == messageLen-1 {
 			message.Content += "\n\n" + info
