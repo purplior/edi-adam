@@ -4,10 +4,14 @@ import (
 	"time"
 
 	"github.com/podossaem/podoroot/application/config"
+	"github.com/podossaem/podoroot/domain/ledger"
 	"github.com/podossaem/podoroot/domain/shared/context"
 	"github.com/podossaem/podoroot/domain/shared/exception"
 	"github.com/podossaem/podoroot/domain/user"
 	"github.com/podossaem/podoroot/domain/verification"
+	"github.com/podossaem/podoroot/domain/wallet"
+	"github.com/podossaem/podoroot/infra/database/podopaysql"
+	"github.com/podossaem/podoroot/infra/database/podosql"
 	"github.com/podossaem/podoroot/lib/myjwt"
 )
 
@@ -51,8 +55,12 @@ type (
 	}
 
 	authService struct {
+		podosqlClient            *podosql.Client
+		podopaySqlClient         *podopaysql.Client
 		emailVerificationService verification.EmailVerificationService
 		userService              user.UserService
+		ledgerService            ledger.LedgerService
+		walletService            wallet.WalletService
 	}
 )
 
@@ -89,15 +97,28 @@ func (s *authService) SignUpByEmailVerification(
 	ctx context.APIContext,
 	request SignUpByEmailVerificationRequest,
 ) error {
+	if err := s.podosqlClient.BeginTX(ctx); err != nil {
+		return err
+	}
+	if err := s.podopaySqlClient.BeginTX(ctx); err != nil {
+		return err
+	}
+
+	defer func() {
+		s.podosqlClient.RecoverTX()
+		s.podopaySqlClient.RecoverTX()
+	}()
+
 	verification, err := s.emailVerificationService.Consume(
 		ctx,
 		request.VerificationID,
 	)
 	if err != nil {
+		s.podosqlClient.RollbackTX()
 		return err
 	}
 
-	_, err = s.userService.RegisterOne(
+	me, err := s.userService.RegisterOne(
 		ctx,
 		user.User{
 			JoinMethod:      user.JoinMethod_Email,
@@ -107,6 +128,46 @@ func (s *authService) SignUpByEmailVerification(
 			Role:            user.Role_User,
 		},
 	)
+	if err != nil {
+		return err
+	}
+
+	wallet, err := s.walletService.RegisterOne(
+		ctx,
+		wallet.Wallet{
+			OwnerID: me.ID,
+			Podo:    5000,
+		},
+	)
+	if err != nil {
+		s.podosqlClient.RollbackTX()
+		return err
+	}
+
+	_, err = s.ledgerService.RegisterOne(
+		ctx,
+		ledger.Ledger{
+			WalletID:   wallet.ID,
+			PodoAmount: 5000,
+			Action:     ledger.LedgerAction_AddBySignUpEvent,
+			Reason:     "",
+		},
+	)
+	if err != nil {
+		s.podosqlClient.RollbackTX()
+		s.podopaySqlClient.RollbackTX()
+		return err
+	}
+
+	// pay는 생성되었지만 user는 생성되지 않았을 가능성이 존재.
+	// 반대의 상황보다는 이 상황이 나음
+	if err := s.podopaySqlClient.CommitTX(); err != nil {
+		s.podosqlClient.RollbackTX()
+		return err
+	}
+	if err := s.podosqlClient.CommitTX(); err != nil {
+		return err
+	}
 
 	return err
 }
@@ -290,11 +351,19 @@ func (s *authService) getRefreshTokenPayload(
 }
 
 func NewAuthService(
+	podosqlClient *podosql.Client,
+	podopaySqlClient *podopaysql.Client,
 	emailVerificationService verification.EmailVerificationService,
 	userService user.UserService,
+	ledgerService ledger.LedgerService,
+	walletService wallet.WalletService,
 ) AuthService {
 	return &authService{
+		podosqlClient:            podosqlClient,
+		podopaySqlClient:         podopaySqlClient,
 		emailVerificationService: emailVerificationService,
 		userService:              userService,
+		ledgerService:            ledgerService,
+		walletService:            walletService,
 	}
 }

@@ -22,7 +22,9 @@ func (r *userRepository) FindOneByID(
 	error,
 ) {
 	var e entity.User
-	result := r.client.DB.WithContext(ctx).
+	db := r.client.DBWithContext(ctx)
+
+	result := db.
 		Where("id = ?", id).
 		First(&e)
 	if result.Error != nil {
@@ -41,7 +43,9 @@ func (r *userRepository) FindOneByAccount(
 	error,
 ) {
 	var e entity.User
-	result := r.client.DB.WithContext(ctx).
+
+	db := r.client.DB.WithContext(ctx)
+	result := db.
 		Where("join_method = ?", joinMethod).
 		Where("account_id = ?", accountID).
 		First(&e)
@@ -60,8 +64,9 @@ func (r *userRepository) InsertOne(
 	error,
 ) {
 	e := entity.MakeUser(userForInsert)
-	result := r.client.DB.WithContext(ctx).
-		Create(&e)
+
+	db := r.client.DB.WithContext(ctx)
+	result := db.Create(&e)
 
 	if result.Error != nil {
 		return domain.User{}, database.ToDomainError(result.Error)

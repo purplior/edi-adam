@@ -22,10 +22,10 @@ func (r *emailVerificationRepository) InsertOne(
 	verification.EmailVerification,
 	error,
 ) {
+	db := r.client.DBWithContext(ctx)
 	e := entity.MakeEmailVerification(emailVerification)
 
-	result := r.client.DB.WithContext(ctx).
-		Create(&e)
+	result := db.Create(&e)
 	if result.Error != nil {
 		return verification.EmailVerification{}, database.ToDomainError(result.Error)
 	}
@@ -40,11 +40,11 @@ func (r *emailVerificationRepository) FindOneById(
 	verification.EmailVerification,
 	error,
 ) {
+	db := r.client.DBWithContext(ctx)
 	eid := dt.UInt(id)
 
 	var e entity.EmailVerification
-	result := r.client.DB.WithContext(ctx).
-		First(&e, eid)
+	result := db.First(&e, eid)
 	if result.Error != nil {
 		return verification.EmailVerification{}, database.ToDomainError(result.Error)
 	}
@@ -61,7 +61,8 @@ func (r *emailVerificationRepository) FindRecentOneByEmail(
 ) {
 	var e entity.EmailVerification
 
-	result := r.client.DB.WithContext(ctx).
+	db := r.client.DBWithContext(ctx)
+	result := db.
 		Where("email = ?", email).
 		Order("created_at DESC").
 		First(&e)
@@ -79,8 +80,9 @@ func (r *emailVerificationRepository) UpdateOne_IsVerified(
 	isVerified bool,
 ) error {
 	eid := dt.UInt(id)
+	db := r.client.DBWithContext(ctx)
 
-	result := r.client.DB.WithContext(ctx).
+	result := db.
 		Model(&entity.EmailVerification{}).
 		Where("id = ?", eid).
 		Update("is_verified", isVerified)
@@ -96,9 +98,10 @@ func (r *emailVerificationRepository) UpdateOne_isConsumed(
 	id string,
 	isConsumed bool,
 ) error {
+	db := r.client.DBWithContext(ctx)
 	eid := dt.UInt(id)
 
-	result := r.client.DB.WithContext(ctx).
+	result := db.
 		Model(&entity.EmailVerification{}).
 		Where("id = ?", eid).
 		Update("is_consumed", isConsumed)

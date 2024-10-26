@@ -21,14 +21,17 @@ import (
 	app3 "github.com/podossaem/podoroot/domain/assisterform/app"
 	"github.com/podossaem/podoroot/domain/auth"
 	app4 "github.com/podossaem/podoroot/domain/auth/app"
+	"github.com/podossaem/podoroot/domain/ledger"
 	"github.com/podossaem/podoroot/domain/me"
 	app5 "github.com/podossaem/podoroot/domain/me/app"
 	"github.com/podossaem/podoroot/domain/user"
 	app6 "github.com/podossaem/podoroot/domain/user/app"
 	"github.com/podossaem/podoroot/domain/verification"
 	app7 "github.com/podossaem/podoroot/domain/verification/app"
+	"github.com/podossaem/podoroot/domain/wallet"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podomongo"
+	"github.com/podossaem/podoroot/infra/database/podopaysql"
 	"github.com/podossaem/podoroot/infra/database/podosql"
 	"github.com/podossaem/podoroot/infra/port/podoopenai"
 	"github.com/podossaem/podoroot/infra/repository"
@@ -43,8 +46,9 @@ import (
 
 func Start() error {
 	client := podosql.NewClient()
+	podopaysqlClient := podopaysql.NewClient()
 	podomongoClient := podomongo.NewClient()
-	databaseManager := database.NewDatabaseManager(client, podomongoClient)
+	databaseManager := database.NewDatabaseManager(client, podopaysqlClient, podomongoClient)
 	assistantRepository := repository.NewAssistantRepository(client)
 	assistantService := assistant.NewAssistantService(assistantRepository)
 	assistantController := app.NewAssistantController(assistantService)
@@ -61,7 +65,11 @@ func Start() error {
 	emailVerificationService := verification.NewEmailVerificationService(emailVerificationRepository)
 	userRepository := repository.NewUserRepository(client)
 	userService := user.NewUserService(userRepository)
-	authService := auth.NewAuthService(emailVerificationService, userService)
+	ledgerRepository := repository.NewLedgerRepository(podopaysqlClient)
+	ledgerService := ledger.NewLedgerService(ledgerRepository)
+	walletRepository := repository.NewWalletRepository(podopaysqlClient)
+	walletService := wallet.NewWalletService(walletRepository)
+	authService := auth.NewAuthService(client, podopaysqlClient, emailVerificationService, userService, ledgerService, walletService)
 	authController := app4.NewAuthController(authService)
 	authRouter := app4.NewAuthRouter(authController)
 	meService := me.NewMeService(userRepository)

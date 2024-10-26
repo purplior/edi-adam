@@ -1,4 +1,4 @@
-package podosql
+package podopaysql
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/podossaem/podoroot/domain/shared/constant"
 	"github.com/podossaem/podoroot/domain/shared/exception"
 	"github.com/podossaem/podoroot/infra/entity"
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -36,7 +36,7 @@ func (c *Client) DBWithContext(ctx context.Context) *gorm.DB {
 }
 
 func (c *Client) ConnectDB() error {
-	db, err := gorm.Open(mysql.Open(c.opt.DSN), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(c.opt.DSN), &gorm.Config{
 		Logger:      logger.Default.LogMode(logger.Silent),
 		PrepareStmt: true,
 	})
@@ -58,17 +58,15 @@ func (c *Client) ConnectDB() error {
 		return err
 	}
 
-	log.Println("[podosql] 데이터베이스 연결에 성공 했어요")
+	log.Println("[podopaysql] 데이터베이스 연결에 성공 했어요")
 
 	return nil
 }
 
 func (c *Client) MigrateDB() error {
 	return c.DB.AutoMigrate(
-		entity.User{},
-		entity.EmailVerification{},
-		entity.Assistant{},
-		entity.Assister{},
+		entity.Wallet{},
+		entity.Ledger{},
 	)
 }
 
@@ -89,24 +87,24 @@ func (c *Client) ReconnectDB(
 	for {
 		err := c.PingDB()
 		if err == nil {
-			log.Println("[podosql] 데이터베이스 재연결에 성공 했어요")
+			log.Println("[podopaysql] 데이터베이스 재연결에 성공 했어요")
 			return
 		}
 
 		attempts++
 		if attempts > maxAttempts {
 
-			log.Fatalf("[podosql] 데이터베이스 재시도 연결 횟수가 최대를 초과 했어요: %v", err)
+			log.Fatalf("[podopaysql] 데이터베이스 재시도 연결 횟수가 최대를 초과 했어요: %v", err)
 			return
 		}
 
 		// 2의 지수 증가
 		delay := baseDelay * time.Duration(1<<attempts)
-		log.Printf("[podosql] 데이터베이스 연결에 실패 했어요, 재시도 중 %v... (attempt %d/%d)", delay, attempts, maxAttempts)
+		log.Printf("[podopaysql] 데이터베이스 연결에 실패 했어요, 재시도 중 %v... (attempt %d/%d)", delay, attempts, maxAttempts)
 		time.Sleep(delay)
 
 		if err := c.ConnectDB(); err != nil {
-			log.Println("[podosql] 데이터베이스 연결에 실패 했어요:", err)
+			log.Println("[podopaysql] 데이터베이스 연결에 실패 했어요:", err)
 			return
 		}
 	}
@@ -167,7 +165,7 @@ func (c *Client) RecoverTX() {
 func NewClient() *Client {
 	opt := ConstructorOption{
 		Phase: config.Phase(),
-		DSN:   config.PodossaemSqlDSN(),
+		DSN:   config.PodopaySqlDSN(),
 	}
 
 	client := &Client{

@@ -47,8 +47,12 @@ func Phase() constant.Phase {
 	return convertPhaseStringToEnum(phase)
 }
 
-func MySqlDSN() string {
-	return os.Getenv("MYSQL_DB_DSN")
+func PodossaemSqlDSN() string {
+	return os.Getenv("PODOSSAEM_DB_DSN")
+}
+
+func PodopaySqlDSN() string {
+	return os.Getenv("PODOPAY_DB_DSN")
 }
 
 func MongoDbURI() string {

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/podossaem/podoroot/infra/database/podomongo"
+	"github.com/podossaem/podoroot/infra/database/podopaysql"
 	"github.com/podossaem/podoroot/infra/database/podosql"
 )
 
@@ -19,8 +20,9 @@ type (
 
 type (
 	databaseManager struct {
-		podosqlClient   *podosql.Client
-		podomongoClient *podomongo.Client
+		podosqlClient    *podosql.Client
+		podopaysqlClient *podopaysql.Client
+		podomongoClient  *podomongo.Client
 	}
 )
 
@@ -32,6 +34,12 @@ func (m *databaseManager) Init() error {
 		return err
 	}
 	if err := m.podosqlClient.MigrateDB(); err != nil {
+		return err
+	}
+	if err := m.podopaysqlClient.ConnectDB(); err != nil {
+		return err
+	}
+	if err := m.podopaysqlClient.MigrateDB(); err != nil {
 		return err
 	}
 
@@ -56,10 +64,12 @@ func (m *databaseManager) Dispose() error {
 
 func NewDatabaseManager(
 	podosqlClient *podosql.Client,
+	podopaysqlClient *podopaysql.Client,
 	podomongoClient *podomongo.Client,
 ) DatabaseManager {
 	return &databaseManager{
-		podosqlClient:   podosqlClient,
-		podomongoClient: podomongoClient,
+		podosqlClient:    podosqlClient,
+		podopaysqlClient: podopaysqlClient,
+		podomongoClient:  podomongoClient,
 	}
 }

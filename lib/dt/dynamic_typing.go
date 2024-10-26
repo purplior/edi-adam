@@ -95,6 +95,94 @@ func Int(in any) (out int) {
 	return out
 }
 
+func Int32(in any) (out int32) {
+	out = 0
+
+	switch in := in.(type) {
+	case nil:
+		out = 0
+	case int:
+		out = int32(in)
+	case uint8:
+		out = int32(in)
+	case uint16:
+		out = int32(in)
+	case uint32:
+		out = int32(in)
+	case uint64:
+		out = int32(in)
+	case uint:
+		out = int32(in)
+	case int8:
+		out = int32(in)
+	case int16:
+		out = int32(in)
+	case int32:
+		out = in
+	case int64:
+		out = int32(in)
+	case float32:
+		out = int32(math.Floor(float64(in)))
+	case float64:
+		out = int32(math.Floor(in))
+	case bool:
+		if in {
+			out = 1
+		}
+	case string:
+		o, _ := strconv.Atoi(in)
+		out = int32(o)
+	default:
+		out = 1
+	}
+
+	return out
+}
+
+func Int64(in any) (out int64) {
+	out = 0
+
+	switch in := in.(type) {
+	case nil:
+		out = 0
+	case int:
+		out = int64(in)
+	case uint8:
+		out = int64(in)
+	case uint16:
+		out = int64(in)
+	case uint32:
+		out = int64(in)
+	case uint64:
+		out = int64(in)
+	case uint:
+		out = int64(in)
+	case int8:
+		out = int64(in)
+	case int16:
+		out = int64(in)
+	case int32:
+		out = int64(in)
+	case int64:
+		out = in
+	case float32:
+		out = int64(math.Floor(float64(in)))
+	case float64:
+		out = int64(math.Floor(in))
+	case bool:
+		if in {
+			out = 1
+		}
+	case string:
+		o, _ := strconv.Atoi(in)
+		out = int64(o)
+	default:
+		out = 1
+	}
+
+	return out
+}
+
 func UInt(in any) (out uint) {
 	out = 0
 

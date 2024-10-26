@@ -22,7 +22,7 @@ func (r *assistantRepository) InsertOne(
 	error,
 ) {
 	e := entity.MakeAssistant(assistantForInsert)
-	result := r.client.DB.WithContext(ctx).
+	result := r.client.DBWithContext(ctx).
 		Create(&e)
 
 	if result.Error != nil {
@@ -41,20 +41,21 @@ func (r *assistantRepository) FindOneByViewID(
 	error,
 ) {
 	var e entity.Assistant
+	db := r.client.DBWithContext(ctx)
 
-	result := r.client.DB.Where("view_id = ?", viewID).First(&e)
+	result := db.Where("view_id = ?", viewID).First(&e)
 	if result.Error != nil {
 		return assistant.Assistant{}, database.ToDomainError(result.Error)
 	}
 
 	if joinOption.WithAuthor {
-		if err := r.client.DB.Model(&e).Association("Author").Find(&e.Author); err != nil {
+		if err := db.Model(&e).Association("Author").Find(&e.Author); err != nil {
 			return assistant.Assistant{}, database.ToDomainError(err)
 		}
 	}
 
 	if joinOption.WithAssisters {
-		if err := r.client.DB.Preload("Assisters").Find(&e).Error; err != nil {
+		if err := db.Preload("Assisters").Find(&e).Error; err != nil {
 			return assistant.Assistant{}, database.ToDomainError(err)
 		}
 	}
@@ -72,7 +73,8 @@ func (r *assistantRepository) FindListByAuthorID(
 ) {
 	var entities []entity.Assistant
 
-	query := r.client.DB.
+	db := r.client.DBWithContext(ctx)
+	query := db.
 		Where("author_id = ? AND is_public = ?", authorID, true).
 		Order("created_at asc")
 	if joinOption.WithAuthor {
