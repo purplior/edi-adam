@@ -1,11 +1,11 @@
 package assisterform
 
-import "github.com/podossaem/podoroot/domain/shared/context"
+import "github.com/podossaem/podoroot/domain/shared/inner"
 
 type (
 	AssisterFormRepository interface {
 		InsertOne(
-			ctx context.APIContext,
+			ctx inner.Context,
 			assisterForm AssisterForm,
 		) (
 			AssisterForm,
@@ -13,7 +13,7 @@ type (
 		)
 
 		FindOneByID(
-			ctx context.APIContext,
+			ctx inner.Context,
 			id string,
 		) (
 			AssisterForm,
@@ -21,7 +21,7 @@ type (
 		)
 
 		FindOneByAssisterID(
-			ctx context.APIContext,
+			ctx inner.Context,
 			assisterID string,
 		) (
 			AssisterForm,

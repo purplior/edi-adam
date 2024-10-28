@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/podossaem/podoroot/domain/assistant"
-	"github.com/podossaem/podoroot/domain/shared/context"
+	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podosql"
 	"github.com/podossaem/podoroot/infra/entity"
@@ -15,7 +15,7 @@ type (
 )
 
 func (r *assistantRepository) InsertOne(
-	ctx context.APIContext,
+	ctx inner.Context,
 	assistantForInsert assistant.Assistant,
 ) (
 	assistant.Assistant,
@@ -33,7 +33,7 @@ func (r *assistantRepository) InsertOne(
 }
 
 func (r *assistantRepository) FindOneByViewID(
-	ctx context.APIContext,
+	ctx inner.Context,
 	viewID string,
 	joinOption assistant.AssistantJoinOption,
 ) (
@@ -64,7 +64,7 @@ func (r *assistantRepository) FindOneByViewID(
 }
 
 func (r *assistantRepository) FindListByAuthorID(
-	ctx context.APIContext,
+	ctx inner.Context,
 	authorID string,
 	joinOption assistant.AssistantJoinOption,
 ) (

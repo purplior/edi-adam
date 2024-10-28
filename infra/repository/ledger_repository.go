@@ -2,7 +2,7 @@ package repository
 
 import (
 	domain "github.com/podossaem/podoroot/domain/ledger"
-	"github.com/podossaem/podoroot/domain/shared/context"
+	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podopaysql"
 	"github.com/podossaem/podoroot/infra/entity"
@@ -15,7 +15,7 @@ type (
 )
 
 func (r *ledgerRepository) InsertOne(
-	ctx context.APIContext,
+	ctx inner.Context,
 	ledger domain.Ledger,
 ) (
 	domain.Ledger,

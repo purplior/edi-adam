@@ -4,7 +4,7 @@ import (
 	"github.com/podossaem/podoroot/application/api"
 	"github.com/podossaem/podoroot/application/response"
 	domain "github.com/podossaem/podoroot/domain/auth"
-	"github.com/podossaem/podoroot/domain/shared/context"
+	"github.com/podossaem/podoroot/domain/shared/inner"
 )
 
 type (
@@ -29,6 +29,7 @@ type (
 type (
 	authController struct {
 		authService domain.AuthService
+		cm          inner.ContextManager
 	}
 )
 
@@ -39,11 +40,11 @@ func (c *authController) SignInByEmailVerification() api.HandlerFunc {
 			return ctx.SendError(err)
 		}
 
-		apiCtx, cancel := context.NewAPIContext()
+		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
 		identityToken, identity, err := c.authService.SignInByEmailVerification(
-			apiCtx,
+			innerCtx,
 			dto,
 		)
 		if err != nil {
@@ -69,11 +70,11 @@ func (c *authController) SignUpByEmailVerification() api.HandlerFunc {
 			return ctx.SendError(err)
 		}
 
-		apiCtx, cancel := context.NewAPIContext()
+		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
 		err := c.authService.SignUpByEmailVerification(
-			apiCtx,
+			innerCtx,
 			dto,
 		)
 		if err != nil {
@@ -92,10 +93,10 @@ func (c *authController) RefreshIdentityToken() api.HandlerFunc {
 			return ctx.SendError(err)
 		}
 
-		apiCtx, cancel := context.NewAPIContext()
+		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		newIdentityToken, err := c.authService.RefreshIdentityToken(apiCtx, dto)
+		newIdentityToken, err := c.authService.RefreshIdentityToken(innerCtx, dto)
 		if err != nil {
 			return ctx.SendError(err)
 		}
@@ -108,8 +109,10 @@ func (c *authController) RefreshIdentityToken() api.HandlerFunc {
 
 func NewAuthController(
 	authService domain.AuthService,
+	cm inner.ContextManager,
 ) AuthController {
 	return &authController{
 		authService: authService,
+		cm:          cm,
 	}
 }

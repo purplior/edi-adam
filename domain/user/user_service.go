@@ -1,11 +1,13 @@
 package user
 
-import "github.com/podossaem/podoroot/domain/shared/context"
+import (
+	"github.com/podossaem/podoroot/domain/shared/inner"
+)
 
 type (
 	UserService interface {
 		GetOneByAccount(
-			ctx context.APIContext,
+			ctx inner.Context,
 			joinMethod string,
 			accountID string,
 		) (
@@ -14,7 +16,7 @@ type (
 		)
 
 		GetDetailOneByID(
-			ctx context.APIContext,
+			ctx inner.Context,
 			id string,
 		) (
 			UserDetail,
@@ -22,7 +24,7 @@ type (
 		)
 
 		RegisterOne(
-			ctx context.APIContext,
+			ctx inner.Context,
 			user User,
 		) (
 			newUser User,
@@ -36,7 +38,7 @@ type (
 )
 
 func (s *userService) GetOneByAccount(
-	ctx context.APIContext,
+	ctx inner.Context,
 	joinMethod string,
 	accountID string,
 ) (
@@ -51,7 +53,7 @@ func (s *userService) GetOneByAccount(
 }
 
 func (s *userService) GetDetailOneByID(
-	ctx context.APIContext,
+	ctx inner.Context,
 	id string,
 ) (
 	UserDetail,
@@ -66,7 +68,7 @@ func (s *userService) GetDetailOneByID(
 }
 
 func (s *userService) RegisterOne(
-	ctx context.APIContext,
+	ctx inner.Context,
 	user User,
 ) (
 	newUser User,

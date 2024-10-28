@@ -5,13 +5,11 @@ import (
 
 	"github.com/podossaem/podoroot/application/config"
 	"github.com/podossaem/podoroot/domain/ledger"
-	"github.com/podossaem/podoroot/domain/shared/context"
 	"github.com/podossaem/podoroot/domain/shared/exception"
+	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/domain/user"
 	"github.com/podossaem/podoroot/domain/verification"
 	"github.com/podossaem/podoroot/domain/wallet"
-	"github.com/podossaem/podoroot/infra/database/podopaysql"
-	"github.com/podossaem/podoroot/infra/database/podosql"
 	"github.com/podossaem/podoroot/lib/myjwt"
 )
 
@@ -22,7 +20,7 @@ var (
 type (
 	AuthService interface {
 		SignInByEmailVerification(
-			ctx context.APIContext,
+			ctx inner.Context,
 			request SignInByEmailVerificationRequest,
 		) (
 			identityToken IdentityToken,
@@ -31,14 +29,14 @@ type (
 		)
 
 		SignUpByEmailVerification(
-			ctx context.APIContext,
+			ctx inner.Context,
 			request SignUpByEmailVerificationRequest,
 		) (
 			err error,
 		)
 
 		RefreshIdentityToken(
-			ctx context.APIContext,
+			ctx inner.Context,
 			identityToken IdentityToken,
 		) (
 			refreshedIdentityToken IdentityToken,
@@ -46,7 +44,7 @@ type (
 		)
 
 		GetTempAccessToken(
-			ctx context.APIContext,
+			ctx inner.Context,
 			identity Identity,
 		) (
 			accessToken string,
@@ -55,17 +53,16 @@ type (
 	}
 
 	authService struct {
-		podosqlClient            *podosql.Client
-		podopaySqlClient         *podopaysql.Client
 		emailVerificationService verification.EmailVerificationService
 		userService              user.UserService
 		ledgerService            ledger.LedgerService
 		walletService            wallet.WalletService
+		cm                       inner.ContextManager
 	}
 )
 
 func (s *authService) SignInByEmailVerification(
-	ctx context.APIContext,
+	ctx inner.Context,
 	request SignInByEmailVerificationRequest,
 ) (
 	IdentityToken,
@@ -94,19 +91,22 @@ func (s *authService) SignInByEmailVerification(
 }
 
 func (s *authService) SignUpByEmailVerification(
-	ctx context.APIContext,
+	ctx inner.Context,
 	request SignUpByEmailVerificationRequest,
 ) error {
-	if err := s.podosqlClient.BeginTX(ctx); err != nil {
+	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
 		return err
 	}
-	if err := s.podopaySqlClient.BeginTX(ctx); err != nil {
+	if err := s.cm.BeginTX(ctx, inner.TX_PodopaySql); err != nil {
 		return err
 	}
 
 	defer func() {
-		s.podosqlClient.RecoverTX()
-		s.podopaySqlClient.RecoverTX()
+		if r := recover(); r != nil {
+			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
+			panic(r)
+		}
 	}()
 
 	verification, err := s.emailVerificationService.Consume(
@@ -114,7 +114,6 @@ func (s *authService) SignUpByEmailVerification(
 		request.VerificationID,
 	)
 	if err != nil {
-		s.podosqlClient.RollbackTX()
 		return err
 	}
 
@@ -129,6 +128,7 @@ func (s *authService) SignUpByEmailVerification(
 		},
 	)
 	if err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
 		return err
 	}
 
@@ -140,7 +140,7 @@ func (s *authService) SignUpByEmailVerification(
 		},
 	)
 	if err != nil {
-		s.podosqlClient.RollbackTX()
+		s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
 		return err
 	}
 
@@ -154,26 +154,29 @@ func (s *authService) SignUpByEmailVerification(
 		},
 	)
 	if err != nil {
-		s.podosqlClient.RollbackTX()
-		s.podopaySqlClient.RollbackTX()
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
 		return err
 	}
 
 	// pay는 생성되었지만 user는 생성되지 않았을 가능성이 존재.
 	// 반대의 상황보다는 이 상황이 나음
-	if err := s.podopaySqlClient.CommitTX(); err != nil {
-		s.podosqlClient.RollbackTX()
+	if err := s.cm.CommitTX(ctx, inner.TX_PodopaySql); err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
 		return err
 	}
-	if err := s.podosqlClient.CommitTX(); err != nil {
+	if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
 		return err
 	}
 
-	return err
+	return nil
 }
 
 func (s *authService) RefreshIdentityToken(
-	ctx context.APIContext,
+	ctx inner.Context,
 	identityToken IdentityToken,
 ) (
 	IdentityToken,
@@ -200,7 +203,7 @@ func (s *authService) RefreshIdentityToken(
 }
 
 func (s *authService) GetTempAccessToken(
-	ctx context.APIContext,
+	ctx inner.Context,
 	identity Identity,
 ) (
 	string,
@@ -351,19 +354,17 @@ func (s *authService) getRefreshTokenPayload(
 }
 
 func NewAuthService(
-	podosqlClient *podosql.Client,
-	podopaySqlClient *podopaysql.Client,
 	emailVerificationService verification.EmailVerificationService,
 	userService user.UserService,
 	ledgerService ledger.LedgerService,
 	walletService wallet.WalletService,
+	cm inner.ContextManager,
 ) AuthService {
 	return &authService{
-		podosqlClient:            podosqlClient,
-		podopaySqlClient:         podopaySqlClient,
 		emailVerificationService: emailVerificationService,
 		userService:              userService,
 		ledgerService:            ledgerService,
 		walletService:            walletService,
+		cm:                       cm,
 	}
 }

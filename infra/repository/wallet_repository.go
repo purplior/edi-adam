@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/podossaem/podoroot/domain/shared/context"
+	"github.com/podossaem/podoroot/domain/shared/inner"
 	domain "github.com/podossaem/podoroot/domain/wallet"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podopaysql"
@@ -15,7 +15,7 @@ type (
 )
 
 func (r *walletRepository) InsertOne(
-	ctx context.APIContext,
+	ctx inner.Context,
 	wallet domain.Wallet,
 ) (
 	domain.Wallet,

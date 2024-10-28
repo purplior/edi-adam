@@ -1,11 +1,11 @@
 package assisterform
 
-import "github.com/podossaem/podoroot/domain/shared/context"
+import "github.com/podossaem/podoroot/domain/shared/inner"
 
 type (
 	AssisterFormService interface {
 		RegisterOne(
-			ctx context.APIContext,
+			ctx inner.Context,
 			request AssisterFormRegisterRequest,
 		) (
 			AssisterForm,
@@ -13,7 +13,7 @@ type (
 		)
 
 		GetOneByID(
-			ctx context.APIContext,
+			ctx inner.Context,
 			id string,
 		) (
 			AssisterForm,
@@ -21,7 +21,7 @@ type (
 		)
 
 		GetOneByAssisterID(
-			ctx context.APIContext,
+			ctx inner.Context,
 			assistantID string,
 		) (
 			AssisterForm,
@@ -37,7 +37,7 @@ type (
 )
 
 func (r *assisterFormService) RegisterOne(
-	ctx context.APIContext,
+	ctx inner.Context,
 	request AssisterFormRegisterRequest,
 ) (
 	AssisterForm,
@@ -53,7 +53,7 @@ func (r *assisterFormService) RegisterOne(
 }
 
 func (r *assisterFormService) GetOneByID(
-	ctx context.APIContext,
+	ctx inner.Context,
 	id string,
 ) (
 	AssisterForm,
@@ -66,7 +66,7 @@ func (r *assisterFormService) GetOneByID(
 }
 
 func (r *assisterFormService) GetOneByAssisterID(
-	ctx context.APIContext,
+	ctx inner.Context,
 	assisterID string,
 ) (
 	AssisterForm,

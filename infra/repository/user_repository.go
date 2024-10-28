@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/podossaem/podoroot/domain/shared/context"
+	"github.com/podossaem/podoroot/domain/shared/inner"
 	domain "github.com/podossaem/podoroot/domain/user"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podosql"
@@ -15,7 +15,7 @@ type (
 )
 
 func (r *userRepository) FindOneByID(
-	ctx context.APIContext,
+	ctx inner.Context,
 	id string,
 ) (
 	domain.User,
@@ -35,7 +35,7 @@ func (r *userRepository) FindOneByID(
 }
 
 func (r *userRepository) FindOneByAccount(
-	ctx context.APIContext,
+	ctx inner.Context,
 	joinMethod string,
 	accountID string,
 ) (
@@ -44,7 +44,7 @@ func (r *userRepository) FindOneByAccount(
 ) {
 	var e entity.User
 
-	db := r.client.DB.WithContext(ctx)
+	db := r.client.DBWithContext(ctx)
 	result := db.
 		Where("join_method = ?", joinMethod).
 		Where("account_id = ?", accountID).
@@ -57,7 +57,7 @@ func (r *userRepository) FindOneByAccount(
 }
 
 func (r *userRepository) InsertOne(
-	ctx context.APIContext,
+	ctx inner.Context,
 	userForInsert domain.User,
 ) (
 	domain.User,
@@ -65,7 +65,7 @@ func (r *userRepository) InsertOne(
 ) {
 	e := entity.MakeUser(userForInsert)
 
-	db := r.client.DB.WithContext(ctx)
+	db := r.client.DBWithContext(ctx)
 	result := db.Create(&e)
 
 	if result.Error != nil {

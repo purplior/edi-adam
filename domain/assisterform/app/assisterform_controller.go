@@ -4,8 +4,8 @@ import (
 	"github.com/podossaem/podoroot/application/api"
 	"github.com/podossaem/podoroot/application/response"
 	domain "github.com/podossaem/podoroot/domain/assisterform"
-	"github.com/podossaem/podoroot/domain/shared/context"
 	"github.com/podossaem/podoroot/domain/shared/exception"
+	"github.com/podossaem/podoroot/domain/shared/inner"
 )
 
 type (
@@ -25,6 +25,7 @@ type (
 type (
 	assisterFormController struct {
 		assisterFormService domain.AssisterFormService
+		cm                  inner.ContextManager
 	}
 )
 
@@ -35,11 +36,11 @@ func (c *assisterFormController) RegisterOne() api.HandlerFunc {
 			return ctx.SendError(err)
 		}
 
-		apiCtx, cancel := context.NewAPIContext()
+		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
 		assisterForm, err := c.assisterFormService.RegisterOne(
-			apiCtx,
+			innerCtx,
 			dto,
 		)
 		if err != nil {
@@ -61,7 +62,7 @@ func (c *assisterFormController) GetOne() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		assisterID := ctx.QueryParam("assister_id")
 
-		apiCtx, cancel := context.NewAPIContext()
+		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
 		var assisterForm domain.AssisterForm
@@ -69,7 +70,7 @@ func (c *assisterFormController) GetOne() api.HandlerFunc {
 
 		if len(assisterID) > 0 {
 			assisterForm, err = c.assisterFormService.GetOneByAssisterID(
-				apiCtx,
+				innerCtx,
 				assisterID,
 			)
 			if err != nil {
@@ -89,8 +90,10 @@ func (c *assisterFormController) GetOne() api.HandlerFunc {
 
 func NewAssisterFormController(
 	assisterFormService domain.AssisterFormService,
+	cm inner.ContextManager,
 ) AssisterFormController {
 	return &assisterFormController{
 		assisterFormService: assisterFormService,
+		cm:                  cm,
 	}
 }

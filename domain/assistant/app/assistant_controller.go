@@ -4,8 +4,8 @@ import (
 	"github.com/podossaem/podoroot/application/api"
 	"github.com/podossaem/podoroot/application/response"
 	domain "github.com/podossaem/podoroot/domain/assistant"
-	"github.com/podossaem/podoroot/domain/shared/context"
 	"github.com/podossaem/podoroot/domain/shared/exception"
+	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/domain/user"
 )
 
@@ -31,6 +31,7 @@ type (
 type (
 	assistantController struct {
 		assistantService domain.AssistantService
+		cm               inner.ContextManager
 	}
 )
 
@@ -41,11 +42,11 @@ func (c *assistantController) RegisterOne() api.HandlerFunc {
 			return ctx.SendError(err)
 		}
 
-		apiCtx, cancel := context.NewAPIContext()
+		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
 		assistant, err := c.assistantService.RegisterOne(
-			apiCtx,
+			innerCtx,
 			ctx.Identity.ID,
 			dto,
 		)
@@ -65,7 +66,7 @@ func (c *assistantController) RegisterOne() api.HandlerFunc {
 
 func (c *assistantController) GetDetailOne() api.HandlerFunc {
 	return func(ctx *api.Context) error {
-		apiCtx, cancel := context.NewAPIContext()
+		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
 		assistantViewID := ctx.Param("assistant_view_id")
@@ -74,7 +75,7 @@ func (c *assistantController) GetDetailOne() api.HandlerFunc {
 		}
 
 		assistantDetail, err := c.assistantService.GetDetailOneByViewID(
-			apiCtx,
+			innerCtx,
 			assistantViewID,
 			domain.AssistantJoinOption{
 				WithAuthor:    true,
@@ -97,11 +98,11 @@ func (c *assistantController) GetDetailOne() api.HandlerFunc {
 
 func (c *assistantController) GetPodoInfoList() api.HandlerFunc {
 	return func(ctx *api.Context) error {
-		apiCtx, cancel := context.NewAPIContext()
+		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
 		assistantInfos, err := c.assistantService.GetInfoListByAuthor(
-			apiCtx,
+			innerCtx,
 			user.ID_Podo,
 			domain.AssistantJoinOption{
 				WithAuthor: true,
@@ -123,8 +124,10 @@ func (c *assistantController) GetPodoInfoList() api.HandlerFunc {
 
 func NewAssistantController(
 	assistantService domain.AssistantService,
+	cm inner.ContextManager,
 ) AssistantController {
 	return &assistantController{
 		assistantService: assistantService,
+		cm:               cm,
 	}
 }

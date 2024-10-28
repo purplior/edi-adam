@@ -1,11 +1,13 @@
 package wallet
 
-import "github.com/podossaem/podoroot/domain/shared/context"
+import (
+	"github.com/podossaem/podoroot/domain/shared/inner"
+)
 
 type (
 	WalletService interface {
 		RegisterOne(
-			ctx context.APIContext,
+			ctx inner.Context,
 			wallet Wallet,
 		) (
 			Wallet,
@@ -21,7 +23,7 @@ type (
 )
 
 func (s *walletService) RegisterOne(
-	ctx context.APIContext,
+	ctx inner.Context,
 	wallet Wallet,
 ) (
 	Wallet,

@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"github.com/podossaem/podoroot/domain/shared/context"
+	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/domain/verification"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podosql"
@@ -16,7 +16,7 @@ type (
 )
 
 func (r *emailVerificationRepository) InsertOne(
-	ctx context.APIContext,
+	ctx inner.Context,
 	emailVerification verification.EmailVerification,
 ) (
 	verification.EmailVerification,
@@ -34,7 +34,7 @@ func (r *emailVerificationRepository) InsertOne(
 }
 
 func (r *emailVerificationRepository) FindOneById(
-	ctx context.APIContext,
+	ctx inner.Context,
 	id string,
 ) (
 	verification.EmailVerification,
@@ -53,7 +53,7 @@ func (r *emailVerificationRepository) FindOneById(
 }
 
 func (r *emailVerificationRepository) FindRecentOneByEmail(
-	ctx context.APIContext,
+	ctx inner.Context,
 	email string,
 ) (
 	verification.EmailVerification,
@@ -75,7 +75,7 @@ func (r *emailVerificationRepository) FindRecentOneByEmail(
 }
 
 func (r *emailVerificationRepository) UpdateOne_IsVerified(
-	ctx context.APIContext,
+	ctx inner.Context,
 	id string,
 	isVerified bool,
 ) error {
@@ -94,7 +94,7 @@ func (r *emailVerificationRepository) UpdateOne_IsVerified(
 }
 
 func (r *emailVerificationRepository) UpdateOne_isConsumed(
-	ctx context.APIContext,
+	ctx inner.Context,
 	id string,
 	isConsumed bool,
 ) error {

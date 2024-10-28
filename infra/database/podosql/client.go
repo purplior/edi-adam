@@ -1,13 +1,12 @@
 package podosql
 
 import (
-	"context"
 	"log"
 	"time"
 
 	"github.com/podossaem/podoroot/application/config"
 	"github.com/podossaem/podoroot/domain/shared/constant"
-	"github.com/podossaem/podoroot/domain/shared/exception"
+	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/infra/entity"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -23,16 +22,16 @@ type (
 	Client struct {
 		*gorm.DB
 		opt ConstructorOption
-		tx  *gorm.DB
 	}
 )
 
-func (c *Client) DBWithContext(ctx context.Context) *gorm.DB {
-	if c.tx != nil {
-		return c.tx
+func (c *Client) DBWithContext(ctx inner.Context) *gorm.DB {
+	tx := ctx.TX(inner.TX_PodoSql)
+	if tx != nil {
+		return tx
 	}
 
-	return c.DB.WithContext(ctx)
+	return c.DB.WithContext(ctx.Value())
 }
 
 func (c *Client) ConnectDB() error {
@@ -125,45 +124,6 @@ func (c *Client) Dispose() error {
 	return nil
 }
 
-func (c *Client) BeginTX(ctx context.Context) error {
-	if c.tx != nil {
-		return exception.ErrInTransaction
-	}
-
-	c.tx = c.WithContext(ctx).Begin()
-
-	return nil
-}
-
-func (c *Client) CommitTX() error {
-	if c.tx == nil {
-		return exception.ErrNoTransaction
-	}
-
-	err := c.tx.Commit().Error
-	c.tx = nil
-
-	return err
-}
-
-func (c *Client) RollbackTX() {
-	if c.tx != nil {
-		c.tx.Rollback()
-		c.tx = nil
-	}
-}
-
-func (c *Client) RecoverTX() {
-	if c.tx != nil {
-		if r := recover(); r != nil {
-			c.tx.Rollback()
-			c.tx = nil
-		} else {
-			c.tx = nil
-		}
-	}
-}
-
 func NewClient() *Client {
 	opt := ConstructorOption{
 		Phase: config.Phase(),
@@ -172,7 +132,6 @@ func NewClient() *Client {
 
 	client := &Client{
 		opt: opt,
-		tx:  nil,
 	}
 
 	return client

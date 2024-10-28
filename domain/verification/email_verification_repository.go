@@ -1,11 +1,11 @@
 package verification
 
-import "github.com/podossaem/podoroot/domain/shared/context"
+import "github.com/podossaem/podoroot/domain/shared/inner"
 
 type (
 	EmailVerificationRepository interface {
 		InsertOne(
-			ctx context.APIContext,
+			ctx inner.Context,
 			emailVerification EmailVerification,
 		) (
 			EmailVerification,
@@ -13,7 +13,7 @@ type (
 		)
 
 		FindOneById(
-			ctx context.APIContext,
+			ctx inner.Context,
 			id string,
 		) (
 			EmailVerification,
@@ -21,7 +21,7 @@ type (
 		)
 
 		FindRecentOneByEmail(
-			ctx context.APIContext,
+			ctx inner.Context,
 			email string,
 		) (
 			EmailVerification,
@@ -29,13 +29,13 @@ type (
 		)
 
 		UpdateOne_IsVerified(
-			ctx context.APIContext,
+			ctx inner.Context,
 			id string,
 			isVerified bool,
 		) error
 
 		UpdateOne_isConsumed(
-			ctx context.APIContext,
+			ctx inner.Context,
 			id string,
 			isConsumed bool,
 		) error

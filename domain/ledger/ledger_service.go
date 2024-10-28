@@ -1,11 +1,11 @@
 package ledger
 
-import "github.com/podossaem/podoroot/domain/shared/context"
+import "github.com/podossaem/podoroot/domain/shared/inner"
 
 type (
 	LedgerService interface {
 		RegisterOne(
-			ctx context.APIContext,
+			ctx inner.Context,
 			ledger Ledger,
 		) (
 			Ledger,
@@ -21,7 +21,7 @@ type (
 )
 
 func (s *ledgerService) RegisterOne(
-	ctx context.APIContext,
+	ctx inner.Context,
 	ledger Ledger,
 ) (
 	Ledger,

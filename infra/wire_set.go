@@ -11,4 +11,5 @@ var New = wire.NewSet(
 	database.New,
 	port.New,
 	repository.New,
+	NewContextManager,
 )

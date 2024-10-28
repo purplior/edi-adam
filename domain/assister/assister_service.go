@@ -2,8 +2,8 @@ package assister
 
 import (
 	"github.com/podossaem/podoroot/domain/assisterform"
-	"github.com/podossaem/podoroot/domain/shared/context"
 	"github.com/podossaem/podoroot/domain/shared/exception"
+	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/infra/port/podoopenai"
 	"github.com/podossaem/podoroot/lib/dt"
 )
@@ -11,7 +11,7 @@ import (
 type (
 	AssisterService interface {
 		RequestStream(
-			ctx context.APIContext,
+			ctx inner.Context,
 			id string,
 			inputs []assisterform.AssisterInput,
 			onInit func() error,
@@ -28,7 +28,7 @@ type (
 )
 
 func (s *assisterService) RequestStream(
-	ctx context.APIContext,
+	ctx inner.Context,
 	id string,
 	inputs []assisterform.AssisterInput,
 	onInit func() error,
@@ -58,7 +58,7 @@ func (s *assisterService) RequestStream(
 	}
 
 	return s.openaiClient.RequestChatCompletionsStream(
-		ctx,
+		ctx.Value(),
 		podoopenai.ChatCompletionRequest{
 			Model:    string(form.Model),
 			Messages: messages,

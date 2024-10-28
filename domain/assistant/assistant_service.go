@@ -1,11 +1,13 @@
 package assistant
 
-import "github.com/podossaem/podoroot/domain/shared/context"
+import (
+	"github.com/podossaem/podoroot/domain/shared/inner"
+)
 
 type (
 	AssistantService interface {
 		RegisterOne(
-			ctx context.APIContext,
+			ctx inner.Context,
 			authorID string,
 			request RegisterOneRequest,
 		) (
@@ -14,7 +16,7 @@ type (
 		)
 
 		GetDetailOneByViewID(
-			ctx context.APIContext,
+			ctx inner.Context,
 			viewID string,
 			joinOption AssistantJoinOption,
 		) (
@@ -23,7 +25,7 @@ type (
 		)
 
 		GetInfoListByAuthor(
-			ctx context.APIContext,
+			ctx inner.Context,
 			authorID string,
 			joinOption AssistantJoinOption,
 		) (
@@ -40,7 +42,7 @@ type (
 )
 
 func (s *assistantService) RegisterOne(
-	ctx context.APIContext,
+	ctx inner.Context,
 	authorID string,
 	request RegisterOneRequest,
 ) (
@@ -61,7 +63,7 @@ func (s *assistantService) RegisterOne(
 }
 
 func (s *assistantService) GetDetailOneByViewID(
-	ctx context.APIContext,
+	ctx inner.Context,
 	viewID string,
 	joinOption AssistantJoinOption,
 ) (
@@ -81,7 +83,7 @@ func (s *assistantService) GetDetailOneByViewID(
 }
 
 func (s *assistantService) GetInfoListByAuthor(
-	ctx context.APIContext,
+	ctx inner.Context,
 	authorID string,
 	joinOption AssistantJoinOption,
 ) (

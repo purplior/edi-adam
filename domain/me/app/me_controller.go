@@ -5,8 +5,8 @@ import (
 	"github.com/podossaem/podoroot/application/response"
 	"github.com/podossaem/podoroot/domain/auth"
 	domain "github.com/podossaem/podoroot/domain/me"
-	"github.com/podossaem/podoroot/domain/shared/context"
 	"github.com/podossaem/podoroot/domain/shared/exception"
+	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/domain/user"
 )
 
@@ -34,6 +34,7 @@ type (
 		meService   domain.MeService
 		authService auth.AuthService
 		userService user.UserService
+		cm          inner.ContextManager
 	}
 )
 
@@ -50,11 +51,11 @@ func (c *meController) GetMyIdentity() api.HandlerFunc {
 
 func (c *meController) GetMyDetail() api.HandlerFunc {
 	return func(ctx *api.Context) error {
-		apiCtx, cancel := context.NewAPIContext()
+		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
 		userDetail, err := c.userService.GetDetailOneByID(
-			apiCtx,
+			innerCtx,
 			ctx.Identity.ID,
 		)
 		if err != nil {
@@ -77,10 +78,10 @@ func (c *meController) GetTempAccessToken() api.HandlerFunc {
 			return ctx.SendError(exception.ErrUnauthorized)
 		}
 
-		apiCtx, cancel := context.NewAPIContext()
+		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		accessToken, err := c.authService.GetTempAccessToken(apiCtx, *ctx.Identity)
+		accessToken, err := c.authService.GetTempAccessToken(innerCtx, *ctx.Identity)
 		if err != nil {
 			return ctx.SendError(err)
 		}
@@ -99,10 +100,12 @@ func NewMeController(
 	meService domain.MeService,
 	authService auth.AuthService,
 	userService user.UserService,
+	cm inner.ContextManager,
 ) MeController {
 	return &meController{
 		meService:   meService,
 		authService: authService,
 		userService: userService,
+		cm:          cm,
 	}
 }

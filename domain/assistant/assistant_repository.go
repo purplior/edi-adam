@@ -1,11 +1,11 @@
 package assistant
 
-import "github.com/podossaem/podoroot/domain/shared/context"
+import "github.com/podossaem/podoroot/domain/shared/inner"
 
 type (
 	AssistantRepository interface {
 		InsertOne(
-			ctx context.APIContext,
+			ctx inner.Context,
 			assistant Assistant,
 		) (
 			Assistant,
@@ -13,7 +13,7 @@ type (
 		)
 
 		FindOneByViewID(
-			ctx context.APIContext,
+			ctx inner.Context,
 			viewID string,
 			joinOption AssistantJoinOption,
 		) (
@@ -22,7 +22,7 @@ type (
 		)
 
 		FindListByAuthorID(
-			ctx context.APIContext,
+			ctx inner.Context,
 			authorID string,
 			joinOption AssistantJoinOption,
 		) (

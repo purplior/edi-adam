@@ -1,15 +1,14 @@
 package app
 
 import (
-	"context"
 	"net/http"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/podossaem/podoroot/application/api"
 	domain "github.com/podossaem/podoroot/domain/assister"
 	"github.com/podossaem/podoroot/domain/assisterform"
 	"github.com/podossaem/podoroot/domain/shared/exception"
+	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/infra/port/podoopenai"
 )
 
@@ -26,6 +25,7 @@ type (
 	assisterController struct {
 		execSem         chan struct{}
 		assisterService domain.AssisterService
+		cm              inner.ContextManager
 	}
 )
 
@@ -47,11 +47,11 @@ func (c *assisterController) Execute() api.HandlerFunc {
 		case c.execSem <- struct{}{}: // 세마포어를 사용해서 리소스 소비
 			defer func() { <-c.execSem }()
 
-			apiCtx, cancel := context.WithTimeout(context.TODO(), time.Duration(time.Minute)*5)
+			innerCtx, cancel := c.cm.NewStreamingContext()
 			defer cancel()
 
 			err := c.assisterService.RequestStream(
-				apiCtx,
+				innerCtx,
 				assisterID,
 				dto.Inputs,
 				func() error {
@@ -98,9 +98,11 @@ func (c *assisterController) Execute() api.HandlerFunc {
 
 func NewAssisterController(
 	assisterService domain.AssisterService,
+	cm inner.ContextManager,
 ) AssisterController {
 	return &assisterController{
 		assisterService: assisterService,
 		execSem:         make(chan struct{}, 500), // 동시 요청 500개로 제한
+		cm:              cm,
 	}
 }

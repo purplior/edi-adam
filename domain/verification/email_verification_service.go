@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/podossaem/podoroot/application/config"
-	"github.com/podossaem/podoroot/domain/shared/context"
 	"github.com/podossaem/podoroot/domain/shared/exception"
+	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/lib/mydate"
 	"github.com/podossaem/podoroot/lib/mymail"
 	"github.com/podossaem/podoroot/lib/strgen"
@@ -14,7 +14,7 @@ import (
 type (
 	EmailVerificationService interface {
 		Consume(
-			ctx context.APIContext,
+			ctx inner.Context,
 			id string,
 		) (
 			EmailVerification,
@@ -22,7 +22,7 @@ type (
 		)
 
 		RequestCode(
-			ctx context.APIContext,
+			ctx inner.Context,
 			email string,
 			isTestMode bool,
 		) (
@@ -31,7 +31,7 @@ type (
 		)
 
 		VerifyCode(
-			ctx context.APIContext,
+			ctx inner.Context,
 			email string,
 			code string,
 		) (
@@ -46,7 +46,7 @@ type (
 )
 
 func (s *service) Consume(
-	ctx context.APIContext,
+	ctx inner.Context,
 	id string,
 ) (EmailVerification, error) {
 	emailVerification, err := s.emailVerificationRepository.FindOneById(ctx, id)
@@ -71,7 +71,7 @@ func (s *service) Consume(
 }
 
 func (s *service) RequestCode(
-	ctx context.APIContext,
+	ctx inner.Context,
 	email string,
 	isTestMode bool,
 ) (EmailVerification, error) {
@@ -108,7 +108,7 @@ func (s *service) RequestCode(
 }
 
 func (s *service) VerifyCode(
-	ctx context.APIContext,
+	ctx inner.Context,
 	email string,
 	code string,
 ) (

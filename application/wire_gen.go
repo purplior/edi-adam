@@ -29,6 +29,7 @@ import (
 	"github.com/podossaem/podoroot/domain/verification"
 	app7 "github.com/podossaem/podoroot/domain/verification/app"
 	"github.com/podossaem/podoroot/domain/wallet"
+	"github.com/podossaem/podoroot/infra"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podomongo"
 	"github.com/podossaem/podoroot/infra/database/podopaysql"
@@ -51,15 +52,16 @@ func Start() error {
 	databaseManager := database.NewDatabaseManager(client, podopaysqlClient, podomongoClient)
 	assistantRepository := repository.NewAssistantRepository(client)
 	assistantService := assistant.NewAssistantService(assistantRepository)
-	assistantController := app.NewAssistantController(assistantService)
+	contextManager := infra.NewContextManager(client, podopaysqlClient)
+	assistantController := app.NewAssistantController(assistantService, contextManager)
 	assistantRouter := app.NewAssistantRouter(assistantController)
 	podoopenaiClient := podoopenai.NewClient()
 	assisterFormRepository := repository.NewAssisterFormRepository(podomongoClient)
 	assisterFormService := assisterform.NewAssisterFormService(assisterFormRepository)
 	assisterService := assister.NewAssisterService(podoopenaiClient, assisterFormService)
-	assisterController := app2.NewAssisterController(assisterService)
+	assisterController := app2.NewAssisterController(assisterService, contextManager)
 	assisterRouter := app2.NewAssisterRouter(assisterController)
-	assisterFormController := app3.NewAssisterFormController(assisterFormService)
+	assisterFormController := app3.NewAssisterFormController(assisterFormService, contextManager)
 	assisterFormRouter := app3.NewAssisterFormRouter(assisterFormController)
 	emailVerificationRepository := repository.NewEmailVerificationRepository(client)
 	emailVerificationService := verification.NewEmailVerificationService(emailVerificationRepository)
@@ -69,15 +71,15 @@ func Start() error {
 	ledgerService := ledger.NewLedgerService(ledgerRepository)
 	walletRepository := repository.NewWalletRepository(podopaysqlClient)
 	walletService := wallet.NewWalletService(walletRepository)
-	authService := auth.NewAuthService(client, podopaysqlClient, emailVerificationService, userService, ledgerService, walletService)
-	authController := app4.NewAuthController(authService)
+	authService := auth.NewAuthService(emailVerificationService, userService, ledgerService, walletService, contextManager)
+	authController := app4.NewAuthController(authService, contextManager)
 	authRouter := app4.NewAuthRouter(authController)
 	meService := me.NewMeService(userRepository)
-	meController := app5.NewMeController(meService, authService, userService)
+	meController := app5.NewMeController(meService, authService, userService, contextManager)
 	meRouter := app5.NewMeRouter(meController)
 	userController := app6.NewUserController()
 	userRouter := app6.NewUserRouter(userController)
-	emailVerificationController := app7.NewEmailVerificationController(emailVerificationService)
+	emailVerificationController := app7.NewEmailVerificationController(emailVerificationService, contextManager)
 	verificationRouter := app7.NewVerificationRouter(emailVerificationController)
 	routerRouter := router.New(assistantRouter, assisterRouter, assisterFormRouter, authRouter, meRouter, userRouter, verificationRouter)
 	error2 := StartApplication(databaseManager, routerRouter)

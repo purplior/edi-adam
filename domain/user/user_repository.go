@@ -1,11 +1,11 @@
 package user
 
-import "github.com/podossaem/podoroot/domain/shared/context"
+import "github.com/podossaem/podoroot/domain/shared/inner"
 
 type (
 	UserRepository interface {
 		FindOneByID(
-			ctx context.APIContext,
+			ctx inner.Context,
 			id string,
 		) (
 			User,
@@ -13,7 +13,7 @@ type (
 		)
 
 		FindOneByAccount(
-			ctx context.APIContext,
+			ctx inner.Context,
 			joinMethod string,
 			accountID string,
 		) (
@@ -22,7 +22,7 @@ type (
 		)
 
 		InsertOne(
-			ctx context.APIContext,
+			ctx inner.Context,
 			user User,
 		) (
 			User,

@@ -3,7 +3,7 @@ package app
 import (
 	"github.com/podossaem/podoroot/application/api"
 	"github.com/podossaem/podoroot/application/response"
-	"github.com/podossaem/podoroot/domain/shared/context"
+	"github.com/podossaem/podoroot/domain/shared/inner"
 	domain "github.com/podossaem/podoroot/domain/verification"
 )
 
@@ -24,6 +24,7 @@ type (
 type (
 	emailVerificationController struct {
 		emailVerificationService domain.EmailVerificationService
+		cm                       inner.ContextManager
 	}
 )
 
@@ -38,11 +39,11 @@ func (c *emailVerificationController) RequestCode() api.HandlerFunc {
 			return ctx.SendError(err)
 		}
 
-		apiCtx, cancel := context.NewAPIContext()
+		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
 		emailVerification, err := c.emailVerificationService.RequestCode(
-			apiCtx,
+			innerCtx,
 			dto.Email,
 			isTestMode,
 		)
@@ -74,10 +75,10 @@ func (c *emailVerificationController) VerifyCode() api.HandlerFunc {
 			return ctx.SendError(err)
 		}
 
-		apiCtx, cancel := context.NewAPIContext()
+		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		emailVerification, err := c.emailVerificationService.VerifyCode(apiCtx, dto.Email, dto.Code)
+		emailVerification, err := c.emailVerificationService.VerifyCode(innerCtx, dto.Email, dto.Code)
 		if err != nil {
 			return ctx.SendError(err)
 		}
@@ -96,8 +97,10 @@ func (c *emailVerificationController) VerifyCode() api.HandlerFunc {
 
 func NewEmailVerificationController(
 	emailVerificationService domain.EmailVerificationService,
+	cm inner.ContextManager,
 ) EmailVerificationController {
 	return &emailVerificationController{
 		emailVerificationService: emailVerificationService,
+		cm:                       cm,
 	}
 }
