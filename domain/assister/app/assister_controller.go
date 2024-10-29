@@ -31,6 +31,7 @@ type (
 
 func (c *assisterController) Execute() api.HandlerFunc {
 	return func(ctx *api.Context) error {
+		userId := ctx.Identity.ID
 		assisterID := ctx.Param("assister_id")
 		if len(assisterID) == 0 {
 			return ctx.String(http.StatusBadRequest, exception.ErrBadRequest.Error())
@@ -52,6 +53,7 @@ func (c *assisterController) Execute() api.HandlerFunc {
 
 			err := c.assisterService.RequestStream(
 				innerCtx,
+				userId,
 				assisterID,
 				dto.Inputs,
 				func() error {
@@ -84,6 +86,8 @@ func (c *assisterController) Execute() api.HandlerFunc {
 					return nil
 				case exception.ErrBadRequest:
 					return ctx.String(http.StatusBadRequest, "입력폼을 다시 확인해주세요")
+				case exception.ErrNoPodo:
+					return ctx.String(http.StatusForbidden, err.Error())
 				default:
 					return ctx.String(http.StatusInternalServerError, "일시적인 서버 오류가 발생했어요")
 				}

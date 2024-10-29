@@ -22,6 +22,7 @@ func (e *Assister) ToModel() assister.Assister {
 	model := assister.Assister{
 		Version:            e.Version,
 		VersionDescription: e.VersionDescription,
+		Cost:               e.Cost,
 		CreatedAt:          e.CreatedAt,
 	}
 	if e.ID > 0 {

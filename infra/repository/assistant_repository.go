@@ -43,7 +43,7 @@ func (r *assistantRepository) FindOneByViewID(
 	var e entity.Assistant
 	db := r.client.DBWithContext(ctx)
 
-	result := db.Where("view_id = ?", viewID).First(&e)
+	result := db.Model(&e).Where("view_id = ?", viewID).First(&e)
 	if result.Error != nil {
 		return assistant.Assistant{}, database.ToDomainError(result.Error)
 	}

@@ -2,8 +2,10 @@ package assister
 
 import (
 	"github.com/podossaem/podoroot/domain/assisterform"
+	"github.com/podossaem/podoroot/domain/ledger"
 	"github.com/podossaem/podoroot/domain/shared/exception"
 	"github.com/podossaem/podoroot/domain/shared/inner"
+	"github.com/podossaem/podoroot/domain/wallet"
 	"github.com/podossaem/podoroot/infra/port/podoopenai"
 	"github.com/podossaem/podoroot/lib/dt"
 )
@@ -12,6 +14,7 @@ type (
 	AssisterService interface {
 		RequestStream(
 			ctx inner.Context,
+			userId string,
 			id string,
 			inputs []assisterform.AssisterInput,
 			onInit func() error,
@@ -24,16 +27,25 @@ type (
 	assisterService struct {
 		openaiClient        *podoopenai.Client
 		assisterFormService assisterform.AssisterFormService
+		walletService       wallet.WalletService
+		assisterRepository  AssisterRepository
+		cm                  inner.ContextManager
 	}
 )
 
 func (s *assisterService) RequestStream(
 	ctx inner.Context,
+	userId string,
 	id string,
 	inputs []assisterform.AssisterInput,
 	onInit func() error,
 	onReceiveMessage func(msg string) error,
 ) error {
+	assister, err := s.assisterRepository.FindOneByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
 	form, err := s.assisterFormService.GetOneByAssisterID(ctx, id)
 	if err != nil {
 		return err
@@ -57,15 +69,44 @@ func (s *assisterService) RequestStream(
 		messages[i] = message.CreatePayload()
 	}
 
-	return s.openaiClient.RequestChatCompletionsStream(
+	if err := s.cm.BeginTX(ctx, inner.TX_PodopaySql); err != nil {
+		return err
+	}
+
+	if err := s.walletService.Expend(
+		ctx,
+		userId,
+		-1*int(assister.Cost),
+		ledger.LedgerAction_ConsumeByAssister,
+		assister.ViewID,
+	); err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
+		return err
+	}
+
+	err = s.openaiClient.RequestChatCompletionsStream(
 		ctx.Value(),
 		podoopenai.ChatCompletionRequest{
 			Model:    string(form.Model),
 			Messages: messages,
 		},
-		onInit,
+		func() error {
+			if err := onInit(); err != nil {
+				return err
+			}
+			if err := s.cm.CommitTX(ctx, inner.TX_PodopaySql); err != nil {
+				return err
+			}
+
+			return nil
+		},
 		onReceiveMessage,
 	)
+	if err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
+	}
+
+	return err
 }
 
 func (s *assisterService) createQueryInformation(
@@ -159,9 +200,15 @@ func (s *assisterService) createQueryInformation(
 func NewAssisterService(
 	openaiClient *podoopenai.Client,
 	assisterFormService assisterform.AssisterFormService,
+	walletService wallet.WalletService,
+	assisterRepository AssisterRepository,
+	cm inner.ContextManager,
 ) AssisterService {
 	return &assisterService{
 		openaiClient:        openaiClient,
 		assisterFormService: assisterFormService,
+		walletService:       walletService,
+		assisterRepository:  assisterRepository,
+		cm:                  cm,
 	}
 }
