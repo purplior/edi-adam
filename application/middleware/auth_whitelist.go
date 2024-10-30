@@ -43,6 +43,14 @@ var (
 				},
 			},
 		},
+		"assisters": {
+			Children: map[string]AuthWhiteListItem{
+				"exec": {
+					Type:   Type_Exact,
+					Method: Method_Post,
+				},
+			},
+		},
 		"assisterforms": {
 			Type:   Type_AllChildren,
 			Method: Method_Get,

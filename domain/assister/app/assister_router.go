@@ -20,7 +20,7 @@ type (
 func (r *assisterRouter) Attach(router *echo.Group) {
 	assisterRouterGroup := router.Group("/assisters")
 
-	assisterRouterGroup.POST("/:assister_id/exec", api.Handler(
+	assisterRouterGroup.POST("/exec", api.Handler(
 		r.assisterController.Execute(),
 	))
 }

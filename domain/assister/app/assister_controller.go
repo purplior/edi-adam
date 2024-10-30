@@ -31,8 +31,12 @@ type (
 
 func (c *assisterController) Execute() api.HandlerFunc {
 	return func(ctx *api.Context) error {
-		userId := ctx.Identity.ID
-		assisterID := ctx.Param("assister_id")
+		userId := ""
+		if ctx.Identity != nil {
+			userId = ctx.Identity.ID
+		}
+
+		assisterID := ctx.QueryParam("aid")
 		if len(assisterID) == 0 {
 			return ctx.String(http.StatusBadRequest, exception.ErrBadRequest.Error())
 		}

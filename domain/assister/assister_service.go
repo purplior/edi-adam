@@ -46,6 +46,11 @@ func (s *assisterService) RequestStream(
 		return err
 	}
 
+	isFree := assister.Cost == 0
+	if !isFree && len(userId) == 0 {
+		return exception.ErrBadRequest
+	}
+
 	form, err := s.assisterFormService.GetOneByAssisterID(ctx, id)
 	if err != nil {
 		return err
@@ -69,19 +74,21 @@ func (s *assisterService) RequestStream(
 		messages[i] = message.CreatePayload()
 	}
 
-	if err := s.cm.BeginTX(ctx, inner.TX_PodopaySql); err != nil {
-		return err
-	}
+	if !isFree {
+		if err := s.cm.BeginTX(ctx, inner.TX_PodopaySql); err != nil {
+			return err
+		}
 
-	if err := s.walletService.Expend(
-		ctx,
-		userId,
-		-1*int(assister.Cost),
-		ledger.LedgerAction_ConsumeByAssister,
-		assister.ViewID,
-	); err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
-		return err
+		if err := s.walletService.Expend(
+			ctx,
+			userId,
+			-1*int(assister.Cost),
+			ledger.LedgerAction_ConsumeByAssister,
+			assister.ViewID,
+		); err != nil {
+			s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
+			return err
+		}
 	}
 
 	err = s.openaiClient.RequestChatCompletionsStream(
@@ -94,8 +101,10 @@ func (s *assisterService) RequestStream(
 			if err := onInit(); err != nil {
 				return err
 			}
-			if err := s.cm.CommitTX(ctx, inner.TX_PodopaySql); err != nil {
-				return err
+			if !isFree {
+				if err := s.cm.CommitTX(ctx, inner.TX_PodopaySql); err != nil {
+					return err
+				}
 			}
 
 			return nil
@@ -103,7 +112,9 @@ func (s *assisterService) RequestStream(
 		onReceiveMessage,
 	)
 	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
+		if !isFree {
+			s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
+		}
 	}
 
 	return err

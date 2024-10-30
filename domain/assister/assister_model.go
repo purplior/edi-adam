@@ -16,6 +16,7 @@ type (
 	// 구현에 대한 정보는 감추고, 보여줘야하는 정보만 보여준다.
 	AssisterInfo struct {
 		ID                 string    `json:"id"`
+		IsFree             bool      `json:"isFree"`
 		Version            string    `json:"version"`
 		VersionDescription string    `json:"versionDescription"`
 		CreatedAt          time.Time `json:"createdAt"`
@@ -25,6 +26,7 @@ type (
 func (m Assister) ToInfo() AssisterInfo {
 	return AssisterInfo{
 		ID:                 m.ID,
+		IsFree:             m.Cost == 0,
 		Version:            m.Version,
 		VersionDescription: m.VersionDescription,
 		CreatedAt:          m.CreatedAt,

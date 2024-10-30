@@ -49,6 +49,11 @@ func (s *walletService) Expend(
 	ledgerAction ledger.LedgerAction,
 	ledgerReason string,
 ) error {
+	// 0은 히스토리에 남기지 않아요
+	if podoDelta == 0 {
+		return nil
+	}
+
 	wallet, err := s.walletRepository.UpdateOneByUserIDAndDelta(
 		ctx,
 		userId,
