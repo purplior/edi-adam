@@ -22,9 +22,17 @@ type (
 
 		GetOneByAssisterID(
 			ctx inner.Context,
-			assistantID string,
+			id string,
 		) (
 			AssisterForm,
+			error,
+		)
+
+		GetViewOneByAssisterID(
+			ctx inner.Context,
+			assistantID string,
+		) (
+			AssisterFormView,
 			error,
 		)
 	}
@@ -76,6 +84,24 @@ func (r *assisterFormService) GetOneByAssisterID(
 		ctx,
 		assisterID,
 	)
+}
+
+func (r *assisterFormService) GetViewOneByAssisterID(
+	ctx inner.Context,
+	assisterID string,
+) (
+	AssisterFormView,
+	error,
+) {
+	assisterForm, err := r.assisterFormRepository.FindOneByAssisterID(
+		ctx,
+		assisterID,
+	)
+	if err != nil {
+		return AssisterFormView{}, err
+	}
+
+	return assisterForm.ToView(), err
 }
 
 func NewAssisterFormService(

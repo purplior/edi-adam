@@ -30,7 +30,7 @@ func (r *assisterFormRouter) Attach(router *echo.Group) {
 	assisterFormRouterGroup.GET(
 		"/one",
 		api.Handler(
-			r.assisterFormController.GetOne(),
+			r.assisterFormController.GetViewOne(),
 		),
 	)
 }

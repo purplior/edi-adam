@@ -18,7 +18,7 @@ type (
 		/**
 		 * 쌤비서 폼 가져오기
 		 */
-		GetOne() api.HandlerFunc
+		GetViewOne() api.HandlerFunc
 	}
 )
 
@@ -58,18 +58,18 @@ func (c *assisterFormController) RegisterOne() api.HandlerFunc {
 	}
 }
 
-func (c *assisterFormController) GetOne() api.HandlerFunc {
+func (c *assisterFormController) GetViewOne() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		assisterID := ctx.QueryParam("assister_id")
 
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		var assisterForm domain.AssisterForm
+		var assisterFormView domain.AssisterFormView
 		var err error = exception.ErrNotFound
 
 		if len(assisterID) > 0 {
-			assisterForm, err = c.assisterFormService.GetOneByAssisterID(
+			assisterFormView, err = c.assisterFormService.GetViewOneByAssisterID(
 				innerCtx,
 				assisterID,
 			)
@@ -80,9 +80,9 @@ func (c *assisterFormController) GetOne() api.HandlerFunc {
 
 		return ctx.SendJSON(response.JSONResponse{
 			Data: struct {
-				AssisterForm domain.AssisterForm `json:"assisterForm"`
+				AssisterFormView domain.AssisterFormView `json:"assisterFormView"`
 			}{
-				AssisterForm: assisterForm,
+				AssisterFormView: assisterFormView,
 			},
 		})
 	}

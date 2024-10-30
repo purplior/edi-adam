@@ -54,6 +54,14 @@ type (
 		QueryInfoHeading string                 `json:"queryInfoHeading"`
 		CreatedAt        time.Time              `json:"createdAt"`
 	}
+
+	AssisterFormView struct {
+		ID         string          `json:"id"`
+		AssisterID string          `json:"assisterId"`
+		Fields     []AssisterField `json:"fields"`
+		SubmitText string          `json:"submitText"`
+		CreatedAt  time.Time       `json:"createdAt"`
+	}
 )
 
 func (m AssisterForm) FindField(name string) (AssisterField, bool) {
@@ -64,6 +72,16 @@ func (m AssisterForm) FindField(name string) (AssisterField, bool) {
 	}
 
 	return AssisterField{}, false
+}
+
+func (m AssisterForm) ToView() AssisterFormView {
+	return AssisterFormView{
+		ID:         m.ID,
+		AssisterID: m.AssisterID,
+		Fields:     m.Fields,
+		SubmitText: m.SubmitText,
+		CreatedAt:  m.CreatedAt,
+	}
 }
 
 type (
