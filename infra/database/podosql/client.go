@@ -64,10 +64,12 @@ func (c *Client) ConnectDB() error {
 
 func (c *Client) MigrateDB() error {
 	return c.DB.AutoMigrate(
-		entity.User{},
-		entity.EmailVerification{},
 		entity.Assistant{},
 		entity.Assister{},
+		entity.User{},
+		entity.Mission{},
+		entity.Challenge{},
+		entity.EmailVerification{},
 	)
 }
 

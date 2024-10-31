@@ -11,12 +11,12 @@ import (
 type (
 	Assistant struct {
 		ID                uint   `gorm:"primaryKey;autoIncrement"`
-		ViewID            string `gorm:"type:varchar(36);not null;unique"`
+		ViewID            string `gorm:"size:36;not null;unique"`
 		AuthorID          uint
 		Author            User
 		Assisters         []Assister `gorm:"foreignKey:AssistantID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-		Title             string     `gorm:"type:varchar(80);not null"`  // 20자 이내
-		Description       string     `gorm:"type:varchar(255);not null"` // 80자 이내
+		Title             string     `gorm:"size:80;not null"`  // 20자 이내
+		Description       string     `gorm:"size:255;not null"` // 80자 이내
 		IsPublic          bool       `gorm:"default:false;not null"`
 		DefaultAssisterID uint
 		CreatedAt         time.Time `gorm:"autoCreateTime"`

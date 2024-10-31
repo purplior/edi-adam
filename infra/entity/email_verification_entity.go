@@ -10,8 +10,8 @@ import (
 type (
 	EmailVerification struct {
 		ID         uint      `gorm:"primaryKey;autoIncrement"`
-		Email      string    `gorm:"type:varchar(100);not null"`
-		Code       string    `gorm:"type:varchar(6);not null"`
+		Email      string    `gorm:"size:100;not null"`
+		Code       string    `gorm:"size:10;not null"`
 		IsVerified bool      `gorm:"not null"`
 		IsConsumed bool      `gorm:"not null"`
 		ExpiredAt  time.Time `gorm:"not null"`

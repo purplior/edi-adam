@@ -9,8 +9,8 @@ import (
 
 type (
 	Ledger struct {
-		ID         uint  `gorm:"primaryKey;autoIncrement"`
-		WalletID   uint  `gorm:"not null"`
+		ID         uint `gorm:"primaryKey;autoIncrement"`
+		WalletID   uint
 		PodoAmount int32 `gorm:"not null"`
 		Action     domain.LedgerAction
 		Reason     string    `gorm:"size:255"`

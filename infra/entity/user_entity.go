@@ -10,13 +10,14 @@ import (
 type (
 	User struct {
 		ID              uint        `gorm:"primaryKey;autoIncrement"`
-		JoinMethod      string      `gorm:"type:varchar(255);not null;uniqueIndex:idx_join_method_account"`
-		AccountID       string      `gorm:"type:varchar(255);not null;uniqueIndex:idx_join_method_account"`
-		AccountPassword string      `gorm:"type:varchar(255);not null"`
-		Nickname        string      `gorm:"type:varchar(100)"`
+		JoinMethod      string      `gorm:"size:255;not null;uniqueIndex:idx_join_method_account"`
+		AccountID       string      `gorm:"size:255;not null;uniqueIndex:idx_join_method_account"`
+		AccountPassword string      `gorm:"size:255;not null"`
+		Nickname        string      `gorm:"size:100"`
 		Role            int         `gorm:"default:100"`
 		CreatedAt       time.Time   `gorm:"autoCreateTime"`
 		Assistants      []Assistant `gorm:"foreignKey:AuthorID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+		Challenges      []Challenge `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	}
 )
 

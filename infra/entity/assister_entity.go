@@ -11,8 +11,8 @@ type (
 	Assister struct {
 		ID                 uint      `gorm:"primaryKey;autoIncrement"`
 		AssistantID        uint      `gorm:"uniqueIndex:idx_assistant_version"`
-		Version            string    `gorm:"type:varchar(80);uniqueIndex:idx_assistant_version"`
-		VersionDescription string    `gorm:"type:varchar(255)"`
+		Version            string    `gorm:"size:80;uniqueIndex:idx_assistant_version"`
+		VersionDescription string    `gorm:"size:255"`
 		Cost               uint      `gorm:"type:tinyint unsigned"`
 		CreatedAt          time.Time `gorm:"autoCreateTime"`
 	}
