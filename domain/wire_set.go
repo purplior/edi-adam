@@ -6,6 +6,7 @@ import (
 	assister "github.com/podossaem/podoroot/domain/assister/app"
 	assisterform "github.com/podossaem/podoroot/domain/assisterform/app"
 	auth "github.com/podossaem/podoroot/domain/auth/app"
+	challenge "github.com/podossaem/podoroot/domain/challenge/app"
 	ledger "github.com/podossaem/podoroot/domain/ledger/app"
 	me "github.com/podossaem/podoroot/domain/me/app"
 	user "github.com/podossaem/podoroot/domain/user/app"
@@ -18,6 +19,7 @@ var New = wire.NewSet(
 	assister.New,
 	assisterform.New,
 	auth.New,
+	challenge.New,
 	ledger.New,
 	me.New,
 	user.New,

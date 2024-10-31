@@ -9,7 +9,9 @@ type (
 	MeRouter interface {
 		Attach(router *echo.Group)
 	}
+)
 
+type (
 	meRouter struct {
 		meController MeController
 	}

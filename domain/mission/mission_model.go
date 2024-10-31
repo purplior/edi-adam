@@ -1,4 +1,4 @@
-package challenge
+package mission
 
 import "time"
 

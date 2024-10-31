@@ -12,6 +12,7 @@ type (
 		ID          uint `gorm:"primaryKey;autoIncrement"`
 		UserID      uint
 		MissionID   uint
+		Mission     Mission
 		IsCompleted bool `gorm:"default:false;not null"`
 		CompletedAt time.Time
 		CreatedAt   time.Time `gorm:"autoCreateTime"`
@@ -33,6 +34,8 @@ func (e Challenge) ToModel() domain.Challenge {
 	}
 	if e.MissionID > 0 {
 		m.MissionID = dt.Str(e.MissionID)
+		m.Mission = e.Mission.ToModel()
+		m.Mission.ID = m.MissionID
 	}
 
 	return m

@@ -6,6 +6,7 @@ import (
 	assister "github.com/podossaem/podoroot/domain/assister/app"
 	assisterform "github.com/podossaem/podoroot/domain/assisterform/app"
 	auth "github.com/podossaem/podoroot/domain/auth/app"
+	challenge "github.com/podossaem/podoroot/domain/challenge/app"
 	me "github.com/podossaem/podoroot/domain/me/app"
 	user "github.com/podossaem/podoroot/domain/user/app"
 	verification "github.com/podossaem/podoroot/domain/verification/app"
@@ -21,6 +22,7 @@ type (
 		assisterRouter     assister.AssisterRouter
 		assisterFormRouter assisterform.AssisterFormRouter
 		authRouter         auth.AuthRouter
+		challengeRouter    challenge.ChallengeRouter
 		meRouter           me.MeRouter
 		userRouter         user.UserRouter
 		verificationRouter verification.VerificationRouter
@@ -34,6 +36,7 @@ func (r *router) Attach(app *echo.Echo) {
 	r.assisterRouter.Attach(api)
 	r.assisterFormRouter.Attach(api)
 	r.authRouter.Attach(api)
+	r.challengeRouter.Attach(api)
 	r.meRouter.Attach(api)
 	r.userRouter.Attach(api)
 	r.verificationRouter.Attach(api)
@@ -44,6 +47,7 @@ func New(
 	assisterRouter assister.AssisterRouter,
 	assisterFormRouter assisterform.AssisterFormRouter,
 	authRouter auth.AuthRouter,
+	challengeRouter challenge.ChallengeRouter,
 	meRouter me.MeRouter,
 	userRouter user.UserRouter,
 	verificationRouter verification.VerificationRouter,
@@ -53,6 +57,7 @@ func New(
 		assisterRouter:     assisterRouter,
 		assisterFormRouter: assisterFormRouter,
 		authRouter:         authRouter,
+		challengeRouter:    challengeRouter,
 		meRouter:           meRouter,
 		userRouter:         userRouter,
 		verificationRouter: verificationRouter,
