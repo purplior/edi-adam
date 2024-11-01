@@ -34,9 +34,26 @@ func (r *walletRepository) InsertOne(
 	return e.ToModel(), nil
 }
 
+func (r *walletRepository) FindOneByUserID(
+	ctx inner.Context,
+	userID string,
+) (
+	domain.Wallet,
+	error,
+) {
+	db := r.client.DBWithContext(ctx)
+
+	var wallet entity.Wallet
+	if err := db.Where("owner_id = ?", userID).First(&wallet).Error; err != nil {
+		return domain.Wallet{}, database.ToDomainError(err)
+	}
+
+	return wallet.ToModel(), nil
+}
+
 func (r *walletRepository) UpdateOneByUserIDAndDelta(
 	ctx inner.Context,
-	userId string,
+	userID string,
 	podoDelta int,
 ) (
 	domain.Wallet,
@@ -45,7 +62,7 @@ func (r *walletRepository) UpdateOneByUserIDAndDelta(
 	db := r.client.DBWithContext(ctx)
 
 	var wallet entity.Wallet
-	if err := db.Where("owner_id = ?", userId).First(&wallet).Error; err != nil {
+	if err := db.Where("owner_id = ?", userID).First(&wallet).Error; err != nil {
 		return domain.Wallet{}, database.ToDomainError(err)
 	}
 

@@ -8,6 +8,7 @@ import (
 	"github.com/podossaem/podoroot/domain/shared/exception"
 	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/domain/user"
+	"github.com/podossaem/podoroot/domain/wallet"
 )
 
 type (
@@ -26,15 +27,21 @@ type (
 		 * 나의 임시 액세스 토큰 발급하기 (유효기간 1시간)
 		 */
 		GetTempAccessToken() api.HandlerFunc
+
+		/**
+		 *
+		 */
+		GetMyPodo() api.HandlerFunc
 	}
 )
 
 type (
 	meController struct {
-		meService   domain.MeService
-		authService auth.AuthService
-		userService user.UserService
-		cm          inner.ContextManager
+		meService     domain.MeService
+		authService   auth.AuthService
+		userService   user.UserService
+		walletService wallet.WalletService
+		cm            inner.ContextManager
 	}
 )
 
@@ -96,16 +103,45 @@ func (c *meController) GetTempAccessToken() api.HandlerFunc {
 	}
 }
 
+func (c *meController) GetMyPodo() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		if ctx.Identity == nil {
+			return ctx.SendError(exception.ErrUnauthorized)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		wallet, err := c.walletService.GetOneByUserID(
+			innerCtx,
+			ctx.Identity.ID,
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				Podo int `json:"podo"`
+			}{
+				Podo: wallet.Podo,
+			},
+		})
+	}
+}
+
 func NewMeController(
 	meService domain.MeService,
 	authService auth.AuthService,
 	userService user.UserService,
+	walletService wallet.WalletService,
 	cm inner.ContextManager,
 ) MeController {
 	return &meController{
-		meService:   meService,
-		authService: authService,
-		userService: userService,
-		cm:          cm,
+		meService:     meService,
+		authService:   authService,
+		userService:   userService,
+		walletService: walletService,
+		cm:            cm,
 	}
 }

@@ -14,9 +14,17 @@ type (
 			error,
 		)
 
+		FindOneByUserID(
+			ctx inner.Context,
+			userID string,
+		) (
+			Wallet,
+			error,
+		)
+
 		UpdateOneByUserIDAndDelta(
 			ctx inner.Context,
-			userId string,
+			userID string,
 			podoDelta int,
 		) (
 			Wallet,

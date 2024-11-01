@@ -35,6 +35,13 @@ func (r *meRouter) Attach(router *echo.Group) {
 	)
 
 	meRouterGroup.GET(
+		"/podo",
+		api.Handler(
+			r.meController.GetMyPodo(),
+		),
+	)
+
+	meRouterGroup.GET(
 		"/temp/at",
 		api.Handler(
 			r.meController.GetTempAccessToken(),

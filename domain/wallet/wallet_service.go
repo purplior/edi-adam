@@ -15,9 +15,17 @@ type (
 			error,
 		)
 
+		GetOneByUserID(
+			ctx inner.Context,
+			userID string,
+		) (
+			Wallet,
+			error,
+		)
+
 		Expend(
 			ctx inner.Context,
-			userId string,
+			userID string,
 			podoDelta int,
 			ledgerAction ledger.LedgerAction,
 			ledgerReason string,
@@ -42,9 +50,22 @@ func (s *walletService) RegisterOne(
 	return s.walletRepository.InsertOne(ctx, wallet)
 }
 
+func (s *walletService) GetOneByUserID(
+	ctx inner.Context,
+	userID string,
+) (
+	Wallet,
+	error,
+) {
+	return s.walletRepository.FindOneByUserID(
+		ctx,
+		userID,
+	)
+}
+
 func (s *walletService) Expend(
 	ctx inner.Context,
-	userId string,
+	userID string,
 	podoDelta int,
 	ledgerAction ledger.LedgerAction,
 	ledgerReason string,
@@ -56,7 +77,7 @@ func (s *walletService) Expend(
 
 	wallet, err := s.walletRepository.UpdateOneByUserIDAndDelta(
 		ctx,
-		userId,
+		userID,
 		podoDelta,
 	)
 	if err != nil {
