@@ -9,23 +9,23 @@ import (
 
 type (
 	Challenge struct {
-		ID          uint `gorm:"primaryKey;autoIncrement"`
-		UserID      uint
-		MissionID   uint
-		Mission     Mission
-		IsActive    bool `gorm:"default:false;not null"`
-		IsCompleted bool `gorm:"default:false;not null"`
-		CompletedAt time.Time
-		CreatedAt   time.Time `gorm:"autoCreateTime"`
+		ID         uint `gorm:"primaryKey;autoIncrement"`
+		UserID     uint
+		MissionID  uint
+		Mission    Mission
+		IsAchieved bool `gorm:"default:false;not null"`
+		IsReceived bool `gorm:"default:false;not null"`
+		ReceivedAt time.Time
+		CreatedAt  time.Time `gorm:"autoCreateTime"`
 	}
 )
 
 func (e Challenge) ToModel() domain.Challenge {
 	m := domain.Challenge{
-		IsActive:    e.IsActive,
-		IsCompleted: e.IsCompleted,
-		CompletedAt: e.CompletedAt,
-		CreatedAt:   e.CreatedAt,
+		IsAchieved: e.IsAchieved,
+		IsReceived: e.IsReceived,
+		ReceivedAt: e.ReceivedAt,
+		CreatedAt:  e.CreatedAt,
 	}
 
 	if e.ID > 0 {

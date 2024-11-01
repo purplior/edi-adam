@@ -28,7 +28,7 @@ func (c *challengeController) GetPaginatedList() api.HandlerFunc {
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		challenges, err := c.challengeService.GetPaginatedListByUserID(
+		challengeInfos, err := c.challengeService.GetPaginatedInfoListByUserID(
 			innerCtx,
 			userID,
 			dt.Int(ctx.QueryParam("psize")),
@@ -40,9 +40,9 @@ func (c *challengeController) GetPaginatedList() api.HandlerFunc {
 
 		return ctx.SendJSON(response.JSONResponse{
 			Data: struct {
-				Challenges []domain.Challenge `json:"challenges"`
+				ChallengeInfos []domain.ChallengeInfo `json:"challengeInfos"`
 			}{
-				Challenges: challenges,
+				ChallengeInfos: challengeInfos,
 			},
 		})
 	}

@@ -4,13 +4,13 @@ import "github.com/podossaem/podoroot/domain/shared/inner"
 
 type (
 	ChallengeService interface {
-		GetPaginatedListByUserID(
+		GetPaginatedInfoListByUserID(
 			ctx inner.Context,
 			userId string,
 			limit int,
 			offset int,
 		) (
-			[]Challenge,
+			[]ChallengeInfo,
 			error,
 		)
 	}
@@ -22,21 +22,31 @@ type (
 	}
 )
 
-func (s *challengeService) GetPaginatedListByUserID(
+func (s *challengeService) GetPaginatedInfoListByUserID(
 	ctx inner.Context,
 	userId string,
 	limit int,
 	offset int,
 ) (
-	[]Challenge,
+	[]ChallengeInfo,
 	error,
 ) {
-	return s.challengeRepository.FindPaginatedListByUserID(
+	challenges, err := s.challengeRepository.FindPaginatedListByUserID(
 		ctx,
 		userId,
 		limit,
 		offset,
 	)
+	if err != nil {
+		return nil, err
+	}
+
+	challengeInfos := make([]ChallengeInfo, len(challenges))
+	for i, challenge := range challenges {
+		challengeInfos[i] = challenge.ToInfo()
+	}
+
+	return challengeInfos, nil
 }
 
 func NewChallengeService(

@@ -21,7 +21,7 @@ func (r *challengeRouter) Attach(router *echo.Group) {
 	challengeRouterGroup := router.Group("/challenges")
 
 	challengeRouterGroup.GET(
-		"/pagination",
+		"/info-pagination",
 		api.Handler(
 			r.challengeController.GetPaginatedList(),
 		),

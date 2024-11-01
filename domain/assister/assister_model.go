@@ -19,6 +19,7 @@ type (
 		IsFree             bool      `json:"isFree"`
 		Version            string    `json:"version"`
 		VersionDescription string    `json:"versionDescription"`
+		Cost               uint      `json:"cost"`
 		CreatedAt          time.Time `json:"createdAt"`
 	}
 )
@@ -29,6 +30,7 @@ func (m Assister) ToInfo() AssisterInfo {
 		IsFree:             m.Cost == 0,
 		Version:            m.Version,
 		VersionDescription: m.VersionDescription,
+		Cost:               m.Cost,
 		CreatedAt:          m.CreatedAt,
 	}
 }
