@@ -22,15 +22,35 @@ func NewAuthMiddleware() echo.MiddlewareFunc {
 			method := request.Method
 			pathname := request.URL.Path
 
-			if isWhiteList(method, pathname) {
+			action := isWhiteList(method, pathname)
+			if action == Action_Skip {
 				return next(c)
 			}
 
 			accessToken := request.Header.Get("Authorization")
 			accessToken = strings.TrimSpace(strings.Replace(accessToken, "Bearer ", "", 1))
 
+			var identity *auth.Identity
+			var err error
 			if len(accessToken) > 0 {
-				if identity, err := authorize(accessToken); err == nil {
+				identity, err = authorize(accessToken)
+			}
+
+			switch action {
+			case Action_Verify:
+				if err == nil {
+					return next(&api.Context{
+						Context:  c,
+						Identity: identity,
+					})
+				} else {
+					return c.JSON(response.Status_Unauthorized, response.ErrorResponse{
+						Status:  response.Status_Unauthorized,
+						Message: "unauthorized",
+					})
+				}
+			case Action_SkipAndParse:
+				if err == nil {
 					return next(&api.Context{
 						Context:  c,
 						Identity: identity,
@@ -38,10 +58,7 @@ func NewAuthMiddleware() echo.MiddlewareFunc {
 				}
 			}
 
-			return c.JSON(response.Status_Unauthorized, response.ErrorResponse{
-				Status:  response.Status_Unauthorized,
-				Message: "unauthorized",
-			})
+			return next(c)
 		}
 	}
 }
@@ -49,35 +66,35 @@ func NewAuthMiddleware() echo.MiddlewareFunc {
 func isWhiteList(
 	method string,
 	pathname string,
-) bool {
+) AuthWhiteListAction {
 	// ["", "api", "v1", "auth"]
 	segments := strings.Split(pathname, "/")
 
 	if len(segments) < 4 {
-		return true
+		return Action_Skip
 	}
 
 	if item, isItem := authWhiteListMap[segments[3]]; isItem {
-		if item.Method == Method_All || item.Method == method {
-			return true
+		if item.Method == Method_All || string(item.Method) == method {
+			return item.Action
 		}
 		if len(segments) < 5 {
-			return false
+			return Action_Verify
 		}
 
 		children := item.Children
 		if len(children) <= 0 {
-			return false
+			return Action_Verify
 		}
 
 		if child, isChild := children[segments[4]]; isChild {
-			if child.Method == Method_All || child.Method == method {
-				return true
+			if child.Method == Method_All || string(child.Method) == method {
+				return child.Action
 			}
 		}
 	}
 
-	return false
+	return Action_Verify
 }
 
 func authorize(accessToken string) (*auth.Identity, error) {

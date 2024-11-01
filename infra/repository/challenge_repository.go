@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"fmt"
-
 	domain "github.com/podossaem/podoroot/domain/challenge"
 	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/infra/database/podosql"
@@ -34,8 +32,6 @@ func (r *challengeRepository) FindPaginatedListByUserID(
 		Error; err != nil {
 		return nil, err
 	}
-
-	fmt.Println(len(entities))
 
 	challenges := make([]domain.Challenge, len(entities))
 	for i, entity := range entities {
