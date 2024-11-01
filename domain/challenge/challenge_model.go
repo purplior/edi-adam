@@ -12,6 +12,7 @@ type (
 		UserID      string          `json:"userId"`
 		MissionID   string          `json:"missionId"`
 		Mission     mission.Mission `json:"mission"`
+		IsActive    bool            `json:"isActive"`
 		IsCompleted bool            `json:"isCompleted"`
 		CompletedAt time.Time       `json:"completedAt"`
 		CreatedAt   time.Time       `json:"createdAt"`

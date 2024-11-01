@@ -13,6 +13,7 @@ type (
 		UserID      uint
 		MissionID   uint
 		Mission     Mission
+		IsActive    bool `gorm:"default:false;not null"`
 		IsCompleted bool `gorm:"default:false;not null"`
 		CompletedAt time.Time
 		CreatedAt   time.Time `gorm:"autoCreateTime"`
@@ -21,6 +22,7 @@ type (
 
 func (e Challenge) ToModel() domain.Challenge {
 	m := domain.Challenge{
+		IsActive:    e.IsActive,
 		IsCompleted: e.IsCompleted,
 		CompletedAt: e.CompletedAt,
 		CreatedAt:   e.CreatedAt,
