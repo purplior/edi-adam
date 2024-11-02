@@ -3,6 +3,7 @@ package entity
 import (
 	"time"
 
+	"github.com/podossaem/podoroot/domain/challenge"
 	domain "github.com/podossaem/podoroot/domain/mission"
 	"github.com/podossaem/podoroot/lib/dt"
 )
@@ -31,7 +32,12 @@ func (e Mission) ToModel() domain.Mission {
 	}
 
 	if e.ID > 0 {
-		m.ID = dt.Str(m.ID)
+		m.ID = dt.Str(e.ID)
+	}
+
+	m.Challenges = make([]challenge.Challenge, len(e.Challenges))
+	for i, entity := range e.Challenges {
+		m.Challenges[i] = entity.ToModel()
 	}
 
 	return m

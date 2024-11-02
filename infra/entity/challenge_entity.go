@@ -12,7 +12,6 @@ type (
 		ID         uint `gorm:"primaryKey;autoIncrement"`
 		UserID     uint
 		MissionID  uint
-		Mission    Mission
 		IsAchieved bool `gorm:"default:false;not null"`
 		IsReceived bool `gorm:"default:false;not null"`
 		ReceivedAt time.Time
@@ -36,8 +35,6 @@ func (e Challenge) ToModel() domain.Challenge {
 	}
 	if e.MissionID > 0 {
 		m.MissionID = dt.Str(e.MissionID)
-		m.Mission = e.Mission.ToModel()
-		m.Mission.ID = m.MissionID
 	}
 
 	return m
@@ -59,7 +56,6 @@ func MakeChallenge(m domain.Challenge) Challenge {
 	}
 	if len(m.MissionID) > 0 {
 		e.MissionID = dt.UInt(m.MissionID)
-		e.Mission = MakeMission(m.Mission)
 	}
 
 	return e

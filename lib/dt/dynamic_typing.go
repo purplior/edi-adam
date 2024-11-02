@@ -277,25 +277,25 @@ func Str(in any) (out string) {
 	case nil:
 		out = ""
 	case int:
-		out = strconv.FormatInt(int64(in), 10)
+		out = strconv.Itoa(in)
 	case uint8:
-		out = strconv.FormatInt(int64(in), 10)
+		out = strconv.Itoa(int(in))
 	case uint16:
-		out = strconv.FormatInt(int64(in), 10)
+		out = strconv.Itoa(int(in))
 	case uint32:
-		out = strconv.FormatInt(int64(in), 10)
+		out = strconv.Itoa(int(in))
 	case uint64:
-		out = strconv.FormatInt(int64(in), 10)
+		out = strconv.Itoa(int(in))
 	case uint:
-		out = strconv.FormatInt(int64(in), 10)
+		out = strconv.Itoa(int(in))
 	case int8:
-		out = strconv.FormatInt(int64(in), 10)
+		out = strconv.Itoa(int(in))
 	case int16:
-		out = strconv.FormatInt(int64(in), 10)
+		out = strconv.Itoa(int(in))
 	case int32:
-		out = strconv.FormatInt(int64(in), 10)
+		out = strconv.Itoa(int(in))
 	case int64:
-		out = strconv.FormatInt(in, 10)
+		out = strconv.Itoa(int(in))
 	case float32:
 		out = strconv.FormatFloat(float64(in), 'f', 2, 64)
 	case float64:

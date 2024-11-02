@@ -39,6 +39,8 @@ func (ctx Context) SendError(err error) error {
 		status = response.Status_BadRequest
 	case exception.ErrAlreadyVerified:
 		status = response.Status_BadRequest
+	case exception.ErrAlreadyReceived:
+		status = response.Status_BadRequest
 	case exception.ErrNotAcceptable:
 		status = response.Status_NotAcceptable
 	case exception.ErrAlreadySignedUp:

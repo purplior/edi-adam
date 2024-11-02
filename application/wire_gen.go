@@ -26,10 +26,12 @@ import (
 	"github.com/podossaem/podoroot/domain/ledger"
 	"github.com/podossaem/podoroot/domain/me"
 	app6 "github.com/podossaem/podoroot/domain/me/app"
+	"github.com/podossaem/podoroot/domain/mission"
+	app7 "github.com/podossaem/podoroot/domain/mission/app"
 	"github.com/podossaem/podoroot/domain/user"
-	app7 "github.com/podossaem/podoroot/domain/user/app"
+	app8 "github.com/podossaem/podoroot/domain/user/app"
 	"github.com/podossaem/podoroot/domain/verification"
-	app8 "github.com/podossaem/podoroot/domain/verification/app"
+	app9 "github.com/podossaem/podoroot/domain/verification/app"
 	"github.com/podossaem/podoroot/domain/wallet"
 	"github.com/podossaem/podoroot/infra"
 	"github.com/podossaem/podoroot/infra/database"
@@ -76,17 +78,21 @@ func Start() error {
 	authController := app4.NewAuthController(authService, contextManager)
 	authRouter := app4.NewAuthRouter(authController)
 	challengeRepository := repository.NewChallengeRepository(client)
-	challengeService := challenge.NewChallengeService(challengeRepository, walletService, contextManager)
+	challengeService := challenge.NewChallengeService(challengeRepository, contextManager)
 	challengeController := app5.NewChallengeController(challengeService, contextManager)
 	challengeRouter := app5.NewChallengeRouter(challengeController)
 	meService := me.NewMeService(userRepository)
 	meController := app6.NewMeController(meService, authService, userService, walletService, contextManager)
 	meRouter := app6.NewMeRouter(meController)
-	userController := app7.NewUserController()
-	userRouter := app7.NewUserRouter(userController)
-	emailVerificationController := app8.NewEmailVerificationController(emailVerificationService, contextManager)
-	verificationRouter := app8.NewVerificationRouter(emailVerificationController)
-	routerRouter := router.New(assistantRouter, assisterRouter, assisterFormRouter, authRouter, challengeRouter, meRouter, userRouter, verificationRouter)
+	missionRepository := repository.NewMissionRepository(client)
+	missionService := mission.NewMissionService(missionRepository, challengeService, walletService, contextManager)
+	missionController := app7.NewMissionController(missionService, contextManager)
+	missionRouter := app7.NewMissionRouter(missionController)
+	userController := app8.NewUserController()
+	userRouter := app8.NewUserRouter(userController)
+	emailVerificationController := app9.NewEmailVerificationController(emailVerificationService, contextManager)
+	verificationRouter := app9.NewVerificationRouter(emailVerificationController)
+	routerRouter := router.New(assistantRouter, assisterRouter, assisterFormRouter, authRouter, challengeRouter, meRouter, missionRouter, userRouter, verificationRouter)
 	error2 := StartApplication(databaseManager, routerRouter)
 	return error2
 }
@@ -102,17 +108,17 @@ func StartApplication(
 		log.Println("[#] 데이터베이스를 초기화 하는데 실패 했어요")
 		return err
 	}
-	app9 := echo.New()
-	app9.
+	app10 := echo.New()
+	app10.
 		Use(middleware.New()...)
 	router2.
-		Attach(app9)
+		Attach(app10)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		if err := app9.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
+		if err := app10.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
 			log.Println("[#] 서버를 시작 하는데 실패 했어요")
 			panic(err)
 		}
@@ -128,7 +134,7 @@ func StartApplication(
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := app9.Shutdown(ctx); err != nil {
+	if err := app10.Shutdown(ctx); err != nil {
 		log.Println("[#] 서버를 종료 하는데 실패 했어요")
 		return err
 	}

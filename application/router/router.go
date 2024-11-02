@@ -8,6 +8,7 @@ import (
 	auth "github.com/podossaem/podoroot/domain/auth/app"
 	challenge "github.com/podossaem/podoroot/domain/challenge/app"
 	me "github.com/podossaem/podoroot/domain/me/app"
+	mission "github.com/podossaem/podoroot/domain/mission/app"
 	user "github.com/podossaem/podoroot/domain/user/app"
 	verification "github.com/podossaem/podoroot/domain/verification/app"
 )
@@ -24,6 +25,7 @@ type (
 		authRouter         auth.AuthRouter
 		challengeRouter    challenge.ChallengeRouter
 		meRouter           me.MeRouter
+		missionRouter      mission.MissionRouter
 		userRouter         user.UserRouter
 		verificationRouter verification.VerificationRouter
 	}
@@ -38,6 +40,7 @@ func (r *router) Attach(app *echo.Echo) {
 	r.authRouter.Attach(api)
 	r.challengeRouter.Attach(api)
 	r.meRouter.Attach(api)
+	r.missionRouter.Attach(api)
 	r.userRouter.Attach(api)
 	r.verificationRouter.Attach(api)
 }
@@ -49,6 +52,7 @@ func New(
 	authRouter auth.AuthRouter,
 	challengeRouter challenge.ChallengeRouter,
 	meRouter me.MeRouter,
+	missionRouter mission.MissionRouter,
 	userRouter user.UserRouter,
 	verificationRouter verification.VerificationRouter,
 ) Router {
@@ -59,6 +63,7 @@ func New(
 		authRouter:         authRouter,
 		challengeRouter:    challengeRouter,
 		meRouter:           meRouter,
+		missionRouter:      missionRouter,
 		userRouter:         userRouter,
 		verificationRouter: verificationRouter,
 	}

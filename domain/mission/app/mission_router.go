@@ -1,13 +1,38 @@
 package app
 
-type (
-	MissionRouter interface{}
+import (
+	"github.com/labstack/echo/v4"
+	"github.com/podossaem/podoroot/application/api"
 )
 
 type (
-	missionRouter struct{}
+	MissionRouter interface {
+		Attach(router *echo.Group)
+	}
 )
 
-func NewMissionRouter() MissionRouter {
-	return &missionRouter{}
+type (
+	missionRouter struct {
+		missionController MissionController
+	}
+)
+
+func (r *missionRouter) Attach(router *echo.Group) {
+	missionRouterGroup := router.Group("/missions")
+
+	missionRouterGroup.GET("/paginated", api.Handler(
+		r.missionController.GetPaginatedList(),
+	))
+
+	missionRouterGroup.POST("/receive", api.Handler(
+		r.missionController.ReceiveOne(),
+	))
+}
+
+func NewMissionRouter(
+	missionController MissionController,
+) MissionRouter {
+	return &missionRouter{
+		missionController: missionController,
+	}
 }

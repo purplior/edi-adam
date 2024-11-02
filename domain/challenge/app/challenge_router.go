@@ -2,7 +2,6 @@ package app
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/podossaem/podoroot/application/api"
 )
 
 type (
@@ -18,14 +17,6 @@ type (
 )
 
 func (r *challengeRouter) Attach(router *echo.Group) {
-	challengeRouterGroup := router.Group("/challenges")
-
-	challengeRouterGroup.POST(
-		"/receive",
-		api.Handler(
-			r.challengeController.ReceiveOne(),
-		),
-	)
 }
 
 func NewChallengeRouter(
