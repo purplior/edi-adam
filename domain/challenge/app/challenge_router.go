@@ -20,10 +20,10 @@ type (
 func (r *challengeRouter) Attach(router *echo.Group) {
 	challengeRouterGroup := router.Group("/challenges")
 
-	challengeRouterGroup.GET(
-		"/info-pagination",
+	challengeRouterGroup.POST(
+		"/receive",
 		api.Handler(
-			r.challengeController.GetPaginatedList(),
+			r.challengeController.ReceiveOne(),
 		),
 	)
 }

@@ -1,17 +1,44 @@
 package challenge
 
-import "github.com/podossaem/podoroot/domain/shared/inner"
+import (
+	"time"
+
+	"github.com/podossaem/podoroot/domain/shared/inner"
+)
 
 type (
 	ChallengeRepository interface {
-		FindPaginatedListByUserID(
+		InsertOne(
 			ctx inner.Context,
-			userId string,
+			challenge Challenge,
+		) (
+			Challenge,
+			error,
+		)
+
+		FindOne_ByID(
+			ctx inner.Context,
+			id string,
+		) (
+			Challenge,
+			error,
+		)
+
+		FindPaginatedList_ByUserID(
+			ctx inner.Context,
+			userID string,
 			limit int,
 			offset int,
 		) (
 			[]Challenge,
 			error,
 		)
+
+		UpdateOne_ReceivedStatus_ByID(
+			ctx inner.Context,
+			id string,
+			isReceived bool,
+			receivedAt time.Time,
+		) error
 	}
 )

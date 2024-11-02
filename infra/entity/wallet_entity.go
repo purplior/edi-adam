@@ -10,9 +10,8 @@ import (
 
 type (
 	Wallet struct {
-		ID uint `gorm:"primaryKey;autoIncrement"`
-		// User와 다른 데이터베이스에 저장되기 때문에 외래키 관계설정을 할 수 없다.
-		OwnerID   uint      `gorm:"not null;unique"`
+		ID        uint      `gorm:"primaryKey;autoIncrement"`
+		OwnerID   uint      `gorm:"unique"`
 		Podo      int64     `gorm:"not null"`
 		CreatedAt time.Time `gorm:"autoCreateTime"`
 		Ledgers   []Ledger  `gorm:"foreignKey:WalletID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`

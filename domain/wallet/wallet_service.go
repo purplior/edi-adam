@@ -30,6 +30,14 @@ type (
 			ledgerAction ledger.LedgerAction,
 			ledgerReason string,
 		) error
+
+		Charge(
+			ctx inner.Context,
+			userID string,
+			podoDelta int,
+			ledgerAction ledger.LedgerAction,
+			ledgerReason string,
+		) error
 	}
 )
 
@@ -64,6 +72,40 @@ func (s *walletService) GetOneByUserID(
 }
 
 func (s *walletService) Expend(
+	ctx inner.Context,
+	userID string,
+	podoDelta int,
+	ledgerAction ledger.LedgerAction,
+	ledgerReason string,
+) error {
+	// 0은 히스토리에 남기지 않아요
+	if podoDelta == 0 {
+		return nil
+	}
+
+	podoDelta = -1 * podoDelta
+	wallet, err := s.walletRepository.UpdateOneByUserIDAndDelta(
+		ctx,
+		userID,
+		podoDelta,
+	)
+	if err != nil {
+		return err
+	}
+
+	if _, err = s.ledgerService.RegisterOne(ctx, ledger.Ledger{
+		WalletID:   wallet.ID,
+		PodoAmount: podoDelta,
+		Action:     ledgerAction,
+		Reason:     ledgerReason,
+	}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *walletService) Charge(
 	ctx inner.Context,
 	userID string,
 	podoDelta int,

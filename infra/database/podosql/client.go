@@ -65,9 +65,11 @@ func (c *Client) ConnectDB() error {
 func (c *Client) MigrateDB() error {
 	// Relation 때문에 AutoMigrate 순서가 중요함
 	return c.DB.AutoMigrate(
+		entity.User{},
+		entity.Wallet{},
+		entity.Ledger{},
 		entity.Assistant{},
 		entity.Assister{},
-		entity.User{},
 		entity.Mission{},
 		entity.Challenge{},
 		entity.EmailVerification{},

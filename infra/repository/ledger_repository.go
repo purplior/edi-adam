@@ -4,13 +4,13 @@ import (
 	domain "github.com/podossaem/podoroot/domain/ledger"
 	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/infra/database"
-	"github.com/podossaem/podoroot/infra/database/podopaysql"
+	"github.com/podossaem/podoroot/infra/database/podosql"
 	"github.com/podossaem/podoroot/infra/entity"
 )
 
 type (
 	ledgerRepository struct {
-		client *podopaysql.Client
+		client *podosql.Client
 	}
 )
 
@@ -34,7 +34,7 @@ func (r *ledgerRepository) InsertOne(
 }
 
 func NewLedgerRepository(
-	client *podopaysql.Client,
+	client *podosql.Client,
 ) domain.LedgerRepository {
 	return &ledgerRepository{
 		client: client,

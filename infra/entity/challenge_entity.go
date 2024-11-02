@@ -42,3 +42,25 @@ func (e Challenge) ToModel() domain.Challenge {
 
 	return m
 }
+
+func MakeChallenge(m domain.Challenge) Challenge {
+	e := Challenge{
+		IsAchieved: m.IsAchieved,
+		IsReceived: m.IsReceived,
+		ReceivedAt: m.ReceivedAt,
+		CreatedAt:  m.CreatedAt,
+	}
+
+	if len(m.ID) > 0 {
+		e.ID = dt.UInt(m.ID)
+	}
+	if len(m.UserID) > 0 {
+		e.UserID = dt.UInt(m.UserID)
+	}
+	if len(m.MissionID) > 0 {
+		e.MissionID = dt.UInt(m.MissionID)
+		e.Mission = MakeMission(m.Mission)
+	}
+
+	return e
+}

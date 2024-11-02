@@ -5,13 +5,13 @@ import (
 	"github.com/podossaem/podoroot/domain/shared/inner"
 	domain "github.com/podossaem/podoroot/domain/wallet"
 	"github.com/podossaem/podoroot/infra/database"
-	"github.com/podossaem/podoroot/infra/database/podopaysql"
+	"github.com/podossaem/podoroot/infra/database/podosql"
 	"github.com/podossaem/podoroot/infra/entity"
 )
 
 type (
 	walletRepository struct {
-		client *podopaysql.Client
+		client *podosql.Client
 	}
 )
 
@@ -79,7 +79,7 @@ func (r *walletRepository) UpdateOneByUserIDAndDelta(
 }
 
 func NewWalletRepository(
-	client *podopaysql.Client,
+	client *podosql.Client,
 ) domain.WalletRepository {
 	return &walletRepository{
 		client: client,

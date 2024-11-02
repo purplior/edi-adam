@@ -6,16 +6,14 @@ import (
 
 	"github.com/podossaem/podoroot/domain/shared/exception"
 	"github.com/podossaem/podoroot/domain/shared/inner"
-	"github.com/podossaem/podoroot/infra/database/podopaysql"
 	"github.com/podossaem/podoroot/infra/database/podosql"
 	"gorm.io/gorm"
 )
 
 type (
 	ctx struct {
-		value        context.Context
-		podosqlTX    *gorm.DB
-		podopaysqlTX *gorm.DB
+		value     context.Context
+		podosqlTX *gorm.DB
 	}
 )
 
@@ -27,8 +25,6 @@ func (c *ctx) TX(target inner.TX) *gorm.DB {
 	switch target {
 	case inner.TX_PodoSql:
 		return c.podosqlTX
-	case inner.TX_PodopaySql:
-		return c.podopaysqlTX
 	}
 
 	return nil
@@ -38,8 +34,6 @@ func (c *ctx) SetTX(target inner.TX, tx *gorm.DB) {
 	switch target {
 	case inner.TX_PodoSql:
 		c.podosqlTX = tx
-	case inner.TX_PodopaySql:
-		c.podopaysqlTX = tx
 	}
 }
 
@@ -47,15 +41,12 @@ func (c *ctx) ClearTX(target inner.TX) {
 	switch target {
 	case inner.TX_PodoSql:
 		c.podosqlTX = nil
-	case inner.TX_PodopaySql:
-		c.podopaysqlTX = nil
 	}
 }
 
 type (
 	contextManager struct {
-		podosqlClient    *podosql.Client
-		podopaysqlClient *podopaysql.Client
+		podosqlClient *podosql.Client
 	}
 )
 
@@ -64,9 +55,8 @@ func (c *contextManager) NewContext() (inner.Context, context.CancelFunc) {
 	value, cancel := context.WithTimeout(todoCtx, time.Duration(12*time.Second))
 
 	return &ctx{
-		value:        value,
-		podosqlTX:    nil,
-		podopaysqlTX: nil,
+		value:     value,
+		podosqlTX: nil,
 	}, cancel
 }
 
@@ -75,9 +65,8 @@ func (c *contextManager) NewStreamingContext() (inner.Context, context.CancelFun
 	value, cancel := context.WithTimeout(todoCtx, time.Duration(5*time.Minute))
 
 	return &ctx{
-		value:        value,
-		podosqlTX:    nil,
-		podopaysqlTX: nil,
+		value:     value,
+		podosqlTX: nil,
 	}, cancel
 }
 
@@ -90,9 +79,6 @@ func (c *contextManager) BeginTX(ctx inner.Context, target inner.TX) error {
 	switch target {
 	case inner.TX_PodoSql:
 		tx := c.podosqlClient.WithContext(ctx.Value()).Begin()
-		ctx.SetTX(target, tx)
-	case inner.TX_PodopaySql:
-		tx := c.podopaysqlClient.WithContext(ctx.Value()).Begin()
 		ctx.SetTX(target, tx)
 	}
 
@@ -126,10 +112,8 @@ func (c *contextManager) RollbackTX(ctx inner.Context, target inner.TX) {
 
 func NewContextManager(
 	podosqlClient *podosql.Client,
-	podopaysqlClient *podopaysql.Client,
 ) inner.ContextManager {
 	return &contextManager{
-		podosqlClient:    podosqlClient,
-		podopaysqlClient: podopaysqlClient,
+		podosqlClient: podosqlClient,
 	}
 }

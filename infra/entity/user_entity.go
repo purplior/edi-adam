@@ -16,6 +16,7 @@ type (
 		Nickname        string      `gorm:"size:100"`
 		Role            int         `gorm:"default:100"`
 		CreatedAt       time.Time   `gorm:"autoCreateTime"`
+		Wallet          Wallet      `gorm:"foreignKey:OwnerID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 		Assistants      []Assistant `gorm:"foreignKey:AuthorID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 		Challenges      []Challenge `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	}

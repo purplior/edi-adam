@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	TX_PodoSql    TX = 1
-	TX_PodopaySql TX = 2
+	TX_PodoSql   TX = 1
+	TX_PodoMongo TX = 2
 )
 
 type (

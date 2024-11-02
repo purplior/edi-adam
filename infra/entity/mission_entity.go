@@ -36,3 +36,20 @@ func (e Mission) ToModel() domain.Mission {
 
 	return m
 }
+
+func MakeMission(m domain.Mission) Mission {
+	e := Mission{
+		Title:             m.Title,
+		Description:       m.Description,
+		Reward:            m.Reward,
+		RewardDescription: m.RewardDescription,
+		IsPublic:          m.IsPublic,
+		CreatedAt:         m.CreatedAt,
+	}
+
+	if len(m.ID) > 0 {
+		e.ID = dt.UInt(m.ID)
+	}
+
+	return e
+}

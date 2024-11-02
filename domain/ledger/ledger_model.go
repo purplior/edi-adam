@@ -3,8 +3,11 @@ package ledger
 import "time"
 
 const (
-	LedgerAction_AddBySignUpEvent  LedgerAction = 1
 	LedgerAction_ConsumeByAssister LedgerAction = 2
+	LedgerAction_ReceiveByMission  LedgerAction = 3
+
+	// @deprecated: 미션형태로 수령하는 방식으로 변경됨
+	LedgerAction_AddBySignUpEvent LedgerAction = 1
 )
 
 type (

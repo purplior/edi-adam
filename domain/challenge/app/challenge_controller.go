@@ -5,12 +5,11 @@ import (
 	"github.com/podossaem/podoroot/application/response"
 	domain "github.com/podossaem/podoroot/domain/challenge"
 	"github.com/podossaem/podoroot/domain/shared/inner"
-	"github.com/podossaem/podoroot/lib/dt"
 )
 
 type (
 	ChallengeController interface {
-		GetPaginatedList() api.HandlerFunc
+		ReceiveOne() api.HandlerFunc
 	}
 )
 
@@ -21,29 +20,30 @@ type (
 	}
 )
 
-func (c *challengeController) GetPaginatedList() api.HandlerFunc {
+func (c challengeController) ReceiveOne() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		userID := ctx.Identity.ID
+
+		var dto struct {
+			ID string `json:"id"`
+		}
+		if err := ctx.Bind(&dto); err != nil {
+			return ctx.SendError(err)
+		}
 
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		challengeInfos, err := c.challengeService.GetPaginatedInfoListByUserID(
+		if err := c.challengeService.ReceiveOne(
 			innerCtx,
+			dto.ID,
 			userID,
-			dt.Int(ctx.QueryParam("psize")),
-			dt.Int(ctx.QueryParam("p")),
-		)
-		if err != nil {
+		); err != nil {
 			return ctx.SendError(err)
 		}
 
 		return ctx.SendJSON(response.JSONResponse{
-			Data: struct {
-				ChallengeInfos []domain.ChallengeInfo `json:"challengeInfos"`
-			}{
-				ChallengeInfos: challengeInfos,
-			},
+			Data: nil,
 		})
 	}
 }

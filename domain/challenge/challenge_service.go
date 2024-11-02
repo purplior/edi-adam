@@ -1,58 +1,94 @@
 package challenge
 
-import "github.com/podossaem/podoroot/domain/shared/inner"
+import (
+	"github.com/podossaem/podoroot/domain/ledger"
+	"github.com/podossaem/podoroot/domain/mission"
+	"github.com/podossaem/podoroot/domain/shared/exception"
+	"github.com/podossaem/podoroot/domain/shared/inner"
+	"github.com/podossaem/podoroot/domain/wallet"
+	"github.com/podossaem/podoroot/lib/mydate"
+)
 
 type (
 	ChallengeService interface {
-		GetPaginatedInfoListByUserID(
+		ReceiveOne(
 			ctx inner.Context,
-			userId string,
-			limit int,
-			offset int,
-		) (
-			[]ChallengeInfo,
-			error,
-		)
+			id string,
+			userID string,
+		) error
 	}
 )
 
 type (
 	challengeService struct {
 		challengeRepository ChallengeRepository
+		walletService       wallet.WalletService
+		cm                  inner.ContextManager
 	}
 )
 
-func (s *challengeService) GetPaginatedInfoListByUserID(
+func (s *challengeService) ReceiveOne(
 	ctx inner.Context,
-	userId string,
-	limit int,
-	offset int,
-) (
-	[]ChallengeInfo,
-	error,
-) {
-	challenges, err := s.challengeRepository.FindPaginatedListByUserID(
+	id string,
+	userID string,
+) error {
+	challenge, err := s.challengeRepository.FindOne_ByID(
 		ctx,
-		userId,
-		limit,
-		offset,
+		id,
 	)
+
 	if err != nil {
-		return nil, err
+		if err == exception.ErrNoRecord {
+			return exception.ErrBadRequest
+		}
+		return err
 	}
 
-	challengeInfos := make([]ChallengeInfo, len(challenges))
-	for i, challenge := range challenges {
-		challengeInfos[i] = challenge.ToInfo()
+	if challenge.UserID != userID {
+		return exception.ErrBadRequest
 	}
 
-	return challengeInfos, nil
+	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
+		return err
+	}
+
+	if err := s.challengeRepository.UpdateOne_ReceivedStatus_ByID(
+		ctx,
+		id,
+		true,
+		mydate.Now(),
+	); err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		return err
+	}
+
+	switch challenge.Mission.Reward {
+	case mission.MissionReward_Podo5000:
+		{
+			if err := s.walletService.Charge(
+				ctx,
+				userID,
+				5000,
+				ledger.LedgerAction_ReceiveByMission,
+				challenge.MissionID,
+			); err != nil {
+				s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+				return err
+			}
+		}
+	}
+
+	return s.cm.CommitTX(ctx, inner.TX_PodoSql)
 }
 
 func NewChallengeService(
 	challengeRepository ChallengeRepository,
+	walletService wallet.WalletService,
+	cm inner.ContextManager,
 ) ChallengeService {
 	return &challengeService{
 		challengeRepository: challengeRepository,
+		walletService:       walletService,
+		cm:                  cm,
 	}
 }

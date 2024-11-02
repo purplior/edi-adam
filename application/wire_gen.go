@@ -34,7 +34,6 @@ import (
 	"github.com/podossaem/podoroot/infra"
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podomongo"
-	"github.com/podossaem/podoroot/infra/database/podopaysql"
 	"github.com/podossaem/podoroot/infra/database/podosql"
 	"github.com/podossaem/podoroot/infra/port/podoopenai"
 	"github.com/podossaem/podoroot/infra/repository"
@@ -49,19 +48,18 @@ import (
 
 func Start() error {
 	client := podosql.NewClient()
-	podopaysqlClient := podopaysql.NewClient()
 	podomongoClient := podomongo.NewClient()
-	databaseManager := database.NewDatabaseManager(client, podopaysqlClient, podomongoClient)
+	databaseManager := database.NewDatabaseManager(client, podomongoClient)
 	assistantRepository := repository.NewAssistantRepository(client)
 	assistantService := assistant.NewAssistantService(assistantRepository)
-	contextManager := infra.NewContextManager(client, podopaysqlClient)
+	contextManager := infra.NewContextManager(client)
 	assistantController := app.NewAssistantController(assistantService, contextManager)
 	assistantRouter := app.NewAssistantRouter(assistantController)
 	podoopenaiClient := podoopenai.NewClient()
 	assisterFormRepository := repository.NewAssisterFormRepository(podomongoClient)
 	assisterFormService := assisterform.NewAssisterFormService(assisterFormRepository)
-	walletRepository := repository.NewWalletRepository(podopaysqlClient)
-	ledgerRepository := repository.NewLedgerRepository(podopaysqlClient)
+	walletRepository := repository.NewWalletRepository(client)
+	ledgerRepository := repository.NewLedgerRepository(client)
 	ledgerService := ledger.NewLedgerService(ledgerRepository)
 	walletService := wallet.NewWalletService(walletRepository, ledgerService)
 	assisterRepository := repository.NewAssisterRepository(client)
@@ -78,7 +76,7 @@ func Start() error {
 	authController := app4.NewAuthController(authService, contextManager)
 	authRouter := app4.NewAuthRouter(authController)
 	challengeRepository := repository.NewChallengeRepository(client)
-	challengeService := challenge.NewChallengeService(challengeRepository)
+	challengeService := challenge.NewChallengeService(challengeRepository, walletService, contextManager)
 	challengeController := app5.NewChallengeController(challengeService, contextManager)
 	challengeRouter := app5.NewChallengeRouter(challengeController)
 	meService := me.NewMeService(userRepository)

@@ -75,18 +75,18 @@ func (s *assisterService) RequestStream(
 	}
 
 	if !isFree {
-		if err := s.cm.BeginTX(ctx, inner.TX_PodopaySql); err != nil {
+		if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
 			return err
 		}
 
 		if err := s.walletService.Expend(
 			ctx,
 			userId,
-			-1*int(assister.Cost),
+			int(assister.Cost),
 			ledger.LedgerAction_ConsumeByAssister,
 			assister.ViewID,
 		); err != nil {
-			s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
+			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
 			return err
 		}
 	}
@@ -102,7 +102,7 @@ func (s *assisterService) RequestStream(
 				return err
 			}
 			if !isFree {
-				if err := s.cm.CommitTX(ctx, inner.TX_PodopaySql); err != nil {
+				if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
 					return err
 				}
 			}
@@ -113,7 +113,7 @@ func (s *assisterService) RequestStream(
 	)
 	if err != nil {
 		if !isFree {
-			s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
+			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
 		}
 	}
 

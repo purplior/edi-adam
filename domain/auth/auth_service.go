@@ -97,14 +97,10 @@ func (s *authService) SignUpByEmailVerification(
 	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
 		return err
 	}
-	if err := s.cm.BeginTX(ctx, inner.TX_PodopaySql); err != nil {
-		return err
-	}
 
 	defer func() {
 		if r := recover(); r != nil {
 			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
-			s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
 			panic(r)
 		}
 	}()
@@ -140,7 +136,7 @@ func (s *authService) SignUpByEmailVerification(
 		},
 	)
 	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
 		return err
 	}
 
@@ -155,20 +151,10 @@ func (s *authService) SignUpByEmailVerification(
 	)
 	if err != nil {
 		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
-		s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
 		return err
 	}
 
-	// pay는 생성되었지만 user는 생성되지 않았을 가능성이 존재.
-	// 반대의 상황보다는 이 상황이 나음
-	if err := s.cm.CommitTX(ctx, inner.TX_PodopaySql); err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
-		s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
-		return err
-	}
 	if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
-		s.cm.RollbackTX(ctx, inner.TX_PodopaySql)
 		return err
 	}
 

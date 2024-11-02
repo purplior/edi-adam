@@ -2,6 +2,7 @@ package database
 
 import (
 	"log"
+	"runtime/debug"
 
 	"github.com/podossaem/podoroot/application/config"
 	"github.com/podossaem/podoroot/domain/shared/constant"
@@ -10,8 +11,9 @@ import (
 )
 
 func ToDomainError(err error) error {
+	log.Println(err)
 	if config.Phase() == constant.Phase_Local {
-		log.Println(err)
+		log.Printf("Error: %v\nStack Trace:\n%s", err, debug.Stack())
 	}
 
 	switch err {
