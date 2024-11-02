@@ -34,7 +34,7 @@ func (r *walletRepository) InsertOne(
 	return e.ToModel(), nil
 }
 
-func (r *walletRepository) FindOneByUserID(
+func (r *walletRepository) FindOne_ByUserID(
 	ctx inner.Context,
 	userID string,
 ) (
@@ -51,7 +51,7 @@ func (r *walletRepository) FindOneByUserID(
 	return wallet.ToModel(), nil
 }
 
-func (r *walletRepository) UpdateOneByUserIDAndDelta(
+func (r *walletRepository) UpdateOne_ByUserIDAndDelta(
 	ctx inner.Context,
 	userID string,
 	podoDelta int,

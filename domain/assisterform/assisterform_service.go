@@ -12,7 +12,7 @@ type (
 			error,
 		)
 
-		GetOneByID(
+		GetOne_ByID(
 			ctx inner.Context,
 			id string,
 		) (
@@ -20,7 +20,7 @@ type (
 			error,
 		)
 
-		GetOneByAssisterID(
+		GetOne_ByAssisterID(
 			ctx inner.Context,
 			id string,
 		) (
@@ -28,7 +28,7 @@ type (
 			error,
 		)
 
-		GetViewOneByAssisterID(
+		GetViewOne_ByAssisterID(
 			ctx inner.Context,
 			assistantID string,
 		) (
@@ -60,40 +60,40 @@ func (r *assisterFormService) RegisterOne(
 	)
 }
 
-func (r *assisterFormService) GetOneByID(
+func (r *assisterFormService) GetOne_ByID(
 	ctx inner.Context,
 	id string,
 ) (
 	AssisterForm,
 	error,
 ) {
-	return r.assisterFormRepository.FindOneByID(
+	return r.assisterFormRepository.FindOne_ByID(
 		ctx,
 		id,
 	)
 }
 
-func (r *assisterFormService) GetOneByAssisterID(
+func (r *assisterFormService) GetOne_ByAssisterID(
 	ctx inner.Context,
 	assisterID string,
 ) (
 	AssisterForm,
 	error,
 ) {
-	return r.assisterFormRepository.FindOneByAssisterID(
+	return r.assisterFormRepository.FindOne_ByAssisterID(
 		ctx,
 		assisterID,
 	)
 }
 
-func (r *assisterFormService) GetViewOneByAssisterID(
+func (r *assisterFormService) GetViewOne_ByAssisterID(
 	ctx inner.Context,
 	assisterID string,
 ) (
 	AssisterFormView,
 	error,
 ) {
-	assisterForm, err := r.assisterFormRepository.FindOneByAssisterID(
+	assisterForm, err := r.assisterFormRepository.FindOne_ByAssisterID(
 		ctx,
 		assisterID,
 	)

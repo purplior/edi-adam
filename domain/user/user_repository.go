@@ -4,7 +4,7 @@ import "github.com/podossaem/podoroot/domain/shared/inner"
 
 type (
 	UserRepository interface {
-		FindOneByID(
+		FindOne_ByID(
 			ctx inner.Context,
 			id string,
 		) (
@@ -12,7 +12,7 @@ type (
 			error,
 		)
 
-		FindOneByAccount(
+		FindOne_ByAccount(
 			ctx inner.Context,
 			joinMethod string,
 			accountID string,

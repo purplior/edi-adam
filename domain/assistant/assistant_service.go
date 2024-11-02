@@ -15,7 +15,7 @@ type (
 			error,
 		)
 
-		GetDetailOneByViewID(
+		GetDetailOne_ByViewID(
 			ctx inner.Context,
 			viewID string,
 			joinOption AssistantJoinOption,
@@ -24,7 +24,7 @@ type (
 			error,
 		)
 
-		GetInfoListByAuthor(
+		GetInfoList_ByAuthor(
 			ctx inner.Context,
 			authorID string,
 			joinOption AssistantJoinOption,
@@ -62,7 +62,7 @@ func (s *assistantService) RegisterOne(
 	)
 }
 
-func (s *assistantService) GetDetailOneByViewID(
+func (s *assistantService) GetDetailOne_ByViewID(
 	ctx inner.Context,
 	viewID string,
 	joinOption AssistantJoinOption,
@@ -70,7 +70,7 @@ func (s *assistantService) GetDetailOneByViewID(
 	AssistantDetail,
 	error,
 ) {
-	assistant, err := s.assistantRepository.FindOneByViewID(
+	assistant, err := s.assistantRepository.FindOne_ByViewID(
 		ctx,
 		viewID,
 		joinOption,
@@ -82,7 +82,7 @@ func (s *assistantService) GetDetailOneByViewID(
 	return assistant.ToDetail()
 }
 
-func (s *assistantService) GetInfoListByAuthor(
+func (s *assistantService) GetInfoList_ByAuthor(
 	ctx inner.Context,
 	authorID string,
 	joinOption AssistantJoinOption,
@@ -90,7 +90,7 @@ func (s *assistantService) GetInfoListByAuthor(
 	[]AssistantInfo,
 	error,
 ) {
-	assistants, err := s.assistantRepository.FindListByAuthorID(
+	assistants, err := s.assistantRepository.FindList_ByAuthorID(
 		ctx,
 		authorID,
 		joinOption,

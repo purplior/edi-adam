@@ -41,7 +41,7 @@ func (s *assisterService) RequestStream(
 	onInit func() error,
 	onReceiveMessage func(msg string) error,
 ) error {
-	assister, err := s.assisterRepository.FindOneByID(ctx, id)
+	assister, err := s.assisterRepository.FindOne_ByID(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (s *assisterService) RequestStream(
 		return exception.ErrBadRequest
 	}
 
-	form, err := s.assisterFormService.GetOneByAssisterID(ctx, id)
+	form, err := s.assisterFormService.GetOne_ByAssisterID(ctx, id)
 	if err != nil {
 		return err
 	}

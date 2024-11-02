@@ -19,7 +19,7 @@ var (
 
 type (
 	AuthService interface {
-		SignInByEmailVerification(
+		SignIn_ByEmailVerification(
 			ctx inner.Context,
 			request SignInByEmailVerificationRequest,
 		) (
@@ -28,7 +28,7 @@ type (
 			err error,
 		)
 
-		SignUpByEmailVerification(
+		SignUp_ByEmailVerification(
 			ctx inner.Context,
 			request SignUpByEmailVerificationRequest,
 		) (
@@ -61,7 +61,7 @@ type (
 	}
 )
 
-func (s *authService) SignInByEmailVerification(
+func (s *authService) SignIn_ByEmailVerification(
 	ctx inner.Context,
 	request SignInByEmailVerificationRequest,
 ) (
@@ -69,7 +69,7 @@ func (s *authService) SignInByEmailVerification(
 	Identity,
 	error,
 ) {
-	existedUser, err := s.userService.GetOneByAccount(
+	existedUser, err := s.userService.GetOne_ByAccount(
 		ctx,
 		user.JoinMethod_Email,
 		request.AccountID,
@@ -90,7 +90,7 @@ func (s *authService) SignInByEmailVerification(
 	return identityToken, identity, nil
 }
 
-func (s *authService) SignUpByEmailVerification(
+func (s *authService) SignUp_ByEmailVerification(
 	ctx inner.Context,
 	request SignUpByEmailVerificationRequest,
 ) error {

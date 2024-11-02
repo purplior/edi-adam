@@ -12,7 +12,7 @@ type (
 			error,
 		)
 
-		FindOneByViewID(
+		FindOne_ByViewID(
 			ctx inner.Context,
 			viewID string,
 			joinOption AssistantJoinOption,
@@ -21,7 +21,7 @@ type (
 			error,
 		)
 
-		FindListByAuthorID(
+		FindList_ByAuthorID(
 			ctx inner.Context,
 			authorID string,
 			joinOption AssistantJoinOption,

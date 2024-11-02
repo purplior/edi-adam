@@ -6,7 +6,7 @@ import (
 
 type (
 	UserService interface {
-		GetOneByAccount(
+		GetOne_ByAccount(
 			ctx inner.Context,
 			joinMethod string,
 			accountID string,
@@ -15,7 +15,7 @@ type (
 			error,
 		)
 
-		GetDetailOneByID(
+		GetDetailOne_ByID(
 			ctx inner.Context,
 			id string,
 		) (
@@ -37,7 +37,7 @@ type (
 	}
 )
 
-func (s *userService) GetOneByAccount(
+func (s *userService) GetOne_ByAccount(
 	ctx inner.Context,
 	joinMethod string,
 	accountID string,
@@ -45,21 +45,21 @@ func (s *userService) GetOneByAccount(
 	User,
 	error,
 ) {
-	return s.userRepository.FindOneByAccount(
+	return s.userRepository.FindOne_ByAccount(
 		ctx,
 		joinMethod,
 		accountID,
 	)
 }
 
-func (s *userService) GetDetailOneByID(
+func (s *userService) GetDetailOne_ByID(
 	ctx inner.Context,
 	id string,
 ) (
 	UserDetail,
 	error,
 ) {
-	user, err := s.userRepository.FindOneByID(ctx, id)
+	user, err := s.userRepository.FindOne_ByID(ctx, id)
 	if err != nil {
 		return UserDetail{}, err
 	}

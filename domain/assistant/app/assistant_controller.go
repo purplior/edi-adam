@@ -74,7 +74,7 @@ func (c *assistantController) GetDetailOne() api.HandlerFunc {
 			return ctx.SendError(exception.ErrBadRequest)
 		}
 
-		assistantDetail, err := c.assistantService.GetDetailOneByViewID(
+		assistantDetail, err := c.assistantService.GetDetailOne_ByViewID(
 			innerCtx,
 			assistantViewID,
 			domain.AssistantJoinOption{
@@ -101,7 +101,7 @@ func (c *assistantController) GetPodoInfoList() api.HandlerFunc {
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		assistantInfos, err := c.assistantService.GetInfoListByAuthor(
+		assistantInfos, err := c.assistantService.GetInfoList_ByAuthor(
 			innerCtx,
 			user.ID_Podo,
 			domain.AssistantJoinOption{

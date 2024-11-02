@@ -12,12 +12,12 @@ type (
 		/**
 		 * 이메일로 로그인
 		 */
-		SignInByEmailVerification() api.HandlerFunc
+		SignIn_ByEmailVerification() api.HandlerFunc
 
 		/**
 		 * 이메일로 회원가입
 		 */
-		SignUpByEmailVerification() api.HandlerFunc
+		SignUp_ByEmailVerification() api.HandlerFunc
 
 		/**
 		 * 토큰 재발급
@@ -33,7 +33,7 @@ type (
 	}
 )
 
-func (c *authController) SignInByEmailVerification() api.HandlerFunc {
+func (c *authController) SignIn_ByEmailVerification() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		var dto domain.SignInByEmailVerificationRequest
 		if err := ctx.Bind(&dto); err != nil {
@@ -43,7 +43,7 @@ func (c *authController) SignInByEmailVerification() api.HandlerFunc {
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		identityToken, identity, err := c.authService.SignInByEmailVerification(
+		identityToken, identity, err := c.authService.SignIn_ByEmailVerification(
 			innerCtx,
 			dto,
 		)
@@ -63,7 +63,7 @@ func (c *authController) SignInByEmailVerification() api.HandlerFunc {
 	}
 }
 
-func (c *authController) SignUpByEmailVerification() api.HandlerFunc {
+func (c *authController) SignUp_ByEmailVerification() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		var dto domain.SignUpByEmailVerificationRequest
 		if err := ctx.Bind(&dto); err != nil {
@@ -73,7 +73,7 @@ func (c *authController) SignUpByEmailVerification() api.HandlerFunc {
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		err := c.authService.SignUpByEmailVerification(
+		err := c.authService.SignUp_ByEmailVerification(
 			innerCtx,
 			dto,
 		)

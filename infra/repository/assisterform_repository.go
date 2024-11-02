@@ -39,7 +39,7 @@ func (r *assisterFormRepository) InsertOne(
 	return e.ToModel(), nil
 }
 
-func (r *assisterFormRepository) FindOneByID(
+func (r *assisterFormRepository) FindOne_ByID(
 	ctx inner.Context,
 	id string,
 ) (
@@ -63,7 +63,7 @@ func (r *assisterFormRepository) FindOneByID(
 	return e.ToModel(), nil
 }
 
-func (r *assisterFormRepository) FindOneByAssisterID(
+func (r *assisterFormRepository) FindOne_ByAssisterID(
 	ctx inner.Context,
 	assisterID string,
 ) (

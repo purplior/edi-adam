@@ -15,7 +15,7 @@ type (
 			error,
 		)
 
-		GetOneByUserID(
+		GetOne_ByUserID(
 			ctx inner.Context,
 			userID string,
 		) (
@@ -58,14 +58,14 @@ func (s *walletService) RegisterOne(
 	return s.walletRepository.InsertOne(ctx, wallet)
 }
 
-func (s *walletService) GetOneByUserID(
+func (s *walletService) GetOne_ByUserID(
 	ctx inner.Context,
 	userID string,
 ) (
 	Wallet,
 	error,
 ) {
-	return s.walletRepository.FindOneByUserID(
+	return s.walletRepository.FindOne_ByUserID(
 		ctx,
 		userID,
 	)
@@ -84,7 +84,7 @@ func (s *walletService) Expend(
 	}
 
 	podoDelta = -1 * podoDelta
-	wallet, err := s.walletRepository.UpdateOneByUserIDAndDelta(
+	wallet, err := s.walletRepository.UpdateOne_ByUserIDAndDelta(
 		ctx,
 		userID,
 		podoDelta,
@@ -117,7 +117,7 @@ func (s *walletService) Charge(
 		return nil
 	}
 
-	wallet, err := s.walletRepository.UpdateOneByUserIDAndDelta(
+	wallet, err := s.walletRepository.UpdateOne_ByUserIDAndDelta(
 		ctx,
 		userID,
 		podoDelta,

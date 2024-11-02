@@ -4,7 +4,7 @@ import "github.com/podossaem/podoroot/domain/shared/inner"
 
 type (
 	AssisterRepository interface {
-		FindOneByID(
+		FindOne_ByID(
 			ctx inner.Context,
 			id string,
 		) (

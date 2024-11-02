@@ -30,14 +30,14 @@ func (r *authRouter) Attach(router *echo.Group) {
 	authRouterGroup.POST(
 		"/email/sign-in",
 		api.Handler(
-			r.authController.SignInByEmailVerification(),
+			r.authController.SignIn_ByEmailVerification(),
 		),
 	)
 
 	authRouterGroup.POST(
 		"/email/sign-up",
 		api.Handler(
-			r.authController.SignUpByEmailVerification(),
+			r.authController.SignUp_ByEmailVerification(),
 		),
 	)
 }

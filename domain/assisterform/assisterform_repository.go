@@ -12,7 +12,7 @@ type (
 			error,
 		)
 
-		FindOneByID(
+		FindOne_ByID(
 			ctx inner.Context,
 			id string,
 		) (
@@ -20,7 +20,7 @@ type (
 			error,
 		)
 
-		FindOneByAssisterID(
+		FindOne_ByAssisterID(
 			ctx inner.Context,
 			assisterID string,
 		) (

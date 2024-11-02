@@ -14,7 +14,7 @@ type (
 	}
 )
 
-func (r *assisterRepository) FindOneByID(
+func (r *assisterRepository) FindOne_ByID(
 	ctx inner.Context,
 	id string,
 ) (

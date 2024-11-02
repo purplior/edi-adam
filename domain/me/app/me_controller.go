@@ -61,7 +61,7 @@ func (c *meController) GetMyDetail() api.HandlerFunc {
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		userDetail, err := c.userService.GetDetailOneByID(
+		userDetail, err := c.userService.GetDetailOne_ByID(
 			innerCtx,
 			ctx.Identity.ID,
 		)
@@ -112,7 +112,7 @@ func (c *meController) GetMyPodo() api.HandlerFunc {
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		wallet, err := c.walletService.GetOneByUserID(
+		wallet, err := c.walletService.GetOne_ByUserID(
 			innerCtx,
 			ctx.Identity.ID,
 		)

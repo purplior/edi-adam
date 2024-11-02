@@ -32,7 +32,7 @@ func (r *assistantRepository) InsertOne(
 	return e.ToModel(), nil
 }
 
-func (r *assistantRepository) FindOneByViewID(
+func (r *assistantRepository) FindOne_ByViewID(
 	ctx inner.Context,
 	viewID string,
 	joinOption assistant.AssistantJoinOption,
@@ -63,7 +63,7 @@ func (r *assistantRepository) FindOneByViewID(
 	return e.ToModel(), nil
 }
 
-func (r *assistantRepository) FindListByAuthorID(
+func (r *assistantRepository) FindList_ByAuthorID(
 	ctx inner.Context,
 	authorID string,
 	joinOption assistant.AssistantJoinOption,

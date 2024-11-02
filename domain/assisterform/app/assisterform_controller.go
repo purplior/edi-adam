@@ -69,7 +69,7 @@ func (c *assisterFormController) GetViewOne() api.HandlerFunc {
 		var err error = exception.ErrNotFound
 
 		if len(assisterID) > 0 {
-			assisterFormView, err = c.assisterFormService.GetViewOneByAssisterID(
+			assisterFormView, err = c.assisterFormService.GetViewOne_ByAssisterID(
 				innerCtx,
 				assisterID,
 			)

@@ -14,7 +14,7 @@ type (
 	}
 )
 
-func (r *userRepository) FindOneByID(
+func (r *userRepository) FindOne_ByID(
 	ctx inner.Context,
 	id string,
 ) (
@@ -34,7 +34,7 @@ func (r *userRepository) FindOneByID(
 	return e.ToModel(), nil
 }
 
-func (r *userRepository) FindOneByAccount(
+func (r *userRepository) FindOne_ByAccount(
 	ctx inner.Context,
 	joinMethod string,
 	accountID string,

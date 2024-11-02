@@ -14,7 +14,7 @@ type (
 			error,
 		)
 
-		FindOneByUserID(
+		FindOne_ByUserID(
 			ctx inner.Context,
 			userID string,
 		) (
@@ -22,7 +22,7 @@ type (
 			error,
 		)
 
-		UpdateOneByUserIDAndDelta(
+		UpdateOne_ByUserIDAndDelta(
 			ctx inner.Context,
 			userID string,
 			podoDelta int,
