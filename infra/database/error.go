@@ -12,7 +12,7 @@ import (
 
 func ToDomainError(err error) error {
 	log.Println(err)
-	if config.Phase() == constant.Phase_Local {
+	if config.Phase() == constant.Phase_Local && err != exception.ErrNoRecord {
 		log.Printf("Error: %v\nStack Trace:\n%s", err, debug.Stack())
 	}
 

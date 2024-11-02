@@ -4,7 +4,8 @@ import (
 	"time"
 
 	"github.com/podossaem/podoroot/application/config"
-	"github.com/podossaem/podoroot/domain/ledger"
+	"github.com/podossaem/podoroot/domain/challenge"
+	"github.com/podossaem/podoroot/domain/shared/constant"
 	"github.com/podossaem/podoroot/domain/shared/exception"
 	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/domain/user"
@@ -55,8 +56,8 @@ type (
 	authService struct {
 		emailVerificationService verification.EmailVerificationService
 		userService              user.UserService
-		ledgerService            ledger.LedgerService
 		walletService            wallet.WalletService
+		challengeService         challenge.ChallengeService
 		cm                       inner.ContextManager
 	}
 )
@@ -105,14 +106,17 @@ func (s *authService) SignUp_ByEmailVerification(
 		}
 	}()
 
+	// 1. 이메일 검증
 	verification, err := s.emailVerificationService.Consume(
 		ctx,
 		request.VerificationID,
 	)
 	if err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
 		return err
 	}
 
+	// 2. 계정 생성
 	me, err := s.userService.RegisterOne(
 		ctx,
 		user.User{
@@ -128,11 +132,12 @@ func (s *authService) SignUp_ByEmailVerification(
 		return err
 	}
 
-	wallet, err := s.walletService.RegisterOne(
+	// 3. 지갑 생성
+	_, err = s.walletService.RegisterOne(
 		ctx,
 		wallet.Wallet{
 			OwnerID: me.ID,
-			Podo:    5000,
+			Podo:    0,
 		},
 	)
 	if err != nil {
@@ -140,16 +145,12 @@ func (s *authService) SignUp_ByEmailVerification(
 		return err
 	}
 
-	_, err = s.ledgerService.RegisterOne(
+	// 4. 회원가입 미션 달성
+	if err := s.challengeService.AchieveOne_ByUserAndMission(
 		ctx,
-		ledger.Ledger{
-			WalletID:   wallet.ID,
-			PodoAmount: 5000,
-			Action:     ledger.LedgerAction_AddBySignUpEvent,
-			Reason:     "",
-		},
-	)
-	if err != nil {
+		me.ID,
+		constant.MissionID_SignUp,
+	); err != nil {
 		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
 		return err
 	}
@@ -342,15 +343,15 @@ func (s *authService) getRefreshTokenPayload(
 func NewAuthService(
 	emailVerificationService verification.EmailVerificationService,
 	userService user.UserService,
-	ledgerService ledger.LedgerService,
 	walletService wallet.WalletService,
+	challengeService challenge.ChallengeService,
 	cm inner.ContextManager,
 ) AuthService {
 	return &authService{
 		emailVerificationService: emailVerificationService,
 		userService:              userService,
-		ledgerService:            ledgerService,
 		walletService:            walletService,
+		challengeService:         challengeService,
 		cm:                       cm,
 	}
 }

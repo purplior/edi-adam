@@ -47,7 +47,6 @@ func (r *challengeRepository) FindOne_ByID(
 	result := db.
 		Model(&e).
 		Where("id = ?", id).
-		Preload("Mission").
 		First(&e)
 
 	if result.Error != nil {
@@ -57,32 +56,28 @@ func (r *challengeRepository) FindOne_ByID(
 	return e.ToModel(), nil
 }
 
-func (r *challengeRepository) FindPaginatedList_ByUserID(
+func (r *challengeRepository) FindOne_ByUserIDAndMissionID(
 	ctx inner.Context,
-	userId string,
-	limit int,
-	offset int,
+	userID string,
+	missionID string,
 ) (
-	[]domain.Challenge,
+	domain.Challenge,
 	error,
 ) {
-	var entities []entity.Challenge
+	var e entity.Challenge
 
 	db := r.client.DBWithContext(ctx)
-	if err := db.Preload("Mission").
-		Limit(limit).
-		Offset(offset).
-		Find(&entities).
-		Error; err != nil {
-		return nil, err
+	result := db.
+		Model(&e).
+		Where("user_id = ?", userID).
+		Where("mission_id = ?", missionID).
+		First(&e)
+
+	if result.Error != nil {
+		return domain.Challenge{}, database.ToDomainError(result.Error)
 	}
 
-	challenges := make([]domain.Challenge, len(entities))
-	for i, entity := range entities {
-		challenges[i] = entity.ToModel()
-	}
-
-	return challenges, nil
+	return e.ToModel(), nil
 }
 
 func (r *challengeRepository) UpdateOne_ReceivedStatus_ByID(
@@ -99,6 +94,27 @@ func (r *challengeRepository) UpdateOne_ReceivedStatus_ByID(
 		Updates(map[string]interface{}{
 			"is_received": isReceived,
 			"received_at": receivedAt,
+		})
+
+	if result.Error != nil {
+		return database.ToDomainError(result.Error)
+	}
+
+	return nil
+}
+
+func (r *challengeRepository) UpdateOne_AchievedStatus_ByID(
+	ctx inner.Context,
+	id string,
+	isAchieved bool,
+) error {
+	db := r.client.DBWithContext(ctx)
+
+	result := db.
+		Model(&entity.Challenge{}).
+		Where("id = ?", id).
+		Updates(map[string]interface{}{
+			"is_achieved": isAchieved,
 		})
 
 	if result.Error != nil {

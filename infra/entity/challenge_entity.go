@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"database/sql"
 	"time"
 
 	domain "github.com/podossaem/podoroot/domain/challenge"
@@ -10,11 +11,11 @@ import (
 type (
 	Challenge struct {
 		ID         uint `gorm:"primaryKey;autoIncrement"`
-		UserID     uint
-		MissionID  uint
+		UserID     uint `gorm:"uniqueIndex:idx_user_mission"`
+		MissionID  uint `gorm:"uniqueIndex:idx_user_mission"`
 		IsAchieved bool `gorm:"default:false;not null"`
 		IsReceived bool `gorm:"default:false;not null"`
-		ReceivedAt time.Time
+		ReceivedAt sql.NullTime
 		CreatedAt  time.Time `gorm:"autoCreateTime"`
 	}
 )
@@ -23,7 +24,7 @@ func (e Challenge) ToModel() domain.Challenge {
 	m := domain.Challenge{
 		IsAchieved: e.IsAchieved,
 		IsReceived: e.IsReceived,
-		ReceivedAt: e.ReceivedAt,
+		ReceivedAt: e.ReceivedAt.Time,
 		CreatedAt:  e.CreatedAt,
 	}
 
@@ -44,10 +45,15 @@ func MakeChallenge(m domain.Challenge) Challenge {
 	e := Challenge{
 		IsAchieved: m.IsAchieved,
 		IsReceived: m.IsReceived,
-		ReceivedAt: m.ReceivedAt,
 		CreatedAt:  m.CreatedAt,
 	}
 
+	if !m.ReceivedAt.IsZero() {
+		e.ReceivedAt = sql.NullTime{
+			Time:  m.ReceivedAt,
+			Valid: true,
+		}
+	}
 	if len(m.ID) > 0 {
 		e.ID = dt.UInt(m.ID)
 	}

@@ -1,6 +1,7 @@
 package challenge
 
 import (
+	"github.com/podossaem/podoroot/domain/shared/exception"
 	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/lib/mydate"
 )
@@ -10,6 +11,12 @@ type (
 		PatchOne_ReceivedStatus(
 			ctx inner.Context,
 			id string,
+		) error
+
+		AchieveOne_ByUserAndMission(
+			ctx inner.Context,
+			userID string,
+			missionID string,
 		) error
 	}
 )
@@ -30,6 +37,48 @@ func (s *challengeService) PatchOne_ReceivedStatus(
 		id,
 		true,
 		mydate.Now(),
+	)
+}
+
+func (s *challengeService) AchieveOne_ByUserAndMission(
+	ctx inner.Context,
+	userID string,
+	missionID string,
+) error {
+	challenge, err := s.challengeRepository.FindOne_ByUserIDAndMissionID(
+		ctx,
+		userID,
+		missionID,
+	)
+
+	isNoRecord := err == exception.ErrNoRecord
+	if err != nil && !isNoRecord {
+		return err
+	}
+
+	if isNoRecord {
+		_, err = s.challengeRepository.InsertOne(
+			ctx,
+			Challenge{
+				UserID:     userID,
+				MissionID:  missionID,
+				IsAchieved: true,
+				IsReceived: false,
+			},
+		)
+
+		return err
+	}
+
+	// 이미 달성했거나 수령한 경우 무시함.
+	if challenge.IsAchieved || challenge.IsReceived {
+		return nil
+	}
+
+	return s.challengeRepository.UpdateOne_AchievedStatus_ByID(
+		ctx,
+		challenge.ID,
+		true,
 	)
 }
 

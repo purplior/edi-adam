@@ -90,7 +90,7 @@ func (s *missionService) ReceiveOne(
 
 	if err := s.challengeService.PatchOne_ReceivedStatus(
 		ctx,
-		id,
+		mission.Challenges[0].ID,
 	); err != nil {
 		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
 		return err

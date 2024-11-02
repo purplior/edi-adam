@@ -24,13 +24,12 @@ type (
 			error,
 		)
 
-		FindPaginatedList_ByUserID(
+		FindOne_ByUserIDAndMissionID(
 			ctx inner.Context,
 			userID string,
-			limit int,
-			offset int,
+			missionID string,
 		) (
-			[]Challenge,
+			Challenge,
 			error,
 		)
 
@@ -39,6 +38,12 @@ type (
 			id string,
 			isReceived bool,
 			receivedAt time.Time,
+		) error
+
+		UpdateOne_AchievedStatus_ByID(
+			ctx inner.Context,
+			id string,
+			isAchieved bool,
 		) error
 	}
 )
