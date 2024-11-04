@@ -24,6 +24,7 @@ func (r *authRouter) Attach(router *echo.Group) {
 		"/identity/refresh",
 		api.Handler(
 			r.authController.RefreshIdentityToken(),
+			api.HandlerFuncOption{},
 		),
 	)
 
@@ -31,6 +32,7 @@ func (r *authRouter) Attach(router *echo.Group) {
 		"/email/sign-in",
 		api.Handler(
 			r.authController.SignIn_ByEmailVerification(),
+			api.HandlerFuncOption{},
 		),
 	)
 
@@ -38,6 +40,7 @@ func (r *authRouter) Attach(router *echo.Group) {
 		"/email/sign-up",
 		api.Handler(
 			r.authController.SignUp_ByEmailVerification(),
+			api.HandlerFuncOption{},
 		),
 	)
 }

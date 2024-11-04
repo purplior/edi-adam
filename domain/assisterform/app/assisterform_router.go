@@ -24,6 +24,7 @@ func (r *assisterFormRouter) Attach(router *echo.Group) {
 		"/",
 		api.Handler(
 			r.assisterFormController.RegisterOne(),
+			api.HandlerFuncOption{},
 		),
 	)
 
@@ -31,6 +32,7 @@ func (r *assisterFormRouter) Attach(router *echo.Group) {
 		"/one",
 		api.Handler(
 			r.assisterFormController.GetViewOne(),
+			api.HandlerFuncOption{},
 		),
 	)
 }

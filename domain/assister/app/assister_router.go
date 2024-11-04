@@ -22,6 +22,7 @@ func (r *assisterRouter) Attach(router *echo.Group) {
 
 	assisterRouterGroup.POST("/exec", api.Handler(
 		r.assisterController.Execute(),
+		api.HandlerFuncOption{},
 	))
 }
 

@@ -24,6 +24,7 @@ func (r *meRouter) Attach(router *echo.Group) {
 		"/identity",
 		api.Handler(
 			r.meController.GetMyIdentity(),
+			api.HandlerFuncOption{},
 		),
 	)
 
@@ -31,6 +32,7 @@ func (r *meRouter) Attach(router *echo.Group) {
 		"/detail",
 		api.Handler(
 			r.meController.GetMyDetail(),
+			api.HandlerFuncOption{},
 		),
 	)
 
@@ -38,6 +40,7 @@ func (r *meRouter) Attach(router *echo.Group) {
 		"/podo",
 		api.Handler(
 			r.meController.GetMyPodo(),
+			api.HandlerFuncOption{},
 		),
 	)
 
@@ -45,6 +48,7 @@ func (r *meRouter) Attach(router *echo.Group) {
 		"/temp/at",
 		api.Handler(
 			r.meController.GetTempAccessToken(),
+			api.HandlerFuncOption{},
 		),
 	)
 }

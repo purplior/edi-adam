@@ -24,6 +24,7 @@ func (r *assistantRouter) Attach(router *echo.Group) {
 		"/",
 		api.Handler(
 			r.assistantController.RegisterOne(),
+			api.HandlerFuncOption{},
 		),
 	)
 
@@ -31,6 +32,7 @@ func (r *assistantRouter) Attach(router *echo.Group) {
 		"/detail/:assistant_view_id",
 		api.Handler(
 			r.assistantController.GetDetailOne(),
+			api.HandlerFuncOption{},
 		),
 	)
 
@@ -38,6 +40,15 @@ func (r *assistantRouter) Attach(router *echo.Group) {
 		"/podo-list",
 		api.Handler(
 			r.assistantController.GetPodoInfoList(),
+			api.HandlerFuncOption{},
+		),
+	)
+
+	assistantRouterGroup.GET(
+		"/admin/pages",
+		api.Handler(
+			r.assistantController.GetPaginatedList_ForAdmin(),
+			api.HandlerFuncOption{AdminOnly: true},
 		),
 	)
 }

@@ -22,10 +22,12 @@ func (r *missionRouter) Attach(router *echo.Group) {
 
 	missionRouterGroup.GET("/paginated", api.Handler(
 		r.missionController.GetPaginatedList(),
+		api.HandlerFuncOption{},
 	))
 
 	missionRouterGroup.POST("/receive", api.Handler(
 		r.missionController.ReceiveOne(),
+		api.HandlerFuncOption{},
 	))
 }
 

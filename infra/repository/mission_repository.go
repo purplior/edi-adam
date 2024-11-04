@@ -60,7 +60,7 @@ func (r *missionRepository) FindPaginatedList_ByUserID(
 
 	if err := db.Model(&entity.Mission{}).
 		Count(&totalCount).Error; err != nil {
-		return nil, pagination.PaginationMeta{}, err
+		return nil, pagination.PaginationMeta{}, database.ToDomainError(err)
 	}
 
 	offset := (page - 1) * pageSize

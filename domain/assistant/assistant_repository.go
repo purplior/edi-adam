@@ -1,6 +1,9 @@
 package assistant
 
-import "github.com/podossaem/podoroot/domain/shared/inner"
+import (
+	"github.com/podossaem/podoroot/domain/shared/inner"
+	"github.com/podossaem/podoroot/domain/shared/pagination"
+)
 
 type (
 	AssistantRepository interface {
@@ -27,6 +30,17 @@ type (
 			joinOption AssistantJoinOption,
 		) (
 			[]Assistant,
+			error,
+		)
+
+		FindPaginatedList_ByAuthorID(
+			ctx inner.Context,
+			authorID string,
+			page int,
+			pageSize int,
+		) (
+			[]Assistant,
+			pagination.PaginationMeta,
 			error,
 		)
 	}

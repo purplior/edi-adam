@@ -6,7 +6,9 @@ import (
 	domain "github.com/podossaem/podoroot/domain/assistant"
 	"github.com/podossaem/podoroot/domain/shared/exception"
 	"github.com/podossaem/podoroot/domain/shared/inner"
+	"github.com/podossaem/podoroot/domain/shared/pagination"
 	"github.com/podossaem/podoroot/domain/user"
+	"github.com/podossaem/podoroot/lib/dt"
 )
 
 type (
@@ -25,6 +27,11 @@ type (
 		 * 포도쌤의 쌤비서 가져오기
 		 */
 		GetPodoInfoList() api.HandlerFunc
+
+		/**
+		 * 카테고리별 쌤비서 가져오기
+		 */
+		GetPaginatedList_ForAdmin() api.HandlerFunc
 	}
 )
 
@@ -117,6 +124,37 @@ func (c *assistantController) GetPodoInfoList() api.HandlerFunc {
 				AssistantInfos []domain.AssistantInfo `json:"assistantInfos"`
 			}{
 				AssistantInfos: assistantInfos,
+			},
+		})
+	}
+}
+
+func (c *assistantController) GetPaginatedList_ForAdmin() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		authorID := ctx.QueryParam("author_id")
+		page := dt.Int(ctx.QueryParam("p"))
+		pageSize := dt.Int(ctx.QueryParam("ps"))
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		assistants, meta, err := c.assistantService.GetPaginatedList_ByAuthor(
+			innerCtx,
+			authorID,
+			page,
+			pageSize,
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				Assistants []domain.Assistant        `json:"assistants"`
+				Meta       pagination.PaginationMeta `json:"meta"`
+			}{
+				Assistants: assistants,
+				Meta:       meta,
 			},
 		})
 	}

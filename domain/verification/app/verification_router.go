@@ -24,12 +24,14 @@ func (r *verificationRouter) Attach(router *echo.Group) {
 		"/email/request-code",
 		api.Handler(
 			r.emailVerificationController.RequestCode(),
+			api.HandlerFuncOption{},
 		),
 	)
 	emailVerificationRouter.POST(
 		"/email/verify-code",
 		api.Handler(
 			r.emailVerificationController.VerifyCode(),
+			api.HandlerFuncOption{},
 		),
 	)
 }

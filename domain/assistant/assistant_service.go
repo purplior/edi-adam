@@ -2,6 +2,7 @@ package assistant
 
 import (
 	"github.com/podossaem/podoroot/domain/shared/inner"
+	"github.com/podossaem/podoroot/domain/shared/pagination"
 )
 
 type (
@@ -30,6 +31,17 @@ type (
 			joinOption AssistantJoinOption,
 		) (
 			[]AssistantInfo,
+			error,
+		)
+
+		GetPaginatedList_ByAuthor(
+			ctx inner.Context,
+			authorID string,
+			page int,
+			pageSize int,
+		) (
+			[]Assistant,
+			pagination.PaginationMeta,
 			error,
 		)
 	}
@@ -108,6 +120,24 @@ func (s *assistantService) GetInfoList_ByAuthor(
 	}
 
 	return assistantInfos, nil
+}
+
+func (s *assistantService) GetPaginatedList_ByAuthor(
+	ctx inner.Context,
+	authorID string,
+	page int,
+	pageSize int,
+) (
+	[]Assistant,
+	pagination.PaginationMeta,
+	error,
+) {
+	return s.assistantRepository.FindPaginatedList_ByAuthorID(
+		ctx,
+		authorID,
+		page,
+		pageSize,
+	)
 }
 
 func NewAssistantService(

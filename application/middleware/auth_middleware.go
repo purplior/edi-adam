@@ -24,7 +24,9 @@ func NewAuthMiddleware() echo.MiddlewareFunc {
 
 			action := isWhiteList(method, pathname)
 			if action == Action_Skip {
-				return next(c)
+				return next(&api.Context{
+					Context: c,
+				})
 			}
 
 			accessToken := request.Header.Get("Authorization")
@@ -58,7 +60,9 @@ func NewAuthMiddleware() echo.MiddlewareFunc {
 				}
 			}
 
-			return next(c)
+			return next(&api.Context{
+				Context: c,
+			})
 		}
 	}
 }
