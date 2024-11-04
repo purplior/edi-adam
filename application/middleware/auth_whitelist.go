@@ -66,9 +66,13 @@ var (
 			},
 		},
 		"assisterforms": {
-			Type:   Type_AllChildren,
-			Method: Method_Get,
-			Action: Action_Skip,
+			Children: map[string]AuthWhiteListItem{
+				"one": {
+					Type:   Type_AllChildren,
+					Method: Method_Get,
+					Action: Action_Skip,
+				},
+			},
 		},
 	}
 )
