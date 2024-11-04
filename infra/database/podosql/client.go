@@ -14,6 +14,8 @@ import (
 )
 
 type (
+	DB = gorm.DB
+
 	ConstructorOption struct {
 		Phase constant.Phase
 		DSN   string
@@ -25,7 +27,7 @@ type (
 	}
 )
 
-func (c *Client) DBWithContext(ctx inner.Context) *gorm.DB {
+func (c *Client) DBWithContext(ctx inner.Context) *DB {
 	tx := ctx.TX(inner.TX_PodoSql)
 	if tx != nil {
 		return tx

@@ -17,6 +17,7 @@
     "myredis",
     "strgen",
     "readpref",
+    "repoutil",
     "assisterform",
     "assisterforms",
     "openai"

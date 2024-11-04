@@ -5,11 +5,14 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/podossaem/podoroot/application/api"
+	"github.com/podossaem/podoroot/application/response"
 	domain "github.com/podossaem/podoroot/domain/assister"
 	"github.com/podossaem/podoroot/domain/assisterform"
 	"github.com/podossaem/podoroot/domain/shared/exception"
 	"github.com/podossaem/podoroot/domain/shared/inner"
+	"github.com/podossaem/podoroot/domain/shared/pagination"
 	"github.com/podossaem/podoroot/infra/port/podoopenai"
+	"github.com/podossaem/podoroot/lib/dt"
 )
 
 type (
@@ -18,6 +21,11 @@ type (
 		 * 쌤비서 실행하기
 		 */
 		Execute() api.HandlerFunc
+
+		/**
+		 * 쌤비서 실행기 가져오기
+		 */
+		GetPaginatedList_ForAdmin() api.HandlerFunc
 	}
 )
 
@@ -101,6 +109,37 @@ func (c *assisterController) Execute() api.HandlerFunc {
 		default:
 			return ctx.String(http.StatusTooManyRequests, "현재 이용자가 매우 많아요, 잠시 후 다시 시도해주세요.")
 		}
+	}
+}
+
+func (c *assisterController) GetPaginatedList_ForAdmin() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		assistantID := ctx.QueryParam("assistant_id")
+		page := dt.Int(ctx.QueryParam("p"))
+		pageSize := dt.Int(ctx.QueryParam("ps"))
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		assisters, meta, err := c.assisterService.GetPaginatedList_ByAssistant(
+			innerCtx,
+			assistantID,
+			page,
+			pageSize,
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				Assisters []domain.Assister         `json:"assisters"`
+				Meta      pagination.PaginationMeta `json:"meta"`
+			}{
+				Assisters: assisters,
+				Meta:      meta,
+			},
+		})
 	}
 }
 

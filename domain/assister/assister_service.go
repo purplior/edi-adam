@@ -5,6 +5,7 @@ import (
 	"github.com/podossaem/podoroot/domain/ledger"
 	"github.com/podossaem/podoroot/domain/shared/exception"
 	"github.com/podossaem/podoroot/domain/shared/inner"
+	"github.com/podossaem/podoroot/domain/shared/pagination"
 	"github.com/podossaem/podoroot/domain/wallet"
 	"github.com/podossaem/podoroot/infra/port/podoopenai"
 	"github.com/podossaem/podoroot/lib/dt"
@@ -20,6 +21,17 @@ type (
 			onInit func() error,
 			onReceiveMessage func(msg string) error,
 		) error
+
+		GetPaginatedList_ByAssistant(
+			ctx inner.Context,
+			assistantID string,
+			page int,
+			pageSize int,
+		) (
+			[]Assister,
+			pagination.PaginationMeta,
+			error,
+		)
 	}
 )
 
@@ -118,6 +130,24 @@ func (s *assisterService) RequestStream(
 	}
 
 	return err
+}
+
+func (s *assisterService) GetPaginatedList_ByAssistant(
+	ctx inner.Context,
+	assistantID string,
+	page int,
+	pageSize int,
+) (
+	[]Assister,
+	pagination.PaginationMeta,
+	error,
+) {
+	return s.assisterRepository.FindPaginatedList_ByAssistantID(
+		ctx,
+		assistantID,
+		page,
+		pageSize,
+	)
 }
 
 func (s *assisterService) createQueryInformation(

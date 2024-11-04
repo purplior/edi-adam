@@ -7,6 +7,7 @@ import (
 	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podosql"
 	"github.com/podossaem/podoroot/infra/entity"
+	"github.com/podossaem/podoroot/infra/repoutil"
 )
 
 type (
@@ -106,29 +107,32 @@ func (r *assistantRepository) FindPaginatedList_ByAuthorID(
 	error,
 ) {
 	var entities []entity.Assistant
-	var totalCount int64
+
 	db := r.client.DBWithContext(ctx)
+	meta, err := repoutil.FindPaginatedList(
+		db,
+		&entity.Assistant{},
+		&entities,
+		page,
+		pageSize,
+		func(db *podosql.DB) *podosql.DB {
+			rdb := db
+			if len(authorID) > 0 {
+				rdb = db.Where("author_id = ?", authorID)
+			}
 
-	if err := db.Model(&entity.Assistant{}).
-		Count(&totalCount).Error; err != nil {
-		return nil, pagination.PaginationMeta{}, database.ToDomainError(err)
-	}
+			return rdb.Order("created_at DESC")
+		},
+		func(db *podosql.DB) *podosql.DB {
+			if len(authorID) > 0 {
+				return db.Where("author_id = ?", authorID)
+			}
 
-	if len(authorID) > 0 {
-		db = db.Where("author_id = ?", authorID)
-	}
-
-	offset := (page - 1) * pageSize
-	if err := db.Offset(offset).
-		Limit(pageSize).
-		Find(&entities).Error; err != nil {
-		return nil, pagination.PaginationMeta{}, database.ToDomainError(err)
-	}
-
-	meta := pagination.PaginationMeta{
-		Page:      page,
-		Size:      pageSize,
-		TotalPage: int((totalCount + int64(pageSize) - 1) / int64(pageSize)),
+			return db
+		},
+	)
+	if err != nil {
+		return nil, meta, database.ToDomainError(err)
 	}
 
 	assistants := make([]domain.Assistant, len(entities))
