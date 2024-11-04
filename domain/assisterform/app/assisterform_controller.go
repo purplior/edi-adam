@@ -19,6 +19,11 @@ type (
 		 * 쌤비서 폼 가져오기
 		 */
 		GetViewOne() api.HandlerFunc
+
+		/**
+		 * 쌤비서 폼 가져오기 (어드민용)
+		 */
+		GetOne_ForAdmin() api.HandlerFunc
 	}
 )
 
@@ -69,7 +74,7 @@ func (c *assisterFormController) GetViewOne() api.HandlerFunc {
 		var err error = exception.ErrNotFound
 
 		if len(assisterID) > 0 {
-			assisterFormView, err = c.assisterFormService.GetViewOne_ByAssisterID(
+			assisterFormView, err = c.assisterFormService.GetViewOne_ByAssister(
 				innerCtx,
 				assisterID,
 			)
@@ -83,6 +88,31 @@ func (c *assisterFormController) GetViewOne() api.HandlerFunc {
 				AssisterFormView domain.AssisterFormView `json:"assisterFormView"`
 			}{
 				AssisterFormView: assisterFormView,
+			},
+		})
+	}
+}
+
+func (c *assisterFormController) GetOne_ForAdmin() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		assisterID := ctx.QueryParam("assister_id")
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		assisterForm, err := c.assisterFormService.GetOne_ByAssisterID(
+			innerCtx,
+			assisterID,
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				AssisterForm domain.AssisterForm `json:"assisterForm"`
+			}{
+				AssisterForm: assisterForm,
 			},
 		})
 	}

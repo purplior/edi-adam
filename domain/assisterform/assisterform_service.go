@@ -28,7 +28,7 @@ type (
 			error,
 		)
 
-		GetViewOne_ByAssisterID(
+		GetViewOne_ByAssister(
 			ctx inner.Context,
 			assistantID string,
 		) (
@@ -86,7 +86,7 @@ func (r *assisterFormService) GetOne_ByAssisterID(
 	)
 }
 
-func (r *assisterFormService) GetViewOne_ByAssisterID(
+func (r *assisterFormService) GetViewOne_ByAssister(
 	ctx inner.Context,
 	assisterID string,
 ) (
