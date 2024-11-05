@@ -29,6 +29,14 @@ func (r *authRouter) Attach(router *echo.Group) {
 	)
 
 	authRouterGroup.POST(
+		"/admin/email/sign-in",
+		api.Handler(
+			r.authController.SignIn_ByEmailVerification_ForAdmin(),
+			api.HandlerFuncOption{AdminOnly: true},
+		),
+	)
+
+	authRouterGroup.POST(
 		"/email/sign-in",
 		api.Handler(
 			r.authController.SignIn_ByEmailVerification(),
