@@ -34,6 +34,24 @@ func (r *assistantRepository) InsertOne(
 	return e.ToModel(), nil
 }
 
+func (r *assistantRepository) FindOne_ByID(
+	ctx inner.Context,
+	id string,
+) (
+	domain.Assistant,
+	error,
+) {
+	var e entity.Assistant
+	db := r.client.DBWithContext(ctx)
+
+	result := db.Model(&e).Where("id = ?", id).First(&e)
+	if result.Error != nil {
+		return domain.Assistant{}, database.ToDomainError(result.Error)
+	}
+
+	return e.ToModel(), nil
+}
+
 func (r *assistantRepository) FindOne_ByViewID(
 	ctx inner.Context,
 	viewID string,

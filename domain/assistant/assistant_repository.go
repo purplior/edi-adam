@@ -15,6 +15,14 @@ type (
 			error,
 		)
 
+		FindOne_ByID(
+			ctx inner.Context,
+			id string,
+		) (
+			Assistant,
+			error,
+		)
+
 		FindOne_ByViewID(
 			ctx inner.Context,
 			viewID string,

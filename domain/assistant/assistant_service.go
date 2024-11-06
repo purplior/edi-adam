@@ -16,6 +16,14 @@ type (
 			error,
 		)
 
+		GetOne_ByID(
+			ctx inner.Context,
+			id string,
+		) (
+			Assistant,
+			error,
+		)
+
 		GetDetailOne_ByViewID(
 			ctx inner.Context,
 			viewID string,
@@ -72,6 +80,16 @@ func (s *assistantService) RegisterOne(
 		ctx,
 		assistant,
 	)
+}
+
+func (s *assistantService) GetOne_ByID(
+	ctx inner.Context,
+	id string,
+) (
+	Assistant,
+	error,
+) {
+	return s.assistantRepository.FindOne_ByID(ctx, id)
 }
 
 func (s *assistantService) GetDetailOne_ByViewID(

@@ -51,6 +51,14 @@ func (r *assistantRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{AdminOnly: true},
 		),
 	)
+
+	assistantRouterGroup.GET(
+		"/admin/one",
+		api.Handler(
+			r.assistantController.GetOne_ForAdmin(),
+			api.HandlerFuncOption{AdminOnly: true},
+		),
+	)
 }
 
 func NewAssistantRouter(

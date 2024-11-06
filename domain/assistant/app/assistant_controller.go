@@ -32,6 +32,11 @@ type (
 		 * 카테고리별 쌤비서 가져오기
 		 */
 		GetPaginatedList_ForAdmin() api.HandlerFunc
+
+		/**
+		 * 쌤비서 상세정보 가져오기
+		 */
+		GetOne_ForAdmin() api.HandlerFunc
 	}
 )
 
@@ -124,6 +129,31 @@ func (c *assistantController) GetPodoInfoList() api.HandlerFunc {
 				AssistantInfos []domain.AssistantInfo `json:"assistantInfos"`
 			}{
 				AssistantInfos: assistantInfos,
+			},
+		})
+	}
+}
+
+func (c *assistantController) GetOne_ForAdmin() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		id := ctx.QueryParam("id")
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		assistant, err := c.assistantService.GetOne_ByID(
+			innerCtx,
+			id,
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				Assistant domain.Assistant `json:"assistant"`
+			}{
+				Assistant: assistant,
 			},
 		})
 	}
