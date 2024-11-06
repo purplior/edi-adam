@@ -37,6 +37,7 @@ func (r *assistantRepository) InsertOne(
 func (r *assistantRepository) FindOne_ByID(
 	ctx inner.Context,
 	id string,
+	joinOption domain.AssistantJoinOption,
 ) (
 	domain.Assistant,
 	error,
@@ -47,6 +48,18 @@ func (r *assistantRepository) FindOne_ByID(
 	result := db.Model(&e).Where("id = ?", id).First(&e)
 	if result.Error != nil {
 		return domain.Assistant{}, database.ToDomainError(result.Error)
+	}
+
+	if joinOption.WithAuthor {
+		if err := db.Model(&e).Association("Author").Find(&e.Author); err != nil {
+			return domain.Assistant{}, database.ToDomainError(err)
+		}
+	}
+
+	if joinOption.WithAssisters {
+		if err := db.Preload("Assisters").Find(&e).Error; err != nil {
+			return domain.Assistant{}, database.ToDomainError(err)
+		}
 	}
 
 	return e.ToModel(), nil

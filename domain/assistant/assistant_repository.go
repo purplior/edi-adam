@@ -18,6 +18,7 @@ type (
 		FindOne_ByID(
 			ctx inner.Context,
 			id string,
+			joinOption AssistantJoinOption,
 		) (
 			Assistant,
 			error,

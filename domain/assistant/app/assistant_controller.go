@@ -144,6 +144,10 @@ func (c *assistantController) GetOne_ForAdmin() api.HandlerFunc {
 		assistant, err := c.assistantService.GetOne_ByID(
 			innerCtx,
 			id,
+			domain.AssistantJoinOption{
+				WithAuthor:    true,
+				WithAssisters: true,
+			},
 		)
 		if err != nil {
 			return ctx.SendError(err)
