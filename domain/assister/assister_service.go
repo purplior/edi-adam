@@ -96,7 +96,7 @@ func (s *assisterService) RequestStream(
 			userId,
 			int(assister.Cost),
 			ledger.LedgerAction_ConsumeByAssister,
-			assister.ViewID,
+			assister.ID,
 		); err != nil {
 			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
 			return err

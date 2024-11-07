@@ -5,7 +5,6 @@ import "time"
 type (
 	Assister struct {
 		ID                 string    `json:"id"`
-		ViewID             string    `json:"viewId"`
 		AssistantID        string    `json:"assistantId"`
 		Version            string    `json:"version"`
 		VersionDescription string    `json:"versionDescription"`
