@@ -22,6 +22,14 @@ type (
 			onReceiveMessage func(msg string) error,
 		) error
 
+		GetOne_ByID(
+			ctx inner.Context,
+			id string,
+		) (
+			Assister,
+			error,
+		)
+
 		GetPaginatedList_ByAssistant(
 			ctx inner.Context,
 			assistantID string,
@@ -130,6 +138,16 @@ func (s *assisterService) RequestStream(
 	}
 
 	return err
+}
+
+func (s *assisterService) GetOne_ByID(
+	ctx inner.Context,
+	id string,
+) (
+	Assister,
+	error,
+) {
+	return s.assisterRepository.FindOne_ByID(ctx, id)
 }
 
 func (s *assisterService) GetPaginatedList_ByAssistant(

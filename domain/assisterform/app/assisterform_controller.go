@@ -23,7 +23,7 @@ type (
 		/**
 		 * 쌤비서 폼 가져오기 (어드민용)
 		 */
-		GetOne_ForAdmin() api.HandlerFunc
+		GetOne_ByAssisterID_ForAdmin() api.HandlerFunc
 	}
 )
 
@@ -93,7 +93,7 @@ func (c *assisterFormController) GetViewOne() api.HandlerFunc {
 	}
 }
 
-func (c *assisterFormController) GetOne_ForAdmin() api.HandlerFunc {
+func (c *assisterFormController) GetOne_ByAssisterID_ForAdmin() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		assisterID := ctx.QueryParam("assister_id")
 

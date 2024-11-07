@@ -22,6 +22,8 @@ type (
 		 */
 		Execute() api.HandlerFunc
 
+		GetOne_ForAdmin() api.HandlerFunc
+
 		/**
 		 * 쌤비서 실행기 가져오기
 		 */
@@ -109,6 +111,28 @@ func (c *assisterController) Execute() api.HandlerFunc {
 		default:
 			return ctx.String(http.StatusTooManyRequests, "현재 이용자가 매우 많아요, 잠시 후 다시 시도해주세요.")
 		}
+	}
+}
+
+func (c *assisterController) GetOne_ForAdmin() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		assisterID := ctx.QueryParam("id")
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		assister, err := c.assisterService.GetOne_ByID(innerCtx, assisterID)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				Assister domain.Assister `json:"assister"`
+			}{
+				Assister: assister,
+			},
+		})
 	}
 }
 

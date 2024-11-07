@@ -25,6 +25,11 @@ func (r *assisterRouter) Attach(router *echo.Group) {
 		api.HandlerFuncOption{},
 	))
 
+	assisterRouterGroup.GET("/admin/one", api.Handler(
+		r.assisterController.GetOne_ForAdmin(),
+		api.HandlerFuncOption{AdminOnly: true},
+	))
+
 	assisterRouterGroup.GET("/admin/pages", api.Handler(
 		r.assisterController.GetPaginatedList_ForAdmin(),
 		api.HandlerFuncOption{AdminOnly: true},
