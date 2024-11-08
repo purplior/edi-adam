@@ -35,6 +35,11 @@ type (
 			AssisterFormView,
 			error,
 		)
+
+		PutOne(
+			ctx inner.Context,
+			assisterForm AssisterForm,
+		) error
 	}
 )
 
@@ -102,6 +107,13 @@ func (r *assisterFormService) GetViewOne_ByAssister(
 	}
 
 	return assisterForm.ToView(), err
+}
+
+func (r *assisterFormService) PutOne(
+	ctx inner.Context,
+	assisterForm AssisterForm,
+) error {
+	return r.assisterFormRepository.UpdateOne(ctx, assisterForm)
 }
 
 func NewAssisterFormService(

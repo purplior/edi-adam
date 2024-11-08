@@ -87,6 +87,28 @@ func (r *assisterFormRepository) FindOne_ByAssisterID(
 	return e.ToModel(), nil
 }
 
+func (r *assisterFormRepository) UpdateOne(
+	ctx inner.Context,
+	assisterForm domain.AssisterForm,
+) error {
+	oid, _ := primitive.ObjectIDFromHex(assisterForm.ID)
+	e := entity.MakeAssisterForm(assisterForm)
+
+	_, err := r.client.
+		MyCollection(podomongo.Collection_AssisterForm).
+		UpdateOne(
+			ctx.Value(),
+			bson.M{
+				"_id": oid,
+			},
+			bson.M{
+				"$set": e,
+			},
+		)
+
+	return err
+}
+
 func NewAssisterFormRepository(
 	client *podomongo.Client,
 ) domain.AssisterFormRepository {

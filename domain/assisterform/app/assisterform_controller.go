@@ -23,7 +23,12 @@ type (
 		/**
 		 * 쌤비서 폼 가져오기 (어드민용)
 		 */
-		GetOne_ByAssisterID_ForAdmin() api.HandlerFunc
+		GetOne_ForAdmin() api.HandlerFunc
+
+		/**
+		 * 쌤비서 폼 가져오기 (어드민용)
+		 */
+		PutOne_ForAdmin() api.HandlerFunc
 	}
 )
 
@@ -93,7 +98,7 @@ func (c *assisterFormController) GetViewOne() api.HandlerFunc {
 	}
 }
 
-func (c *assisterFormController) GetOne_ByAssisterID_ForAdmin() api.HandlerFunc {
+func (c *assisterFormController) GetOne_ForAdmin() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		assisterID := ctx.QueryParam("assister_id")
 
@@ -115,6 +120,30 @@ func (c *assisterFormController) GetOne_ByAssisterID_ForAdmin() api.HandlerFunc 
 				AssisterForm: assisterForm,
 			},
 		})
+	}
+}
+
+func (c *assisterFormController) PutOne_ForAdmin() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		var dto struct {
+			AssisterForm domain.AssisterForm `json:"assisterForm"`
+		}
+
+		if err := ctx.Bind(&dto); err != nil {
+			return ctx.SendError(err)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		if err := c.assisterFormService.PutOne(
+			innerCtx,
+			dto.AssisterForm,
+		); err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{})
 	}
 }
 

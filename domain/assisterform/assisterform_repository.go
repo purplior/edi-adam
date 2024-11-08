@@ -27,5 +27,10 @@ type (
 			AssisterForm,
 			error,
 		)
+
+		UpdateOne(
+			ctx inner.Context,
+			assisterForm AssisterForm,
+		) error
 	}
 )

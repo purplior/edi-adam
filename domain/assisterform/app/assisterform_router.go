@@ -39,7 +39,15 @@ func (r *assisterFormRouter) Attach(router *echo.Group) {
 	assisterFormRouterGroup.GET(
 		"/admin/one",
 		api.Handler(
-			r.assisterFormController.GetOne_ByAssisterID_ForAdmin(),
+			r.assisterFormController.GetOne_ForAdmin(),
+			api.HandlerFuncOption{AdminOnly: true},
+		),
+	)
+
+	assisterFormRouterGroup.PUT(
+		"/admin/one",
+		api.Handler(
+			r.assisterFormController.PutOne_ForAdmin(),
 			api.HandlerFuncOption{AdminOnly: true},
 		),
 	)
