@@ -40,6 +40,11 @@ type (
 			pagination.PaginationMeta,
 			error,
 		)
+
+		PutOne(
+			ctx inner.Context,
+			assister Assister,
+		) error
 	}
 )
 
@@ -254,6 +259,13 @@ func (s *assisterService) createQueryInformation(
 	}
 
 	return content, nil
+}
+
+func (s *assisterService) PutOne(
+	ctx inner.Context,
+	assister Assister,
+) error {
+	return s.assisterRepository.UpdateOne(ctx, assister)
 }
 
 func NewAssisterService(

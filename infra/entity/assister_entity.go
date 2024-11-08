@@ -3,7 +3,7 @@ package entity
 import (
 	"time"
 
-	"github.com/podossaem/podoroot/domain/assister"
+	domain "github.com/podossaem/podoroot/domain/assister"
 	"github.com/podossaem/podoroot/lib/dt"
 )
 
@@ -18,8 +18,8 @@ type (
 	}
 )
 
-func (e *Assister) ToModel() assister.Assister {
-	model := assister.Assister{
+func (e *Assister) ToModel() domain.Assister {
+	model := domain.Assister{
 		Version:            e.Version,
 		VersionDescription: e.VersionDescription,
 		Cost:               e.Cost,
@@ -33,4 +33,22 @@ func (e *Assister) ToModel() assister.Assister {
 	}
 
 	return model
+}
+
+func MakeAssister(m domain.Assister) Assister {
+	e := Assister{
+		Version:            m.Version,
+		VersionDescription: m.VersionDescription,
+		Cost:               m.Cost,
+		CreatedAt:          m.CreatedAt,
+	}
+
+	if len(m.ID) > 0 {
+		e.ID = dt.UInt(m.ID)
+	}
+	if len(m.AssistantID) > 0 {
+		e.AssistantID = dt.UInt(m.AssistantID)
+	}
+
+	return e
 }

@@ -22,12 +22,20 @@ type (
 		 */
 		Execute() api.HandlerFunc
 
-		GetOne_ForAdmin() api.HandlerFunc
-
 		/**
 		 * 쌤비서 실행기 가져오기
 		 */
+		GetOne_ForAdmin() api.HandlerFunc
+
+		/**
+		 * 쌤비서 실행기 목록 가져오기
+		 */
 		GetPaginatedList_ForAdmin() api.HandlerFunc
+
+		/**
+		 * 쌤비서 실행기 수정하기
+		 */
+		PutOne_ForAdmin() api.HandlerFunc
 	}
 )
 
@@ -164,6 +172,30 @@ func (c *assisterController) GetPaginatedList_ForAdmin() api.HandlerFunc {
 				Meta:      meta,
 			},
 		})
+	}
+}
+
+func (c *assisterController) PutOne_ForAdmin() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		var dto struct {
+			Assister domain.Assister `json:"assister"`
+		}
+
+		if err := ctx.Bind(&dto); err != nil {
+			return ctx.SendError(err)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		if err := c.assisterService.PutOne(
+			innerCtx,
+			dto.Assister,
+		); err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{})
 	}
 }
 

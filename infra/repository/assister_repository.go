@@ -72,6 +72,21 @@ func (r *assisterRepository) FindPaginatedList_ByAssistantID(
 	return assisters, meta, nil
 }
 
+func (r *assisterRepository) UpdateOne(
+	ctx inner.Context,
+	assister domain.Assister,
+) error {
+	e := entity.MakeAssister(assister)
+	db := r.client.DBWithContext(ctx)
+
+	result := db.Save(e)
+	if result.Error != nil {
+		return database.ToDomainError(result.Error)
+	}
+
+	return nil
+}
+
 func NewAssisterRepository(
 	client *podosql.Client,
 ) domain.AssisterRepository {

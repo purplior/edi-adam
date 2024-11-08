@@ -34,6 +34,11 @@ func (r *assisterRouter) Attach(router *echo.Group) {
 		r.assisterController.GetPaginatedList_ForAdmin(),
 		api.HandlerFuncOption{AdminOnly: true},
 	))
+
+	assisterRouterGroup.PUT("/admin/one", api.Handler(
+		r.assisterController.PutOne_ForAdmin(),
+		api.HandlerFuncOption{AdminOnly: true},
+	))
 }
 
 func NewAssisterRouter(

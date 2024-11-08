@@ -25,5 +25,10 @@ type (
 			pagination.PaginationMeta,
 			error,
 		)
+
+		UpdateOne(
+			ctx inner.Context,
+			assister Assister,
+		) error
 	}
 )
