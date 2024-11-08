@@ -55,6 +55,7 @@ func (e Assistant) ToModel() assistant.Assistant {
 
 func MakeAssistant(m assistant.Assistant) Assistant {
 	entity := Assistant{
+		ViewID:      m.ViewID,
 		Title:       m.Title,
 		Description: m.Description,
 		IsPublic:    m.IsPublic,
@@ -66,6 +67,9 @@ func MakeAssistant(m assistant.Assistant) Assistant {
 	}
 	if len(m.AuthorID) > 0 {
 		entity.AuthorID = dt.UInt(m.AuthorID)
+	}
+	if len(m.DefaultAssisterID) > 0 {
+		entity.DefaultAssisterID = dt.UInt(m.DefaultAssisterID)
 	}
 
 	return entity

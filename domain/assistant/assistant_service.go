@@ -53,6 +53,11 @@ type (
 			pagination.PaginationMeta,
 			error,
 		)
+
+		PutOne(
+			ctx inner.Context,
+			assistant Assistant,
+		) error
 	}
 )
 
@@ -158,6 +163,13 @@ func (s *assistantService) GetPaginatedList_ByAuthor(
 		page,
 		pageSize,
 	)
+}
+
+func (s *assistantService) PutOne(
+	ctx inner.Context,
+	assistant Assistant,
+) error {
+	return s.assistantRepository.UpdateOne(ctx, assistant)
 }
 
 func NewAssistantService(

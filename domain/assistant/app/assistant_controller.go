@@ -1,6 +1,8 @@
 package app
 
 import (
+	"fmt"
+
 	"github.com/podossaem/podoroot/application/api"
 	"github.com/podossaem/podoroot/application/response"
 	domain "github.com/podossaem/podoroot/domain/assistant"
@@ -34,9 +36,14 @@ type (
 		GetPaginatedList_ForAdmin() api.HandlerFunc
 
 		/**
-		 * 쌤비서 상세정보 가져오기
+		 * 쌤비서 가져오기 (어드민용)
 		 */
 		GetOne_ForAdmin() api.HandlerFunc
+
+		/**
+		 * 쌤비서 수정하기 (어드민용)
+		 */
+		PutOne_ForAdmin() api.HandlerFunc
 	}
 )
 
@@ -191,6 +198,32 @@ func (c *assistantController) GetPaginatedList_ForAdmin() api.HandlerFunc {
 				Meta:       meta,
 			},
 		})
+	}
+}
+
+func (c *assistantController) PutOne_ForAdmin() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		var dto struct {
+			Assistant domain.Assistant `json:"assistant"`
+		}
+
+		if err := ctx.Bind(&dto); err != nil {
+			fmt.Println(err)
+			return ctx.SendError(err)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		if err := c.assistantService.PutOne(
+			innerCtx,
+			dto.Assistant,
+		); err != nil {
+			fmt.Println(err)
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{})
 	}
 }
 
