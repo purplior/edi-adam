@@ -17,7 +17,7 @@ const (
 	AssisterOrigin_OpenAI               AssisterOrigin = "openai"
 	AssisterModel_OpenAI_ChatGPT35Turbo AssisterModel  = "gpt-3.5-turbo"
 	AssisterModel_OpenAI_ChatGPT4o      AssisterModel  = "gpt-4o"
-	AssisterModel_OpenAI_O1Preview      AssisterModel  = "o1-preview"
+	AssisterModel_OpenAI_O1Mini         AssisterModel  = "o1-mini"
 )
 
 type (
@@ -63,6 +63,7 @@ type (
 		AssisterID string          `json:"assisterId"`
 		Fields     []AssisterField `json:"fields"`
 		SubmitText string          `json:"submitText"`
+		NoStream   bool            `json:"noStream"`
 		CreatedAt  time.Time       `json:"createdAt"`
 	}
 )
@@ -78,11 +79,18 @@ func (m AssisterForm) FindField(name string) (AssisterField, bool) {
 }
 
 func (m AssisterForm) ToView() AssisterFormView {
+	noStream := false
+
+	if m.Model == AssisterModel_OpenAI_O1Mini {
+		noStream = true
+	}
+
 	return AssisterFormView{
 		ID:         m.ID,
 		AssisterID: m.AssisterID,
 		Fields:     m.Fields,
 		SubmitText: m.SubmitText,
+		NoStream:   noStream,
 		CreatedAt:  m.CreatedAt,
 	}
 }

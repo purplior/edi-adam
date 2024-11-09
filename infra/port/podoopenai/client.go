@@ -45,6 +45,78 @@ const (
 	BufferUnit = 40
 )
 
+func (c *Client) RequestChatCompletions(
+	ctx context.Context,
+	request ChatCompletionRequest,
+	onInit func() error,
+) (string, error) {
+	requestBody, err := json.Marshal(map[string]interface{}{
+		"model":    request.Model,
+		"messages": request.Messages,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	fmt.Println(request.Messages)
+
+	req, err := http.NewRequestWithContext(
+		ctx,
+		"POST",
+		"https://api.openai.com/v1/chat/completions",
+		bytes.NewBuffer(requestBody),
+	)
+	if err != nil {
+		return "", err
+	}
+
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header.Set("Authorization", "Bearer "+c.opt.ApiKey)
+	req.Header.Set("OpenAI-Organization", c.opt.OrganizationID)
+	req.Header.Set("OpenAI-Project", c.opt.ProjectID)
+
+	httpClient := &http.Client{
+		Timeout: time.Minute * 5,
+	}
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer req.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("unexpected HTTP status: %s", resp.Status)
+	}
+
+	if err := onInit(); err != nil {
+		return "", err
+	}
+
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	var completionResponse struct {
+		Choices []struct {
+			Message struct {
+				Content string `json:"content"`
+			} `json:"message"`
+		} `json:"choices"`
+	}
+
+	if err := json.Unmarshal(responseBody, &completionResponse); err != nil {
+		return "", err
+	}
+
+	if len(completionResponse.Choices) == 0 {
+		return "", fmt.Errorf("no completion choices found")
+	}
+
+	return completionResponse.Choices[0].Message.Content, nil
+}
+
 func (c *Client) RequestChatCompletionsStream(
 	ctx context.Context,
 	request ChatCompletionRequest,

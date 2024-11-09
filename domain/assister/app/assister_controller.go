@@ -20,7 +20,12 @@ type (
 		/**
 		 * 쌤비서 실행하기
 		 */
-		Execute() api.HandlerFunc
+		ExecuteAsResult() api.HandlerFunc
+
+		/**
+		 * 쌤비서 Stream으로 실행하기
+		 */
+		ExecuteAsStream() api.HandlerFunc
 
 		/**
 		 * 쌤비서 실행기 가져오기
@@ -47,7 +52,49 @@ type (
 	}
 )
 
-func (c *assisterController) Execute() api.HandlerFunc {
+func (c *assisterController) ExecuteAsResult() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		userId := ""
+		if ctx.Identity != nil {
+			userId = ctx.Identity.ID
+		}
+
+		assisterID := ctx.QueryParam("aid")
+		if len(assisterID) == 0 {
+			return ctx.String(http.StatusBadRequest, exception.ErrBadRequest.Error())
+		}
+
+		var dto struct {
+			Inputs []assisterform.AssisterInput `json:"inputs"`
+		}
+		if err := ctx.Bind(&dto); err != nil {
+			return ctx.String(http.StatusBadRequest, exception.ErrBadRequest.Error())
+		}
+
+		innerCtx, cancel := c.cm.NewStreamingContext()
+		defer cancel()
+
+		result, err := c.assisterService.Request(
+			innerCtx,
+			userId,
+			assisterID,
+			dto.Inputs,
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				Result string `json:"result"`
+			}{
+				Result: result,
+			},
+		})
+	}
+}
+
+func (c *assisterController) ExecuteAsStream() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		userId := ""
 		if ctx.Identity != nil {

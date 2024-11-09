@@ -13,6 +13,16 @@ import (
 
 type (
 	AssisterService interface {
+		Request(
+			ctx inner.Context,
+			userId string,
+			id string,
+			inputs []assisterform.AssisterInput,
+		) (
+			string,
+			error,
+		)
+
 		RequestStream(
 			ctx inner.Context,
 			userId string,
@@ -57,6 +67,87 @@ type (
 		cm                  inner.ContextManager
 	}
 )
+
+func (s *assisterService) Request(
+	ctx inner.Context,
+	userId string,
+	id string,
+	inputs []assisterform.AssisterInput,
+) (
+	string,
+	error,
+) {
+	assister, err := s.assisterRepository.FindOne_ByID(ctx, id)
+	if err != nil {
+		return "", err
+	}
+
+	isFree := assister.Cost == 0
+	if !isFree && len(userId) == 0 {
+		return "", exception.ErrBadRequest
+	}
+
+	form, err := s.assisterFormService.GetOne_ByAssisterID(ctx, id)
+	if err != nil {
+		return "", err
+	}
+
+	info, err := s.createQueryInformation(
+		form,
+		inputs,
+	)
+	if err != nil {
+		return "", err
+	}
+
+	queryMessages := form.QueryMessages
+	queryMessages = append(queryMessages, assisterform.AssisterQueryMessage{
+		Role: assisterform.QueryMessageRole_User,
+		Content: []string{
+			info,
+		},
+	})
+
+	messageLen := len(queryMessages)
+	messages := make([]map[string]string, messageLen)
+	for i, message := range queryMessages {
+		messages[i] = message.CreatePayload()
+	}
+
+	if !isFree {
+		if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
+			return "", err
+		}
+
+		if err := s.walletService.Expend(
+			ctx,
+			userId,
+			int(assister.Cost),
+			ledger.LedgerAction_ConsumeByAssister,
+			assister.ID,
+		); err != nil {
+			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			return "", err
+		}
+	}
+
+	return s.openaiClient.RequestChatCompletions(
+		ctx.Value(),
+		podoopenai.ChatCompletionRequest{
+			Model:    string(form.Model),
+			Messages: messages,
+		},
+		func() error {
+			if !isFree {
+				if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
+					return err
+				}
+			}
+
+			return nil
+		},
+	)
+}
 
 func (s *assisterService) RequestStream(
 	ctx inner.Context,
