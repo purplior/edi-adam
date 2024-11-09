@@ -11,14 +11,16 @@ import (
 )
 
 func ToDomainError(err error) error {
-	log.Println(err)
-	if config.Phase() == constant.Phase_Local && err != exception.ErrNoRecord {
-		log.Printf("Error: %v\nStack Trace:\n%s", err, debug.Stack())
-	}
-
 	switch err {
 	case gorm.ErrRecordNotFound:
 		return exception.ErrNoRecord
+	}
+
+	if config.Phase() == constant.Phase_Local {
+		log.Println(err)
+		if err != exception.ErrNoRecord {
+			log.Printf("Error: %v\nStack Trace:\n%s", err, debug.Stack())
+		}
 	}
 
 	return exception.ErrDBProcess

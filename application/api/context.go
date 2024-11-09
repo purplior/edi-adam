@@ -2,10 +2,13 @@ package api
 
 import (
 	"log"
+	"runtime/debug"
 
 	"github.com/labstack/echo/v4"
+	"github.com/podossaem/podoroot/application/config"
 	"github.com/podossaem/podoroot/application/response"
 	"github.com/podossaem/podoroot/domain/auth"
+	"github.com/podossaem/podoroot/domain/shared/constant"
 	"github.com/podossaem/podoroot/domain/shared/exception"
 )
 
@@ -58,6 +61,11 @@ func (ctx Context) SendError(err error) error {
 		message = err.Error()
 	case response.Status_InternalServerError:
 		log.Println(err.Error())
+	}
+
+	if config.Phase() == constant.Phase_Local {
+		log.Println(err)
+		log.Printf("Error: %v\nStack Trace:\n%s", err, debug.Stack())
 	}
 
 	return ctx.JSON(status, response.ErrorResponse{
