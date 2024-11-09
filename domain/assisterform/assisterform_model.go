@@ -1,6 +1,9 @@
 package assisterform
 
-import "time"
+import (
+	"strings"
+	"time"
+)
 
 const (
 	AssisterFieldType_Keyword        AssisterFieldType = "keyword"
@@ -87,13 +90,13 @@ func (m AssisterForm) ToView() AssisterFormView {
 type (
 	AssisterQueryMessage struct {
 		Role    AssisterQueryMessageRole `json:"role"`
-		Content string                   `json:"content"`
+		Content []string                 `json:"content"`
 	}
 )
 
 func (m AssisterQueryMessage) CreatePayload() map[string]string {
 	return map[string]string{
 		"role":    string(m.Role),
-		"content": m.Content,
+		"content": strings.Join(m.Content, "\n"),
 	}
 }

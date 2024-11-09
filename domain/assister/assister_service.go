@@ -89,13 +89,17 @@ func (s *assisterService) RequestStream(
 		return err
 	}
 
-	messageLen := len(form.QueryMessages)
-	messages := make([]map[string]string, messageLen)
+	queryMessages := form.QueryMessages
+	queryMessages = append(queryMessages, assisterform.AssisterQueryMessage{
+		Role: assisterform.QueryMessageRole_User,
+		Content: []string{
+			info,
+		},
+	})
 
-	for i, message := range form.QueryMessages {
-		if i == messageLen-1 {
-			message.Content += "\n\n" + info
-		}
+	messageLen := len(queryMessages)
+	messages := make([]map[string]string, messageLen)
+	for i, message := range queryMessages {
 		messages[i] = message.CreatePayload()
 	}
 

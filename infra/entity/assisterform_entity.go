@@ -116,7 +116,7 @@ func MakeAssisterField(m domain.AssisterField) AssisterField {
 type (
 	AssisterQueryMessage struct {
 		Role    domain.AssisterQueryMessageRole `bson:"role"`
-		Content string                          `bson:"content"`
+		Content []string                        `bson:"content"`
 	}
 )
 
