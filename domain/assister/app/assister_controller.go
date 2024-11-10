@@ -271,7 +271,9 @@ func (c *assisterController) CreateOne_ForAdmin() api.HandlerFunc {
 			return ctx.SendError(err)
 		}
 
-		return ctx.SendJSON(response.JSONResponse{})
+		return ctx.SendJSON(response.JSONResponse{
+			Status: response.Status_Created,
+		})
 	}
 }
 

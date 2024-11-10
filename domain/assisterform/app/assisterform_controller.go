@@ -29,6 +29,11 @@ type (
 		 * 쌤비서 폼 가져오기 (어드민용)
 		 */
 		PutOne_ForAdmin() api.HandlerFunc
+
+		/**
+		 * 쌤비서 폼 생성하기 (어드민용)
+		 */
+		CreateOne_ForAdmin() api.HandlerFunc
 	}
 )
 
@@ -144,6 +149,32 @@ func (c *assisterFormController) PutOne_ForAdmin() api.HandlerFunc {
 		}
 
 		return ctx.SendJSON(response.JSONResponse{})
+	}
+}
+
+func (c *assisterFormController) CreateOne_ForAdmin() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		var dto struct {
+			AssisterForm domain.AssisterForm `json:"assisterForm"`
+		}
+
+		if err := ctx.Bind(&dto); err != nil {
+			return ctx.SendError(err)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		if err := c.assisterFormService.CreateOne(
+			innerCtx,
+			dto.AssisterForm,
+		); err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Status: response.Status_Created,
+		})
 	}
 }
 

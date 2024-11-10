@@ -40,6 +40,11 @@ type (
 			ctx inner.Context,
 			assisterForm AssisterForm,
 		) error
+
+		CreateOne(
+			ctx inner.Context,
+			assisterForm AssisterForm,
+		) error
 	}
 )
 
@@ -49,14 +54,14 @@ type (
 	}
 )
 
-func (r *assisterFormService) RegisterOne(
+func (s *assisterFormService) RegisterOne(
 	ctx inner.Context,
 	request AssisterFormRegisterRequest,
 ) (
 	AssisterForm,
 	error,
 ) {
-	return r.assisterFormRepository.InsertOne(
+	return s.assisterFormRepository.InsertOne(
 		ctx,
 		AssisterForm{
 			Fields:        request.Fields,
@@ -65,40 +70,40 @@ func (r *assisterFormService) RegisterOne(
 	)
 }
 
-func (r *assisterFormService) GetOne_ByID(
+func (s *assisterFormService) GetOne_ByID(
 	ctx inner.Context,
 	id string,
 ) (
 	AssisterForm,
 	error,
 ) {
-	return r.assisterFormRepository.FindOne_ByID(
+	return s.assisterFormRepository.FindOne_ByID(
 		ctx,
 		id,
 	)
 }
 
-func (r *assisterFormService) GetOne_ByAssisterID(
+func (s *assisterFormService) GetOne_ByAssisterID(
 	ctx inner.Context,
 	assisterID string,
 ) (
 	AssisterForm,
 	error,
 ) {
-	return r.assisterFormRepository.FindOne_ByAssisterID(
+	return s.assisterFormRepository.FindOne_ByAssisterID(
 		ctx,
 		assisterID,
 	)
 }
 
-func (r *assisterFormService) GetViewOne_ByAssister(
+func (s *assisterFormService) GetViewOne_ByAssister(
 	ctx inner.Context,
 	assisterID string,
 ) (
 	AssisterFormView,
 	error,
 ) {
-	assisterForm, err := r.assisterFormRepository.FindOne_ByAssisterID(
+	assisterForm, err := s.assisterFormRepository.FindOne_ByAssisterID(
 		ctx,
 		assisterID,
 	)
@@ -109,11 +114,20 @@ func (r *assisterFormService) GetViewOne_ByAssister(
 	return assisterForm.ToView(), err
 }
 
-func (r *assisterFormService) PutOne(
+func (s *assisterFormService) PutOne(
 	ctx inner.Context,
 	assisterForm AssisterForm,
 ) error {
-	return r.assisterFormRepository.UpdateOne(ctx, assisterForm)
+	return s.assisterFormRepository.UpdateOne(ctx, assisterForm)
+}
+
+func (s *assisterFormService) CreateOne(
+	ctx inner.Context,
+	assisterForm AssisterForm,
+) error {
+	_, err := s.assisterFormRepository.InsertOne(ctx, assisterForm)
+
+	return err
 }
 
 func NewAssisterFormService(
