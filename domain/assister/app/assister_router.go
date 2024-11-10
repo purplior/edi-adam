@@ -44,6 +44,11 @@ func (r *assisterRouter) Attach(router *echo.Group) {
 		r.assisterController.PutOne_ForAdmin(),
 		api.HandlerFuncOption{AdminOnly: true},
 	))
+
+	assisterRouterGroup.POST("/admin/one", api.Handler(
+		r.assisterController.CreateOne_ForAdmin(),
+		api.HandlerFuncOption{AdminOnly: true},
+	))
 }
 
 func NewAssisterRouter(

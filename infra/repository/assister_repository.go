@@ -87,6 +87,25 @@ func (r *assisterRepository) UpdateOne(
 	return nil
 }
 
+func (r *assisterRepository) InsertOne(
+	ctx inner.Context,
+	assister domain.Assister,
+) (
+	domain.Assister,
+	error,
+) {
+	db := r.client.DBWithContext(ctx)
+	e := entity.MakeAssister(assister)
+
+	result := db.Create(&e)
+
+	if result.Error != nil {
+		return domain.Assister{}, database.ToDomainError(result.Error)
+	}
+
+	return e.ToModel(), nil
+}
+
 func NewAssisterRepository(
 	client *podosql.Client,
 ) domain.AssisterRepository {

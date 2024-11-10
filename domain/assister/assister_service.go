@@ -55,6 +55,11 @@ type (
 			ctx inner.Context,
 			assister Assister,
 		) error
+
+		CreateOne(
+			ctx inner.Context,
+			assister Assister,
+		) error
 	}
 )
 
@@ -361,6 +366,18 @@ func (s *assisterService) PutOne(
 	assister Assister,
 ) error {
 	return s.assisterRepository.UpdateOne(ctx, assister)
+}
+
+func (s *assisterService) CreateOne(
+	ctx inner.Context,
+	assister Assister,
+) error {
+	_, err := s.assisterRepository.InsertOne(
+		ctx,
+		assister,
+	)
+
+	return err
 }
 
 func NewAssisterService(

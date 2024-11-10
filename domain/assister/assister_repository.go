@@ -30,5 +30,13 @@ type (
 			ctx inner.Context,
 			assister Assister,
 		) error
+
+		InsertOne(
+			ctx inner.Context,
+			assister Assister,
+		) (
+			Assister,
+			error,
+		)
 	}
 )
