@@ -1,8 +1,6 @@
 package app
 
 import (
-	"fmt"
-
 	"github.com/podossaem/podoroot/application/api"
 	"github.com/podossaem/podoroot/application/response"
 	domain "github.com/podossaem/podoroot/domain/assistant"
@@ -44,6 +42,11 @@ type (
 		 * 쌤비서 수정하기 (어드민용)
 		 */
 		PutOne_ForAdmin() api.HandlerFunc
+
+		/**
+		 * 쌤비서 수정하기 (어드민용)
+		 */
+		CreateOne_ForAdmin() api.HandlerFunc
 	}
 )
 
@@ -208,7 +211,6 @@ func (c *assistantController) PutOne_ForAdmin() api.HandlerFunc {
 		}
 
 		if err := ctx.Bind(&dto); err != nil {
-			fmt.Println(err)
 			return ctx.SendError(err)
 		}
 
@@ -219,7 +221,30 @@ func (c *assistantController) PutOne_ForAdmin() api.HandlerFunc {
 			innerCtx,
 			dto.Assistant,
 		); err != nil {
-			fmt.Println(err)
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{})
+	}
+}
+
+func (c *assistantController) CreateOne_ForAdmin() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		var dto struct {
+			Assistant domain.Assistant `json:"assistant"`
+		}
+
+		if err := ctx.Bind(&dto); err != nil {
+			return ctx.SendError(err)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		if err := c.assistantService.CreateOne(
+			innerCtx,
+			dto.Assistant,
+		); err != nil {
 			return ctx.SendError(err)
 		}
 
