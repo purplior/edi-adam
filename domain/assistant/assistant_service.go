@@ -3,6 +3,7 @@ package assistant
 import (
 	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/domain/shared/pagination"
+	"github.com/podossaem/podoroot/lib/strgen"
 )
 
 type (
@@ -181,6 +182,8 @@ func (s *assistantService) CreateOne(
 	ctx inner.Context,
 	assistant Assistant,
 ) error {
+	assistant.ViewID = strgen.ShortUniqueID()
+
 	_, err := s.assistantRepository.InsertOne(
 		ctx,
 		assistant,
