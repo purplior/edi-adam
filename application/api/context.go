@@ -50,6 +50,8 @@ func (ctx Context) SendError(err error) error {
 		status = response.Status_NotAcceptable
 	case exception.ErrUnauthorized:
 		status = response.Status_Unauthorized
+	case exception.ErrNoRecord:
+		status = response.Status_NotFound
 	}
 
 	switch status {
@@ -59,8 +61,6 @@ func (ctx Context) SendError(err error) error {
 		message = err.Error()
 	case response.Status_Unauthorized:
 		message = err.Error()
-	case response.Status_InternalServerError:
-		log.Println(err.Error())
 	}
 
 	if config.Phase() == constant.Phase_Local {

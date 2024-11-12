@@ -1,8 +1,11 @@
 package repository
 
 import (
+	"fmt"
+
 	domain "github.com/podossaem/podoroot/domain/assisterform"
 	"github.com/podossaem/podoroot/domain/shared/inner"
+	"github.com/podossaem/podoroot/infra/database"
 	"github.com/podossaem/podoroot/infra/database/podomongo"
 	"github.com/podossaem/podoroot/infra/entity"
 	"github.com/podossaem/podoroot/lib/dt"
@@ -31,7 +34,7 @@ func (r *assisterFormRepository) InsertOne(
 		MyCollection(podomongo.Collection_AssisterForm).
 		InsertOne(ctx.Value(), e)
 	if err != nil {
-		return domain.AssisterForm{}, err
+		return domain.AssisterForm{}, database.ToDomainError(err)
 	}
 
 	e.ID = result.InsertedID.(primitive.ObjectID)
@@ -57,7 +60,7 @@ func (r *assisterFormRepository) FindOne_ByID(
 				"_id": oid,
 			},
 		).Decode(&e); err != nil {
-		return domain.AssisterForm{}, err
+		return domain.AssisterForm{}, database.ToDomainError(err)
 	}
 
 	return e.ToModel(), nil
@@ -81,7 +84,8 @@ func (r *assisterFormRepository) FindOne_ByAssisterID(
 				"assisterId": assisterEntityID,
 			},
 		).Decode(&e); err != nil {
-		return domain.AssisterForm{}, err
+		fmt.Println("여기 아니야?")
+		return domain.AssisterForm{}, database.ToDomainError(err)
 	}
 
 	return e.ToModel(), nil
@@ -106,7 +110,7 @@ func (r *assisterFormRepository) UpdateOne(
 			},
 		)
 
-	return err
+	return database.ToDomainError(err)
 }
 
 func NewAssisterFormRepository(

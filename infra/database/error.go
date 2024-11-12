@@ -7,12 +7,15 @@ import (
 	"github.com/podossaem/podoroot/application/config"
 	"github.com/podossaem/podoroot/domain/shared/constant"
 	"github.com/podossaem/podoroot/domain/shared/exception"
+	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 )
 
 func ToDomainError(err error) error {
 	switch err {
 	case gorm.ErrRecordNotFound:
+		return exception.ErrNoRecord
+	case mongo.ErrNoDocuments:
 		return exception.ErrNoRecord
 	}
 
@@ -25,22 +28,3 @@ func ToDomainError(err error) error {
 
 	return exception.ErrDBProcess
 }
-
-func ToReadError(err error) string {
-	if err == nil {
-		return ReadError_Success
-	}
-
-	switch err {
-	case gorm.ErrRecordNotFound:
-		return ReadError_NoRecord
-	}
-
-	return ReadError_ErrorOccurred
-}
-
-var (
-	ReadError_NoRecord      = "no_record"
-	ReadError_ErrorOccurred = "error_occurred"
-	ReadError_Success       = "success"
-)
