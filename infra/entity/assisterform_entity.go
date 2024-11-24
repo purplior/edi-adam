@@ -5,6 +5,7 @@ import (
 
 	domain "github.com/podossaem/podoroot/domain/assisterform"
 	"github.com/podossaem/podoroot/lib/dt"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -15,6 +16,7 @@ type (
 		Origin           domain.AssisterOrigin  `bson:"origin"`
 		Model            domain.AssisterModel   `bson:"model"`
 		Fields           []AssisterField        `bson:"fields"`
+		Tests            []AssisterInput        `bson:"tests"`
 		SubmitText       string                 `bson:"submitText"`
 		QueryMessages    []AssisterQueryMessage `bson:"queryMessages"`
 		QueryInfoHeading string                 `bson:"queryInfoHeading"`
@@ -42,6 +44,11 @@ func (e AssisterForm) ToModel() domain.AssisterForm {
 	model.Fields = make([]domain.AssisterField, len(e.Fields))
 	for i, field := range e.Fields {
 		model.Fields[i] = field.ToModel()
+	}
+
+	model.Tests = make([]domain.AssisterInput, len(e.Tests))
+	for i, test := range e.Tests {
+		model.Tests[i] = test.ToModel()
 	}
 
 	model.QueryMessages = make([]domain.AssisterQueryMessage, len(e.QueryMessages))
@@ -73,6 +80,11 @@ func MakeAssisterForm(m domain.AssisterForm) AssisterForm {
 	entity.Fields = make([]AssisterField, len(m.Fields))
 	for i, field := range m.Fields {
 		entity.Fields[i] = MakeAssisterField(field)
+	}
+
+	entity.Tests = make([]AssisterInput, len(m.Tests))
+	for i, test := range m.Tests {
+		entity.Tests[i] = MakeAssisterInput(test)
 	}
 
 	entity.QueryMessages = make([]AssisterQueryMessage, len(m.QueryMessages))
@@ -131,5 +143,47 @@ func MakeAssisterQueryMessage(m domain.AssisterQueryMessage) AssisterQueryMessag
 	return AssisterQueryMessage{
 		Role:    m.Role,
 		Content: m.Content,
+	}
+}
+
+type (
+	AssisterInput struct {
+		Name   string        `bson:"name"`
+		Values []interface{} `bson:"values"`
+	}
+)
+
+func (e AssisterInput) ToModel() domain.AssisterInput {
+	values := make([]interface{}, len(e.Values))
+	for i, value := range e.Values {
+		switch v := value.(type) {
+		case string:
+			values[i] = v
+		case bson.A:
+			vGroups := make([]map[string]string, len(v))
+			for j, vItem := range v {
+				bItem := vItem.(bson.D)
+
+				item := map[string]string{
+					bItem[0].Key: bItem[0].Value.(string),
+					bItem[1].Key: bItem[1].Value.(string),
+				}
+
+				vGroups[j] = item
+			}
+			values[i] = vGroups
+		}
+	}
+
+	return domain.AssisterInput{
+		Name:   e.Name,
+		Values: values,
+	}
+}
+
+func MakeAssisterInput(m domain.AssisterInput) AssisterInput {
+	return AssisterInput{
+		Name:   m.Name,
+		Values: m.Values,
 	}
 }

@@ -181,6 +181,7 @@ func (s *assisterService) RequestStream(
 		form,
 		inputs,
 	)
+
 	if err != nil {
 		return err
 	}

@@ -52,6 +52,7 @@ type (
 		Origin           AssisterOrigin         `json:"origin"`
 		Model            AssisterModel          `json:"model"`
 		Fields           []AssisterField        `json:"fields"`
+		Tests            []AssisterInput        `json:"tests"`
 		SubmitText       string                 `json:"submitText"`
 		QueryMessages    []AssisterQueryMessage `json:"queryMessages"`
 		QueryInfoHeading string                 `json:"queryInfoHeading"`
@@ -62,6 +63,7 @@ type (
 		ID         string          `json:"id"`
 		AssisterID string          `json:"assisterId"`
 		Fields     []AssisterField `json:"fields"`
+		Tests      []AssisterInput `json:"tests"`
 		SubmitText string          `json:"submitText"`
 		NoStream   bool            `json:"noStream"`
 		CreatedAt  time.Time       `json:"createdAt"`
@@ -89,6 +91,7 @@ func (m AssisterForm) ToView() AssisterFormView {
 		ID:         m.ID,
 		AssisterID: m.AssisterID,
 		Fields:     m.Fields,
+		Tests:      m.Tests,
 		SubmitText: m.SubmitText,
 		NoStream:   noStream,
 		CreatedAt:  m.CreatedAt,

@@ -1,8 +1,6 @@
 package repository
 
 import (
-	"fmt"
-
 	domain "github.com/podossaem/podoroot/domain/assisterform"
 	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/infra/database"
@@ -84,7 +82,6 @@ func (r *assisterFormRepository) FindOne_ByAssisterID(
 				"assisterId": assisterEntityID,
 			},
 		).Decode(&e); err != nil {
-		fmt.Println("여기 아니야?")
 		return domain.AssisterForm{}, database.ToDomainError(err)
 	}
 

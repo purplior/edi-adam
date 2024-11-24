@@ -58,8 +58,6 @@ func (c *Client) RequestChatCompletions(
 		return "", err
 	}
 
-	fmt.Println(request.Messages)
-
 	req, err := http.NewRequestWithContext(
 		ctx,
 		"POST",
