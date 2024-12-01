@@ -44,6 +44,15 @@ type (
 			error,
 		)
 
+		GetInfoList_ByCategory(
+			ctx inner.Context,
+			categoryAlias string,
+			joinOption AssistantJoinOption,
+		) (
+			[]AssistantInfo,
+			error,
+		)
+
 		GetPaginatedList_ByAuthor(
 			ctx inner.Context,
 			authorID string,
@@ -136,6 +145,34 @@ func (s *assistantService) GetInfoList_ByAuthor(
 	assistants, err := s.assistantRepository.FindList_ByAuthorID(
 		ctx,
 		authorID,
+		joinOption,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	assistantInfos := make([]AssistantInfo, len(assistants))
+	for i, assistant := range assistants {
+		assistantInfos[i], err = assistant.ToInfo()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return assistantInfos, nil
+}
+
+func (s *assistantService) GetInfoList_ByCategory(
+	ctx inner.Context,
+	categoryAlias string,
+	joinOption AssistantJoinOption,
+) (
+	[]AssistantInfo,
+	error,
+) {
+	assistants, err := s.assistantRepository.FindList_ByCategoryAlias(
+		ctx,
+		categoryAlias,
 		joinOption,
 	)
 	if err != nil {

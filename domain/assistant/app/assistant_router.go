@@ -37,9 +37,9 @@ func (r *assistantRouter) Attach(router *echo.Group) {
 	)
 
 	assistantRouterGroup.GET(
-		"/podo-list",
+		"/category",
 		api.Handler(
-			r.assistantController.GetPodoInfoList(),
+			r.assistantController.GetInfoList_ByCategory(),
 			api.HandlerFuncOption{},
 		),
 	)

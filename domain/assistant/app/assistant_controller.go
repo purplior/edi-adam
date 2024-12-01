@@ -7,7 +7,6 @@ import (
 	"github.com/podossaem/podoroot/domain/shared/exception"
 	"github.com/podossaem/podoroot/domain/shared/inner"
 	"github.com/podossaem/podoroot/domain/shared/pagination"
-	"github.com/podossaem/podoroot/domain/user"
 	"github.com/podossaem/podoroot/lib/dt"
 )
 
@@ -24,9 +23,9 @@ type (
 		GetDetailOne() api.HandlerFunc
 
 		/**
-		 * 포도쌤의 쌤비서 가져오기
+		 * 쌤비서 목록 가져오기 (카테고리)
 		 */
-		GetPodoInfoList() api.HandlerFunc
+		GetInfoList_ByCategory() api.HandlerFunc
 
 		/**
 		 * 카테고리별 쌤비서 가져오기
@@ -118,16 +117,19 @@ func (c *assistantController) GetDetailOne() api.HandlerFunc {
 	}
 }
 
-func (c *assistantController) GetPodoInfoList() api.HandlerFunc {
+func (c *assistantController) GetInfoList_ByCategory() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		assistantInfos, err := c.assistantService.GetInfoList_ByAuthor(
+		categoryAlias := ctx.QueryParam("c")
+
+		assistantInfos, err := c.assistantService.GetInfoList_ByCategory(
 			innerCtx,
-			user.ID_Podo,
+			categoryAlias,
 			domain.AssistantJoinOption{
-				WithAuthor: true,
+				WithAuthor:   true,
+				WithCategory: true,
 			},
 		)
 		if err != nil {

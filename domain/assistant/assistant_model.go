@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/podossaem/podoroot/domain/assister"
+	"github.com/podossaem/podoroot/domain/category"
 	"github.com/podossaem/podoroot/domain/user"
 )
 
@@ -12,17 +13,20 @@ type (
 		ID                string              `json:"id"`
 		ViewID            string              `json:"viewId"`
 		AuthorID          string              `json:"authorId"`
-		Author            user.User           `json:"author"`
+		CategoryID        string              `json:"categoryId"`
 		Assisters         []assister.Assister `json:"assisters"`
 		Title             string              `json:"title"`
 		Description       string              `json:"description"`
 		IsPublic          bool                `json:"isPublic"`
 		DefaultAssisterID string              `json:"defaultAssisterId"`
 		CreatedAt         time.Time           `json:"createdAt"`
+		Author            user.User           `json:"author"`
+		Category          category.Category   `json:"category"`
 	}
 
 	AssistantJoinOption struct {
 		WithAuthor    bool
+		WithCategory  bool
 		WithAssisters bool
 	}
 )
@@ -36,6 +40,7 @@ func (m *Assistant) ToInfo() (
 		Title:             m.Title,
 		Description:       m.Description,
 		AuthorInfo:        m.Author.ToInfo(),
+		CategoryInfo:      m.Category.ToInfo(),
 		DefaultAssisterID: m.DefaultAssisterID,
 		CreatedAt:         m.CreatedAt,
 	}, nil
@@ -64,12 +69,13 @@ func (m *Assistant) ToDetail() (
 
 type (
 	AssistantInfo struct {
-		ViewID            string        `json:"viewId"`
-		Title             string        `json:"title"`
-		Description       string        `json:"description"`
-		AuthorInfo        user.UserInfo `json:"authorInfo"`
-		DefaultAssisterID string        `json:"defaultAssisterId"`
-		CreatedAt         time.Time     `json:"createdAt"`
+		ViewID            string                `json:"viewId"`
+		Title             string                `json:"title"`
+		Description       string                `json:"description"`
+		AuthorInfo        user.UserInfo         `json:"authorInfo"`
+		CategoryInfo      category.CategoryInfo `json:"categoryInfo"`
+		DefaultAssisterID string                `json:"defaultAssisterId"`
+		CreatedAt         time.Time             `json:"createdAt"`
 	}
 )
 

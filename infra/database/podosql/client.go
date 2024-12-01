@@ -69,6 +69,7 @@ func (c *Client) MigrateDB() error {
 	return c.DB.AutoMigrate(
 		entity.User{},
 		entity.Wallet{},
+		entity.Category{},
 		entity.Ledger{},
 		entity.Assistant{},
 		entity.Assister{},

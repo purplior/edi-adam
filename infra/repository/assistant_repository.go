@@ -127,6 +127,45 @@ func (r *assistantRepository) FindList_ByAuthorID(
 	return assistants, nil
 }
 
+func (r *assistantRepository) FindList_ByCategoryAlias(
+	ctx inner.Context,
+	categoryAlias string,
+	joinOption domain.AssistantJoinOption,
+) (
+	[]domain.Assistant,
+	error,
+) {
+	db := r.client.DBWithContext(ctx)
+
+	var categoryEntity entity.Category
+	if result := db.
+		Model(&categoryEntity).
+		Where("alias = ?", categoryAlias).
+		First(&categoryEntity); result.Error != nil {
+		return nil, database.ToDomainError(result.Error)
+	}
+
+	var entities []entity.Assistant
+	query := db.
+		Where("category_id = ? AND is_public = ?", categoryEntity.ID, true).
+		Order("created_at asc")
+	if joinOption.WithAuthor {
+		query = query.Preload("Author")
+	}
+
+	if result := query.Find(&entities); result.Error != nil {
+		return nil, database.ToDomainError(result.Error)
+	}
+
+	assistants := make([]domain.Assistant, len(entities))
+	for i, entity := range entities {
+		entity.Category = categoryEntity
+		assistants[i] = entity.ToModel()
+	}
+
+	return assistants, nil
+}
+
 func (r *assistantRepository) FindPaginatedList_ByAuthorID(
 	ctx inner.Context,
 	authorID string,

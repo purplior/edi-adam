@@ -13,13 +13,15 @@ type (
 		ID                uint   `gorm:"primaryKey;autoIncrement"`
 		ViewID            string `gorm:"size:36;not null;unique"`
 		AuthorID          uint
-		Author            User
-		Assisters         []Assister `gorm:"foreignKey:AssistantID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-		Title             string     `gorm:"size:80;not null"`  // 20자 이내
-		Description       string     `gorm:"size:255;not null"` // 80자 이내
-		IsPublic          bool       `gorm:"default:false;not null"`
+		CategoryID        uint
+		Title             string `gorm:"size:80;not null"`  // 20자 이내
+		Description       string `gorm:"size:255;not null"` // 80자 이내
+		IsPublic          bool   `gorm:"default:false;not null"`
 		DefaultAssisterID uint
 		CreatedAt         time.Time `gorm:"autoCreateTime"`
+		Author            User
+		Category          Category
+		Assisters         []Assister `gorm:"foreignKey:AssistantID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	}
 )
 
@@ -38,6 +40,10 @@ func (e Assistant) ToModel() assistant.Assistant {
 	if e.AuthorID > 0 {
 		model.AuthorID = dt.Str(e.AuthorID)
 		model.Author = e.Author.ToModel()
+	}
+	if e.CategoryID > 0 {
+		model.CategoryID = dt.Str(e.CategoryID)
+		model.Category = e.Category.ToModel()
 	}
 
 	assisters := make([]assister.Assister, len(e.Assisters))
@@ -67,6 +73,9 @@ func MakeAssistant(m assistant.Assistant) Assistant {
 	}
 	if len(m.AuthorID) > 0 {
 		entity.AuthorID = dt.UInt(m.AuthorID)
+	}
+	if len(m.CategoryID) > 0 {
+		entity.CategoryID = dt.UInt(m.CategoryID)
 	}
 	if len(m.DefaultAssisterID) > 0 {
 		entity.DefaultAssisterID = dt.UInt(m.DefaultAssisterID)
