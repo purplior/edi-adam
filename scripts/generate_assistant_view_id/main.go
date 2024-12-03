@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/podossaem/podoroot/lib/strgen"
+	"github.com/purplior/podoroot/lib/strgen"
 )
 
 func main() {

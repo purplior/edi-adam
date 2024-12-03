@@ -1,7 +1,7 @@
 package me
 
 import (
-	"github.com/podossaem/podoroot/domain/user"
+	"github.com/purplior/podoroot/domain/user"
 )
 
 type (

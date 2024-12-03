@@ -3,9 +3,9 @@ package assistant
 import (
 	"time"
 
-	"github.com/podossaem/podoroot/domain/assister"
-	"github.com/podossaem/podoroot/domain/category"
-	"github.com/podossaem/podoroot/domain/user"
+	"github.com/purplior/podoroot/domain/assister"
+	"github.com/purplior/podoroot/domain/category"
+	"github.com/purplior/podoroot/domain/user"
 )
 
 type (

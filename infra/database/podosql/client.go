@@ -4,10 +4,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/podossaem/podoroot/application/config"
-	"github.com/podossaem/podoroot/domain/shared/constant"
-	"github.com/podossaem/podoroot/domain/shared/inner"
-	"github.com/podossaem/podoroot/infra/entity"
+	"github.com/purplior/podoroot/application/config"
+	"github.com/purplior/podoroot/domain/shared/constant"
+	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/infra/entity"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -135,7 +135,7 @@ func (c *Client) Dispose() error {
 func NewClient() *Client {
 	opt := ConstructorOption{
 		Phase: config.Phase(),
-		DSN:   config.PodossaemSqlDSN(),
+		DSN:   config.SqlDbDSN(),
 	}
 
 	client := &Client{

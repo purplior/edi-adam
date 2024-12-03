@@ -3,8 +3,8 @@ package database
 import (
 	"time"
 
-	"github.com/podossaem/podoroot/infra/database/podomongo"
-	"github.com/podossaem/podoroot/infra/database/podosql"
+	"github.com/purplior/podoroot/infra/database/podomongo"
+	"github.com/purplior/podoroot/infra/database/podosql"
 )
 
 type (

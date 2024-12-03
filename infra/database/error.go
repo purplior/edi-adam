@@ -4,9 +4,9 @@ import (
 	"log"
 	"runtime/debug"
 
-	"github.com/podossaem/podoroot/application/config"
-	"github.com/podossaem/podoroot/domain/shared/constant"
-	"github.com/podossaem/podoroot/domain/shared/exception"
+	"github.com/purplior/podoroot/application/config"
+	"github.com/purplior/podoroot/domain/shared/constant"
+	"github.com/purplior/podoroot/domain/shared/exception"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 )

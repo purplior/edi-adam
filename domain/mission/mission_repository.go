@@ -1,8 +1,8 @@
 package mission
 
 import (
-	"github.com/podossaem/podoroot/domain/shared/inner"
-	"github.com/podossaem/podoroot/domain/shared/pagination"
+	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/domain/shared/pagination"
 )
 
 type (

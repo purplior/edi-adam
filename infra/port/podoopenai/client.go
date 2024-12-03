@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/podossaem/podoroot/application/config"
+	"github.com/purplior/podoroot/application/config"
 )
 
 type (

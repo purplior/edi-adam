@@ -14,12 +14,12 @@ import (
 
 	"github.com/google/wire"
 	"github.com/labstack/echo/v4"
-	"github.com/podossaem/podoroot/application/config"
-	"github.com/podossaem/podoroot/application/middleware"
-	"github.com/podossaem/podoroot/application/router"
-	"github.com/podossaem/podoroot/domain"
-	"github.com/podossaem/podoroot/infra"
-	"github.com/podossaem/podoroot/infra/database"
+	"github.com/purplior/podoroot/application/config"
+	"github.com/purplior/podoroot/application/middleware"
+	"github.com/purplior/podoroot/application/router"
+	"github.com/purplior/podoroot/domain"
+	"github.com/purplior/podoroot/infra"
+	"github.com/purplior/podoroot/infra/database"
 )
 
 func StartApplication(

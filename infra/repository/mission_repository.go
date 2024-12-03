@@ -1,13 +1,13 @@
 package repository
 
 import (
-	domain "github.com/podossaem/podoroot/domain/mission"
-	"github.com/podossaem/podoroot/domain/shared/exception"
-	"github.com/podossaem/podoroot/domain/shared/inner"
-	"github.com/podossaem/podoroot/domain/shared/pagination"
-	"github.com/podossaem/podoroot/infra/database"
-	"github.com/podossaem/podoroot/infra/database/podosql"
-	"github.com/podossaem/podoroot/infra/entity"
+	domain "github.com/purplior/podoroot/domain/mission"
+	"github.com/purplior/podoroot/domain/shared/exception"
+	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/domain/shared/pagination"
+	"github.com/purplior/podoroot/infra/database"
+	"github.com/purplior/podoroot/infra/database/podosql"
+	"github.com/purplior/podoroot/infra/entity"
 )
 
 type (
@@ -64,7 +64,7 @@ func (r *missionRepository) FindPaginatedList_ByUserID(
 	}
 
 	offset := (page - 1) * pageSize
-	if err := db.Preload("Challenges", "user_id = ?", userID).
+	if err := db.Preload("Challenges", "challenges.user_id = ?", userID).
 		Offset(offset).
 		Limit(pageSize).
 		Find(&entities).Error; err != nil {

@@ -1,12 +1,12 @@
 package repository
 
 import (
-	"github.com/podossaem/podoroot/domain/shared/exception"
-	"github.com/podossaem/podoroot/domain/shared/inner"
-	domain "github.com/podossaem/podoroot/domain/wallet"
-	"github.com/podossaem/podoroot/infra/database"
-	"github.com/podossaem/podoroot/infra/database/podosql"
-	"github.com/podossaem/podoroot/infra/entity"
+	"github.com/purplior/podoroot/domain/shared/exception"
+	"github.com/purplior/podoroot/domain/shared/inner"
+	domain "github.com/purplior/podoroot/domain/wallet"
+	"github.com/purplior/podoroot/infra/database"
+	"github.com/purplior/podoroot/infra/database/podosql"
+	"github.com/purplior/podoroot/infra/entity"
 )
 
 type (

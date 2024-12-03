@@ -1,11 +1,11 @@
 package repository
 
 import (
-	domain "github.com/podossaem/podoroot/domain/ledger"
-	"github.com/podossaem/podoroot/domain/shared/inner"
-	"github.com/podossaem/podoroot/infra/database"
-	"github.com/podossaem/podoroot/infra/database/podosql"
-	"github.com/podossaem/podoroot/infra/entity"
+	domain "github.com/purplior/podoroot/domain/ledger"
+	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/infra/database"
+	"github.com/purplior/podoroot/infra/database/podosql"
+	"github.com/purplior/podoroot/infra/entity"
 )
 
 type (

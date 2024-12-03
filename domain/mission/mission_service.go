@@ -1,12 +1,12 @@
 package mission
 
 import (
-	"github.com/podossaem/podoroot/domain/challenge"
-	"github.com/podossaem/podoroot/domain/ledger"
-	"github.com/podossaem/podoroot/domain/shared/exception"
-	"github.com/podossaem/podoroot/domain/shared/inner"
-	"github.com/podossaem/podoroot/domain/shared/pagination"
-	"github.com/podossaem/podoroot/domain/wallet"
+	"github.com/purplior/podoroot/domain/challenge"
+	"github.com/purplior/podoroot/domain/ledger"
+	"github.com/purplior/podoroot/domain/shared/exception"
+	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/domain/shared/pagination"
+	"github.com/purplior/podoroot/domain/wallet"
 )
 
 type (

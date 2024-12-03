@@ -5,11 +5,11 @@ import (
 	"runtime/debug"
 
 	"github.com/labstack/echo/v4"
-	"github.com/podossaem/podoroot/application/config"
-	"github.com/podossaem/podoroot/application/response"
-	"github.com/podossaem/podoroot/domain/auth"
-	"github.com/podossaem/podoroot/domain/shared/constant"
-	"github.com/podossaem/podoroot/domain/shared/exception"
+	"github.com/purplior/podoroot/application/config"
+	"github.com/purplior/podoroot/application/response"
+	"github.com/purplior/podoroot/domain/auth"
+	"github.com/purplior/podoroot/domain/shared/constant"
+	"github.com/purplior/podoroot/domain/shared/exception"
 )
 
 type (

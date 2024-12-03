@@ -1,11 +1,11 @@
 package app
 
 import (
-	"github.com/podossaem/podoroot/application/api"
-	"github.com/podossaem/podoroot/application/response"
-	domain "github.com/podossaem/podoroot/domain/assisterform"
-	"github.com/podossaem/podoroot/domain/shared/exception"
-	"github.com/podossaem/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/application/api"
+	"github.com/purplior/podoroot/application/response"
+	domain "github.com/purplior/podoroot/domain/assisterform"
+	"github.com/purplior/podoroot/domain/shared/exception"
+	"github.com/purplior/podoroot/domain/shared/inner"
 )
 
 type (

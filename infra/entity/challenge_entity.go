@@ -4,8 +4,8 @@ import (
 	"database/sql"
 	"time"
 
-	domain "github.com/podossaem/podoroot/domain/challenge"
-	"github.com/podossaem/podoroot/lib/dt"
+	domain "github.com/purplior/podoroot/domain/challenge"
+	"github.com/purplior/podoroot/lib/dt"
 )
 
 type (

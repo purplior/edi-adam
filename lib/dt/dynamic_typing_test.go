@@ -3,7 +3,7 @@ package dt_test
 import (
 	"testing"
 
-	"github.com/podossaem/podoroot/lib/dt"
+	"github.com/purplior/podoroot/lib/dt"
 )
 
 func Test_Json_with_string_argument(t *testing.T) {

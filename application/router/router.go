@@ -2,15 +2,15 @@ package router
 
 import (
 	"github.com/labstack/echo/v4"
-	assistant "github.com/podossaem/podoroot/domain/assistant/app"
-	assister "github.com/podossaem/podoroot/domain/assister/app"
-	assisterform "github.com/podossaem/podoroot/domain/assisterform/app"
-	auth "github.com/podossaem/podoroot/domain/auth/app"
-	challenge "github.com/podossaem/podoroot/domain/challenge/app"
-	me "github.com/podossaem/podoroot/domain/me/app"
-	mission "github.com/podossaem/podoroot/domain/mission/app"
-	user "github.com/podossaem/podoroot/domain/user/app"
-	verification "github.com/podossaem/podoroot/domain/verification/app"
+	assistant "github.com/purplior/podoroot/domain/assistant/app"
+	assister "github.com/purplior/podoroot/domain/assister/app"
+	assisterform "github.com/purplior/podoroot/domain/assisterform/app"
+	auth "github.com/purplior/podoroot/domain/auth/app"
+	challenge "github.com/purplior/podoroot/domain/challenge/app"
+	me "github.com/purplior/podoroot/domain/me/app"
+	mission "github.com/purplior/podoroot/domain/mission/app"
+	user "github.com/purplior/podoroot/domain/user/app"
+	verification "github.com/purplior/podoroot/domain/verification/app"
 )
 
 type (

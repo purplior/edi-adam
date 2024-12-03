@@ -1,9 +1,9 @@
 package challenge
 
 import (
-	"github.com/podossaem/podoroot/domain/shared/exception"
-	"github.com/podossaem/podoroot/domain/shared/inner"
-	"github.com/podossaem/podoroot/lib/mydate"
+	"github.com/purplior/podoroot/domain/shared/exception"
+	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/lib/mydate"
 )
 
 type (

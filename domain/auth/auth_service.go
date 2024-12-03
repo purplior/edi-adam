@@ -3,15 +3,15 @@ package auth
 import (
 	"time"
 
-	"github.com/podossaem/podoroot/application/config"
-	"github.com/podossaem/podoroot/domain/challenge"
-	"github.com/podossaem/podoroot/domain/shared/constant"
-	"github.com/podossaem/podoroot/domain/shared/exception"
-	"github.com/podossaem/podoroot/domain/shared/inner"
-	"github.com/podossaem/podoroot/domain/user"
-	"github.com/podossaem/podoroot/domain/verification"
-	"github.com/podossaem/podoroot/domain/wallet"
-	"github.com/podossaem/podoroot/lib/myjwt"
+	"github.com/purplior/podoroot/application/config"
+	"github.com/purplior/podoroot/domain/challenge"
+	"github.com/purplior/podoroot/domain/shared/constant"
+	"github.com/purplior/podoroot/domain/shared/exception"
+	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/domain/user"
+	"github.com/purplior/podoroot/domain/verification"
+	"github.com/purplior/podoroot/domain/wallet"
+	"github.com/purplior/podoroot/lib/myjwt"
 )
 
 var (

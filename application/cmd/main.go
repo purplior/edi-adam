@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/podossaem/podoroot/application"
-	"github.com/podossaem/podoroot/application/config"
+	"github.com/purplior/podoroot/application"
+	"github.com/purplior/podoroot/application/config"
 )
 
 func main() {

@@ -2,9 +2,9 @@ package infra
 
 import (
 	"github.com/google/wire"
-	"github.com/podossaem/podoroot/infra/database"
-	"github.com/podossaem/podoroot/infra/port"
-	"github.com/podossaem/podoroot/infra/repository"
+	"github.com/purplior/podoroot/infra/database"
+	"github.com/purplior/podoroot/infra/port"
+	"github.com/purplior/podoroot/infra/repository"
 )
 
 var New = wire.NewSet(

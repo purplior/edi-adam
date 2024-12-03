@@ -3,8 +3,8 @@ package entity
 import (
 	"time"
 
-	"github.com/podossaem/podoroot/domain/verification"
-	"github.com/podossaem/podoroot/lib/dt"
+	"github.com/purplior/podoroot/domain/verification"
+	"github.com/purplior/podoroot/lib/dt"
 )
 
 type (

@@ -1,6 +1,6 @@
 package ledger
 
-import "github.com/podossaem/podoroot/domain/shared/inner"
+import "github.com/purplior/podoroot/domain/shared/inner"
 
 type (
 	LedgerService interface {

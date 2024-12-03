@@ -1,14 +1,14 @@
 package app
 
 import (
-	"github.com/podossaem/podoroot/application/api"
-	"github.com/podossaem/podoroot/application/response"
-	"github.com/podossaem/podoroot/domain/auth"
-	domain "github.com/podossaem/podoroot/domain/me"
-	"github.com/podossaem/podoroot/domain/shared/exception"
-	"github.com/podossaem/podoroot/domain/shared/inner"
-	"github.com/podossaem/podoroot/domain/user"
-	"github.com/podossaem/podoroot/domain/wallet"
+	"github.com/purplior/podoroot/application/api"
+	"github.com/purplior/podoroot/application/response"
+	"github.com/purplior/podoroot/domain/auth"
+	domain "github.com/purplior/podoroot/domain/me"
+	"github.com/purplior/podoroot/domain/shared/exception"
+	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/domain/user"
+	"github.com/purplior/podoroot/domain/wallet"
 )
 
 type (

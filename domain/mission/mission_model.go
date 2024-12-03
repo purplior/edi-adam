@@ -3,7 +3,7 @@ package mission
 import (
 	"time"
 
-	"github.com/podossaem/podoroot/domain/challenge"
+	"github.com/purplior/podoroot/domain/challenge"
 )
 
 const (
@@ -15,7 +15,7 @@ type (
 
 	Mission struct {
 		ID                string                `json:"id"`
-		Title             string                `json:"string"`
+		Title             string                `json:"title"`
 		Description       string                `json:"description"`
 		Reward            MissionReward         `json:"reward"`
 		RewardDescription string                `json:"rewardDescription"`

@@ -3,8 +3,8 @@ package logger
 import (
 	"log"
 
-	"github.com/podossaem/podoroot/application/config"
-	"github.com/podossaem/podoroot/domain/shared/constant"
+	"github.com/purplior/podoroot/application/config"
+	"github.com/purplior/podoroot/domain/shared/constant"
 )
 
 var (

@@ -4,11 +4,11 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
-	"github.com/podossaem/podoroot/application/api"
-	"github.com/podossaem/podoroot/application/config"
-	"github.com/podossaem/podoroot/application/response"
-	"github.com/podossaem/podoroot/domain/auth"
-	"github.com/podossaem/podoroot/lib/myjwt"
+	"github.com/purplior/podoroot/application/api"
+	"github.com/purplior/podoroot/application/config"
+	"github.com/purplior/podoroot/application/response"
+	"github.com/purplior/podoroot/domain/auth"
+	"github.com/purplior/podoroot/lib/myjwt"
 )
 
 var (

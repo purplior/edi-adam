@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/joho/godotenv"
-	"github.com/podossaem/podoroot/domain/shared/constant"
+	"github.com/purplior/podoroot/domain/shared/constant"
 )
 
 func Init() error {
@@ -47,12 +47,8 @@ func Phase() constant.Phase {
 	return convertPhaseStringToEnum(phase)
 }
 
-func PodossaemSqlDSN() string {
-	return os.Getenv("PODOSSAEM_DB_DSN")
-}
-
-func PodopaySqlDSN() string {
-	return os.Getenv("PODOPAY_DB_DSN")
+func SqlDbDSN() string {
+	return os.Getenv("SQL_DB_DSN")
 }
 
 func MongoDbURI() string {

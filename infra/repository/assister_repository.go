@@ -1,13 +1,13 @@
 package repository
 
 import (
-	domain "github.com/podossaem/podoroot/domain/assister"
-	"github.com/podossaem/podoroot/domain/shared/inner"
-	"github.com/podossaem/podoroot/domain/shared/pagination"
-	"github.com/podossaem/podoroot/infra/database"
-	"github.com/podossaem/podoroot/infra/database/podosql"
-	"github.com/podossaem/podoroot/infra/entity"
-	"github.com/podossaem/podoroot/infra/repoutil"
+	domain "github.com/purplior/podoroot/domain/assister"
+	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/domain/shared/pagination"
+	"github.com/purplior/podoroot/infra/database"
+	"github.com/purplior/podoroot/infra/database/podosql"
+	"github.com/purplior/podoroot/infra/entity"
+	"github.com/purplior/podoroot/infra/repoutil"
 )
 
 type (

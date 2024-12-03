@@ -1,8 +1,8 @@
 package repoutil
 
 import (
-	"github.com/podossaem/podoroot/domain/shared/pagination"
-	"github.com/podossaem/podoroot/infra/database/podosql"
+	"github.com/purplior/podoroot/domain/shared/pagination"
+	"github.com/purplior/podoroot/infra/database/podosql"
 )
 
 func FindPaginatedList(

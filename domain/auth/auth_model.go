@@ -3,7 +3,7 @@ package auth
 import (
 	"encoding/json"
 
-	"github.com/podossaem/podoroot/lib/dt"
+	"github.com/purplior/podoroot/lib/dt"
 )
 
 type (
