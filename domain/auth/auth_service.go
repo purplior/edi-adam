@@ -12,6 +12,7 @@ import (
 	"github.com/purplior/podoroot/domain/verification"
 	"github.com/purplior/podoroot/domain/wallet"
 	"github.com/purplior/podoroot/lib/myjwt"
+	"github.com/purplior/podoroot/lib/strgen"
 )
 
 var (
@@ -123,6 +124,8 @@ func (s *authService) SignUp_ByEmailVerification(
 			JoinMethod:      user.JoinMethod_Email,
 			AccountID:       verification.Email,
 			AccountPassword: request.Password,
+			AvatarTheme:     1,
+			AvatarText:      strgen.ExtractInitialChar(request.Nickname),
 			Nickname:        request.Nickname,
 			Role:            user.Role_User,
 		},

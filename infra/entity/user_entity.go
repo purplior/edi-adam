@@ -13,6 +13,8 @@ type (
 		JoinMethod      string      `gorm:"size:255;not null;uniqueIndex:idx_join_method_account"`
 		AccountID       string      `gorm:"size:255;not null;uniqueIndex:idx_join_method_account"`
 		AccountPassword string      `gorm:"size:255;not null"`
+		AvatarTheme     int         `gorm:"default:1"`
+		AvatarText      string      `gorm:"size:10"`
 		Nickname        string      `gorm:"size:100"`
 		Role            int         `gorm:"default:100"`
 		CreatedAt       time.Time   `gorm:"autoCreateTime"`
@@ -28,6 +30,8 @@ func (e User) ToModel() user.User {
 		JoinMethod:      e.JoinMethod,
 		AccountID:       e.AccountID,
 		AccountPassword: e.AccountPassword,
+		AvatarTheme:     e.AvatarTheme,
+		AvatarText:      e.AvatarText,
 		Nickname:        e.Nickname,
 		Role:            e.Role,
 		CreatedAt:       e.CreatedAt,
@@ -45,6 +49,8 @@ func MakeUser(m user.User) User {
 		JoinMethod:      m.JoinMethod,
 		AccountID:       m.AccountID,
 		AccountPassword: m.AccountPassword,
+		AvatarTheme:     m.AvatarTheme,
+		AvatarText:      m.AvatarText,
 		Nickname:        m.Nickname,
 		Role:            m.Role,
 		CreatedAt:       m.CreatedAt,
