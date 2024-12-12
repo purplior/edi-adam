@@ -8,13 +8,20 @@ import (
 	"github.com/purplior/podoroot/domain/user"
 )
 
+const (
+	AssistantType_Writing AssistantType = 1
+)
+
 type (
+	AssistantType int
+
 	Assistant struct {
 		ID                string              `json:"id"`
 		ViewID            string              `json:"viewId"`
 		AuthorID          string              `json:"authorId"`
 		CategoryID        string              `json:"categoryId"`
 		Assisters         []assister.Assister `json:"assisters"`
+		AssistantType     AssistantType       `json:"assistantType"`
 		Title             string              `json:"title"`
 		Description       string              `json:"description"`
 		IsPublic          bool                `json:"isPublic"`
@@ -38,6 +45,7 @@ func (m *Assistant) ToInfo() (
 	return AssistantInfo{
 		ViewID:            m.ViewID,
 		Title:             m.Title,
+		AssistantType:     m.AssistantType,
 		Description:       m.Description,
 		AuthorInfo:        m.Author.ToInfo(),
 		CategoryInfo:      m.Category.ToInfo(),
@@ -58,6 +66,7 @@ func (m *Assistant) ToDetail() (
 	return AssistantDetail{
 		ViewID:            m.ViewID,
 		AuthorInfo:        m.Author.ToInfo(),
+		AssistantType:     m.AssistantType,
 		Title:             m.Title,
 		Description:       m.Description,
 		IsPublic:          m.IsPublic,
@@ -71,6 +80,7 @@ type (
 	AssistantInfo struct {
 		ViewID            string                `json:"viewId"`
 		Title             string                `json:"title"`
+		AssistantType     AssistantType         `json:"assistantType"`
 		Description       string                `json:"description"`
 		AuthorInfo        user.UserInfo         `json:"authorInfo"`
 		CategoryInfo      category.CategoryInfo `json:"categoryInfo"`
@@ -82,6 +92,7 @@ type (
 type (
 	AssistantDetail struct {
 		ViewID            string                  `json:"viewId"`
+		AssistantType     AssistantType           `json:"assistantType"`
 		AuthorInfo        user.UserInfo           `json:"authorInfo"`
 		Title             string                  `json:"title"`
 		Description       string                  `json:"description"`

@@ -14,6 +14,7 @@ type (
 		ViewID            string `gorm:"size:36;not null;unique"`
 		AuthorID          uint
 		CategoryID        uint
+		AssistantType     uint   `gorm:"default:0"`
 		Title             string `gorm:"size:80;not null"`  // 20자 이내
 		Description       string `gorm:"size:255;not null"` // 80자 이내
 		IsPublic          bool   `gorm:"default:false;not null"`
@@ -27,11 +28,12 @@ type (
 
 func (e Assistant) ToModel() assistant.Assistant {
 	model := assistant.Assistant{
-		ViewID:      e.ViewID,
-		Title:       e.Title,
-		Description: e.Description,
-		IsPublic:    e.IsPublic,
-		CreatedAt:   e.CreatedAt,
+		ViewID:        e.ViewID,
+		AssistantType: assistant.AssistantType(e.AssistantType),
+		Title:         e.Title,
+		Description:   e.Description,
+		IsPublic:      e.IsPublic,
+		CreatedAt:     e.CreatedAt,
 	}
 
 	if e.ID > 0 {
@@ -61,11 +63,12 @@ func (e Assistant) ToModel() assistant.Assistant {
 
 func MakeAssistant(m assistant.Assistant) Assistant {
 	entity := Assistant{
-		ViewID:      m.ViewID,
-		Title:       m.Title,
-		Description: m.Description,
-		IsPublic:    m.IsPublic,
-		CreatedAt:   m.CreatedAt,
+		ViewID:        m.ViewID,
+		AssistantType: uint(m.AssistantType),
+		Title:         m.Title,
+		Description:   m.Description,
+		IsPublic:      m.IsPublic,
+		CreatedAt:     m.CreatedAt,
 	}
 
 	if len(m.ID) > 0 {
