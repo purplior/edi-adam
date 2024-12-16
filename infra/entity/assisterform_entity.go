@@ -11,26 +11,22 @@ import (
 
 type (
 	AssisterForm struct {
-		ID               primitive.ObjectID     `bson:"_id,omitempty"`
-		AssisterID       int                    `bson:"assisterId"`
-		Origin           domain.AssisterOrigin  `bson:"origin"`
-		Model            domain.AssisterModel   `bson:"model"`
-		Fields           []AssisterField        `bson:"fields"`
-		Tests            []AssisterInput        `bson:"tests"`
-		SubmitText       string                 `bson:"submitText"`
-		QueryMessages    []AssisterQueryMessage `bson:"queryMessages"`
-		QueryInfoHeading string                 `bson:"queryInfoHeading"`
-		CreatedAt        time.Time              `bson:"created_at"`
+		ID            primitive.ObjectID     `bson:"_id,omitempty"`
+		AssisterID    int                    `bson:"assisterId"`
+		Origin        domain.AssisterOrigin  `bson:"origin"`
+		Model         domain.AssisterModel   `bson:"model"`
+		Fields        []AssisterField        `bson:"fields"`
+		Tests         []AssisterInput        `bson:"tests"`
+		QueryMessages []AssisterQueryMessage `bson:"queryMessages"`
+		CreatedAt     time.Time              `bson:"created_at"`
 	}
 )
 
 func (e AssisterForm) ToModel() domain.AssisterForm {
 	model := domain.AssisterForm{
-		Origin:           e.Origin,
-		Model:            e.Model,
-		SubmitText:       e.SubmitText,
-		QueryInfoHeading: e.QueryInfoHeading,
-		CreatedAt:        e.CreatedAt,
+		Origin:    e.Origin,
+		Model:     e.Model,
+		CreatedAt: e.CreatedAt,
 	}
 
 	if !e.ID.IsZero() {
@@ -61,11 +57,9 @@ func (e AssisterForm) ToModel() domain.AssisterForm {
 
 func MakeAssisterForm(m domain.AssisterForm) AssisterForm {
 	entity := AssisterForm{
-		Origin:           m.Origin,
-		Model:            m.Model,
-		SubmitText:       m.SubmitText,
-		QueryInfoHeading: m.QueryInfoHeading,
-		CreatedAt:        m.CreatedAt,
+		Origin:    m.Origin,
+		Model:     m.Model,
+		CreatedAt: m.CreatedAt,
 	}
 
 	if len(m.ID) > 0 {

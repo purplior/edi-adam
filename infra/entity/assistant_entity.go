@@ -10,19 +10,19 @@ import (
 
 type (
 	Assistant struct {
-		ID                uint   `gorm:"primaryKey;autoIncrement"`
-		ViewID            string `gorm:"size:36;not null;unique"`
-		AuthorID          uint
-		CategoryID        uint
-		AssistantType     uint   `gorm:"default:0"`
-		Title             string `gorm:"size:80;not null"`  // 20자 이내
-		Description       string `gorm:"size:255;not null"` // 80자 이내
-		IsPublic          bool   `gorm:"default:false;not null"`
-		DefaultAssisterID uint
-		CreatedAt         time.Time `gorm:"autoCreateTime"`
-		Author            User
-		Category          Category
-		Assisters         []Assister `gorm:"foreignKey:AssistantID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+		ID            uint   `gorm:"primaryKey;autoIncrement"`
+		ViewID        string `gorm:"size:36;not null;unique"`
+		AuthorID      uint
+		CategoryID    uint
+		AssistantType uint      `gorm:"default:0"`
+		Title         string    `gorm:"size:80;not null"`  // 20자 이내
+		Description   string    `gorm:"size:255;not null"` // 80자 이내
+		Tags          []string  `gorm:"type:json"`
+		IsPublic      bool      `gorm:"default:false;not null"`
+		CreatedAt     time.Time `gorm:"autoCreateTime"`
+		Author        User
+		Category      Category
+		Assisters     []Assister `gorm:"foreignKey:AssistantID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	}
 )
 
@@ -32,6 +32,7 @@ func (e Assistant) ToModel() assistant.Assistant {
 		AssistantType: assistant.AssistantType(e.AssistantType),
 		Title:         e.Title,
 		Description:   e.Description,
+		Tags:          e.Tags,
 		IsPublic:      e.IsPublic,
 		CreatedAt:     e.CreatedAt,
 	}
@@ -54,10 +55,6 @@ func (e Assistant) ToModel() assistant.Assistant {
 	}
 	model.Assisters = assisters
 
-	if e.DefaultAssisterID > 0 {
-		model.DefaultAssisterID = dt.Str(e.DefaultAssisterID)
-	}
-
 	return model
 }
 
@@ -67,6 +64,7 @@ func MakeAssistant(m assistant.Assistant) Assistant {
 		AssistantType: uint(m.AssistantType),
 		Title:         m.Title,
 		Description:   m.Description,
+		Tags:          m.Tags,
 		IsPublic:      m.IsPublic,
 		CreatedAt:     m.CreatedAt,
 	}
@@ -79,9 +77,6 @@ func MakeAssistant(m assistant.Assistant) Assistant {
 	}
 	if len(m.CategoryID) > 0 {
 		entity.CategoryID = dt.UInt(m.CategoryID)
-	}
-	if len(m.DefaultAssisterID) > 0 {
-		entity.DefaultAssisterID = dt.UInt(m.DefaultAssisterID)
 	}
 
 	return entity

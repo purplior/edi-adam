@@ -13,6 +13,14 @@ import (
 
 type (
 	AssisterService interface {
+		RegisterOne(
+			ctx inner.Context,
+			request AssisterRegisterRequest,
+		) (
+			Assister,
+			error,
+		)
+
 		Request(
 			ctx inner.Context,
 			userId string,
@@ -72,6 +80,24 @@ type (
 		cm                  inner.ContextManager
 	}
 )
+
+func (s *assisterService) RegisterOne(
+	ctx inner.Context,
+	request AssisterRegisterRequest,
+) (
+	Assister,
+	error,
+) {
+	return s.assisterRepository.InsertOne(
+		ctx,
+		Assister{
+			AssistantID:        request.AssistantID,
+			Version:            request.Version,
+			VersionDescription: request.VersionDescription,
+			Cost:               request.Cost,
+		},
+	)
+}
 
 func (s *assisterService) Request(
 	ctx inner.Context,
@@ -279,11 +305,6 @@ func (s *assisterService) createQueryInformation(
 	inputs []assisterform.AssisterInput,
 ) (string, error) {
 	content := "## "
-	if len(form.QueryInfoHeading) == 0 {
-		content += "정보"
-	} else {
-		content += form.QueryInfoHeading
-	}
 
 	for _, input := range inputs {
 		content += "\n\n### " + input.Name

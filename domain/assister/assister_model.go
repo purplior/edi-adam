@@ -33,3 +33,12 @@ func (m Assister) ToInfo() AssisterInfo {
 		CreatedAt:          m.CreatedAt,
 	}
 }
+
+type (
+	AssisterRegisterRequest struct {
+		AssistantID        string `json:"assistantId"`
+		Version            string `json:"version"`
+		VersionDescription string `json:"versionDescription"`
+		Cost               uint   `json:"cost"`
+	}
+)

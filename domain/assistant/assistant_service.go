@@ -1,6 +1,8 @@
 package assistant
 
 import (
+	"github.com/purplior/podoroot/domain/assister"
+	"github.com/purplior/podoroot/domain/assisterform"
 	"github.com/purplior/podoroot/domain/shared/inner"
 	"github.com/purplior/podoroot/domain/shared/pagination"
 	"github.com/purplior/podoroot/lib/strgen"
@@ -79,6 +81,9 @@ type (
 type (
 	assistantService struct {
 		assistantRepository AssistantRepository
+		assisterService     assister.AssisterService
+		assisterformService assisterform.AssisterFormService
+		cm                  inner.ContextManager
 	}
 )
 
@@ -90,17 +95,74 @@ func (s *assistantService) RegisterOne(
 	Assistant,
 	error,
 ) {
-	assistant := Assistant{
-		AuthorID:    authorID,
-		Title:       request.Title,
-		Description: request.Description,
-		IsPublic:    request.IsPublic,
+	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
+		return Assistant{}, err
 	}
 
-	return s.assistantRepository.InsertOne(
+	defer func() {
+		if r := recover(); r != nil {
+			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			panic(r)
+		}
+	}()
+
+	_assistant, err := s.assistantRepository.InsertOne(
 		ctx,
-		assistant,
+		Assistant{
+			ViewID:        strgen.ShortUniqueID(),
+			AuthorID:      authorID,
+			CategoryID:    request.CategoryID,
+			AssistantType: AssistantType_Formal,
+			Title:         request.Title,
+			Description:   request.Description,
+			Tags:          request.Tags,
+			IsPublic:      request.IsPublic,
+		},
 	)
+	if err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		return Assistant{}, err
+	}
+
+	_assister, err := s.assisterService.RegisterOne(
+		ctx,
+		assister.AssisterRegisterRequest{
+			AssistantID:        _assistant.ID,
+			Version:            request.Version,
+			VersionDescription: request.VersionDescription,
+			Cost:               2,
+		},
+	)
+	if err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		return Assistant{}, err
+	}
+
+	_, err = s.assisterformService.RegisterOne(
+		ctx,
+		assisterform.AssisterFormRegisterRequest{
+			AssisterID:    _assister.ID,
+			Origin:        assisterform.AssisterOrigin_OpenAI,
+			Model:         assisterform.AssisterModel_OpenAI_ChatGPT4o,
+			Tests:         request.Tests,
+			Fields:        request.Fields,
+			QueryMessages: request.QueryMessages,
+		},
+	)
+	if err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		return Assistant{}, err
+	}
+
+	if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
+		return Assistant{}, err
+	}
+
+	_assistant.Assisters = []assister.Assister{
+		_assister,
+	}
+
+	return _assistant, nil
 }
 
 func (s *assistantService) GetOne_ByID(
@@ -231,8 +293,14 @@ func (s *assistantService) CreateOne(
 
 func NewAssistantService(
 	assistantRepository AssistantRepository,
+	assisterService assister.AssisterService,
+	assisterformService assisterform.AssisterFormService,
+	cm inner.ContextManager,
 ) AssistantService {
 	return &assistantService{
 		assistantRepository: assistantRepository,
+		assisterService:     assisterService,
+		assisterformService: assisterformService,
+		cm:                  cm,
 	}
 }
