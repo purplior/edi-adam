@@ -20,14 +20,6 @@ type (
 func (r *assistantRouter) Attach(router *echo.Group) {
 	assistantRouterGroup := router.Group("/assistants")
 
-	assistantRouterGroup.POST(
-		"/",
-		api.Handler(
-			r.assistantController.RegisterOne(),
-			api.HandlerFuncOption{},
-		),
-	)
-
 	assistantRouterGroup.GET(
 		"/detail/:assistant_view_id",
 		api.Handler(

@@ -1,6 +1,7 @@
 package entity
 
 import (
+	"strings"
 	"time"
 
 	domain "github.com/purplior/podoroot/domain/assisterform"
@@ -91,31 +92,25 @@ func MakeAssisterForm(m domain.AssisterForm) AssisterForm {
 
 type (
 	AssisterField struct {
-		Name     string                   `bson:"name"`
-		Type     domain.AssisterFieldType `bson:"type"`
-		ItemName string                   `bson:"itemName"`
-		Required bool                     `bson:"required"`
-		Option   map[string]interface{}   `bson:"option"`
+		Name   string                   `bson:"name"`
+		Type   domain.AssisterFieldType `bson:"type"`
+		Option map[string]interface{}   `bson:"option"`
 	}
 )
 
 func (e AssisterField) ToModel() domain.AssisterField {
 	return domain.AssisterField{
-		Name:     e.Name,
-		Type:     e.Type,
-		ItemName: e.ItemName,
-		Required: e.Required,
-		Option:   e.Option,
+		Name:   e.Name,
+		Type:   e.Type,
+		Option: e.Option,
 	}
 }
 
 func MakeAssisterField(m domain.AssisterField) AssisterField {
 	return AssisterField{
-		Name:     m.Name,
-		Type:     m.Type,
-		ItemName: m.ItemName,
-		Required: m.Required,
-		Option:   m.Option,
+		Name:   m.Name,
+		Type:   m.Type,
+		Option: m.Option,
 	}
 }
 
@@ -129,14 +124,14 @@ type (
 func (e AssisterQueryMessage) ToModel() domain.AssisterQueryMessage {
 	return domain.AssisterQueryMessage{
 		Role:    e.Role,
-		Content: e.Content,
+		Content: strings.Join(e.Content, "\n"),
 	}
 }
 
 func MakeAssisterQueryMessage(m domain.AssisterQueryMessage) AssisterQueryMessage {
 	return AssisterQueryMessage{
 		Role:    m.Role,
-		Content: m.Content,
+		Content: strings.Split(m.Content, "\n"),
 	}
 }
 

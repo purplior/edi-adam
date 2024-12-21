@@ -3,12 +3,14 @@ package app
 import (
 	"github.com/purplior/podoroot/application/api"
 	"github.com/purplior/podoroot/application/response"
+	"github.com/purplior/podoroot/domain/assistant"
 	"github.com/purplior/podoroot/domain/auth"
 	domain "github.com/purplior/podoroot/domain/me"
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
 	"github.com/purplior/podoroot/domain/user"
 	"github.com/purplior/podoroot/domain/wallet"
+	"github.com/purplior/podoroot/lib/validator"
 )
 
 type (
@@ -29,19 +31,25 @@ type (
 		GetTempAccessToken() api.HandlerFunc
 
 		/**
-		 *
+		 * 나의 포도 확인하기
 		 */
 		GetMyPodo() api.HandlerFunc
+
+		/**
+		 * 내 어시 등록하기
+		 */
+		RegisterMyAssistant() api.HandlerFunc
 	}
 )
 
 type (
 	meController struct {
-		meService     domain.MeService
-		authService   auth.AuthService
-		userService   user.UserService
-		walletService wallet.WalletService
-		cm            inner.ContextManager
+		meService        domain.MeService
+		assistantService assistant.AssistantService
+		authService      auth.AuthService
+		userService      user.UserService
+		walletService    wallet.WalletService
+		cm               inner.ContextManager
 	}
 )
 
@@ -130,18 +138,52 @@ func (c *meController) GetMyPodo() api.HandlerFunc {
 	}
 }
 
+func (c *meController) RegisterMyAssistant() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		if ctx.Identity == nil {
+			return ctx.SendError(exception.ErrUnauthorized)
+		}
+
+		var request assistant.RegisterOneRequest
+		if err := ctx.Bind(&request); err != nil {
+			return ctx.SendError(err)
+		}
+
+		if err := validator.CheckValidAssistantRegisterRequest(request); err != nil {
+			return ctx.SendError(err)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		if _, err := c.assistantService.RegisterOne(
+			innerCtx,
+			ctx.Identity.ID,
+			request,
+		); err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Status: response.Status_Created,
+		})
+	}
+}
+
 func NewMeController(
 	meService domain.MeService,
+	assistantService assistant.AssistantService,
 	authService auth.AuthService,
 	userService user.UserService,
 	walletService wallet.WalletService,
 	cm inner.ContextManager,
 ) MeController {
 	return &meController{
-		meService:     meService,
-		authService:   authService,
-		userService:   userService,
-		walletService: walletService,
-		cm:            cm,
+		meService:        meService,
+		assistantService: assistantService,
+		authService:      authService,
+		userService:      userService,
+		walletService:    walletService,
+		cm:               cm,
 	}
 }

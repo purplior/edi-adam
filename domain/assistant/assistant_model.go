@@ -102,15 +102,13 @@ func (m *Assistant) ToDetail() (
 
 type (
 	RegisterOneRequest struct {
-		Title              string                              `json:"title"`
-		Description        string                              `json:"description"`
-		CategoryID         string                              `json:"categoryId"`
-		Tags               []string                            `json:"tags"`
-		Fields             []assisterform.AssisterField        `json:"fields"`
-		QueryMessages      []assisterform.AssisterQueryMessage `json:"queryMessages"`
-		Tests              []assisterform.AssisterInput        `json:"tests"`
-		Version            string                              `json:"version"`
-		VersionDescription string                              `json:"versionDescription"`
-		IsPublic           bool                                `json:"isPublic"`
+		Title         string                              `json:"title"`
+		Description   string                              `json:"description"`
+		CategoryID    string                              `json:"categoryId"`
+		Tags          []string                            `json:"tags"`
+		Fields        []assisterform.AssisterField        `json:"fields"`
+		QueryMessages []assisterform.AssisterQueryMessage `json:"queryMessages"`
+		Tests         []assisterform.AssisterInput        `json:"tests"`
+		IsPublic      bool                                `json:"isPublic"`
 	}
 )

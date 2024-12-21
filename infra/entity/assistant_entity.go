@@ -17,7 +17,7 @@ type (
 		AssistantType uint      `gorm:"default:0"`
 		Title         string    `gorm:"size:80;not null"`  // 20자 이내
 		Description   string    `gorm:"size:255;not null"` // 80자 이내
-		Tags          []string  `gorm:"type:json"`
+		Tags          []string  `gorm:"serializer:json"`
 		IsPublic      bool      `gorm:"default:false;not null"`
 		CreatedAt     time.Time `gorm:"autoCreateTime"`
 		Author        User

@@ -133,10 +133,8 @@ func (s *assisterService) Request(
 
 	queryMessages := form.QueryMessages
 	queryMessages = append(queryMessages, assisterform.AssisterQueryMessage{
-		Role: assisterform.QueryMessageRole_User,
-		Content: []string{
-			info,
-		},
+		Role:    assisterform.QueryMessageRole_User,
+		Content: info,
 	})
 
 	messageLen := len(queryMessages)
@@ -214,10 +212,8 @@ func (s *assisterService) RequestStream(
 
 	queryMessages := form.QueryMessages
 	queryMessages = append(queryMessages, assisterform.AssisterQueryMessage{
-		Role: assisterform.QueryMessageRole_User,
-		Content: []string{
-			info,
-		},
+		Role:    assisterform.QueryMessageRole_User,
+		Content: info,
 	})
 
 	messageLen := len(queryMessages)
@@ -319,13 +315,6 @@ func (s *assisterService) createQueryInformation(
 			case assisterform.AssisterFieldType_Keyword:
 				{
 					value := v.(string)
-					if len(value) == 0 {
-						if field.Required {
-							return "", exception.ErrBadRequest
-						} else {
-							continue
-						}
-					}
 
 					if i > 0 {
 						content += ","
@@ -338,11 +327,6 @@ func (s *assisterService) createQueryInformation(
 				{
 					value := v.(string)
 					if len(value) == 0 {
-						if field.Required {
-							return "", exception.ErrBadRequest
-						} else {
-							continue
-						}
 					}
 
 					content += "\n" + dt.Str(i+1) + ". " + value
@@ -352,26 +336,13 @@ func (s *assisterService) createQueryInformation(
 					vIObjects := v.([]interface{})
 					vIObjectsLen := len(vIObjects)
 					if vIObjectsLen == 0 {
-						if field.Required {
-							return "", exception.ErrBadRequest
-						} else {
-							continue
-						}
 					}
 
-					content += "\n" + dt.Str(i+1) + ". " + field.ItemName
+					content += "\n" + dt.Str(i+1) + ". " + field.Name
 					for _, vIObj := range vIObjects {
 						vObj := vIObj.(map[string]interface{})
 						childName := dt.Str(vObj["name"])
 						childValue := dt.Str(vObj["value"])
-
-						if len(childValue) == 0 {
-							if field.Required {
-								return "", exception.ErrBadRequest
-							} else {
-								continue
-							}
-						}
 
 						content += "\n\t- " + childName + ": " + childValue
 					}

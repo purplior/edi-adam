@@ -13,11 +13,6 @@ import (
 type (
 	AssistantController interface {
 		/**
-		 * 신규 쌤비서 등록
-		 */
-		RegisterOne() api.HandlerFunc
-
-		/**
 		 * 쌤비서 상세정보 가져오기
 		 */
 		GetDetailOne() api.HandlerFunc
@@ -55,35 +50,6 @@ type (
 		cm               inner.ContextManager
 	}
 )
-
-func (c *assistantController) RegisterOne() api.HandlerFunc {
-	return func(ctx *api.Context) error {
-		var dto domain.RegisterOneRequest
-		if err := ctx.Bind(&dto); err != nil {
-			return ctx.SendError(err)
-		}
-
-		innerCtx, cancel := c.cm.NewContext()
-		defer cancel()
-
-		assistant, err := c.assistantService.RegisterOne(
-			innerCtx,
-			ctx.Identity.ID,
-			dto,
-		)
-		if err != nil {
-			return ctx.SendError(err)
-		}
-
-		return ctx.SendJSON(response.JSONResponse{
-			Data: struct {
-				Assistant domain.Assistant `json:"assistant"`
-			}{
-				Assistant: assistant,
-			},
-		})
-	}
-}
 
 func (c *assistantController) GetDetailOne() api.HandlerFunc {
 	return func(ctx *api.Context) error {

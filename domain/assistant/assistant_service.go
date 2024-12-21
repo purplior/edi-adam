@@ -128,8 +128,8 @@ func (s *assistantService) RegisterOne(
 		ctx,
 		assister.AssisterRegisterRequest{
 			AssistantID:        _assistant.ID,
-			Version:            request.Version,
-			VersionDescription: request.VersionDescription,
+			Version:            "v1.0.0",
+			VersionDescription: "- 기본 기능 배포",
 			Cost:               2,
 		},
 	)

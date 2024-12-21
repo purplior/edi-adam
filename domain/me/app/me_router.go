@@ -51,6 +51,14 @@ func (r *meRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{},
 		),
 	)
+
+	meRouterGroup.POST(
+		"/assistant",
+		api.Handler(
+			r.meController.RegisterMyAssistant(),
+			api.HandlerFuncOption{},
+		),
+	)
 }
 
 func NewMeRouter(

@@ -1,7 +1,7 @@
 package assisterform
 
 import (
-	"strings"
+	"errors"
 	"time"
 )
 
@@ -20,6 +20,10 @@ const (
 	AssisterModel_OpenAI_O1Mini         AssisterModel  = "o1-mini"
 )
 
+var (
+	ErrInvalidAssisterFieldKey = errors.New("invalid assister field key")
+)
+
 type (
 	AssisterFieldType        string
 	AssisterQueryMessageRole string
@@ -27,11 +31,9 @@ type (
 	AssisterModel            string
 
 	AssisterField struct {
-		Name     string                 `json:"name"`
-		Type     AssisterFieldType      `json:"type"`
-		ItemName string                 `json:"itemName"`
-		Required bool                   `json:"required"`
-		Option   map[string]interface{} `json:"option"`
+		Name   string                 `json:"name"`
+		Type   AssisterFieldType      `json:"type"`
+		Option map[string]interface{} `json:"option"`
 	}
 
 	AssisterFormRegisterRequest struct {
@@ -48,6 +50,30 @@ type (
 		Values []interface{} `json:"values"`
 	}
 )
+
+func MakeAssisterFieldFromMap(m map[string]interface{}) (
+	AssisterField,
+	error,
+) {
+	field := AssisterField{}
+	if name, ok := m["name"].(string); ok {
+		field.Name = name
+	} else {
+		return AssisterField{}, ErrInvalidAssisterFieldKey
+	}
+	if t, ok := m["type"].(string); ok {
+		field.Type = AssisterFieldType(t)
+	} else {
+		return AssisterField{}, ErrInvalidAssisterFieldKey
+	}
+	if opt, ok := m["option"].(map[string]interface{}); ok {
+		field.Option = opt
+	} else {
+		return AssisterField{}, ErrInvalidAssisterFieldKey
+	}
+
+	return field, nil
+}
 
 type (
 	AssisterForm struct {
@@ -101,13 +127,13 @@ func (m AssisterForm) ToView() AssisterFormView {
 type (
 	AssisterQueryMessage struct {
 		Role    AssisterQueryMessageRole `json:"role"`
-		Content []string                 `json:"content"`
+		Content string                   `json:"content"`
 	}
 )
 
 func (m AssisterQueryMessage) CreatePayload() map[string]string {
 	return map[string]string{
 		"role":    string(m.Role),
-		"content": strings.Join(m.Content, "\n"),
+		"content": m.Content,
 	}
 }
