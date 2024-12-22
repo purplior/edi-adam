@@ -113,6 +113,11 @@ func (s *assistantService) RegisterOne(
 		}
 	}()
 
+	status := AssistantStatus_Registered
+	if request.IsPublic {
+		status = AssistantStatus_UnderReview
+	}
+
 	_assistant, err := s.assistantRepository.InsertOne(
 		ctx,
 		Assistant{
@@ -123,7 +128,8 @@ func (s *assistantService) RegisterOne(
 			Title:         request.Title,
 			Description:   request.Description,
 			Tags:          request.Tags,
-			IsPublic:      request.IsPublic,
+			IsPublic:      false,
+			Status:        status,
 		},
 	)
 	if err != nil {

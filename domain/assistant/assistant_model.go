@@ -11,10 +11,15 @@ import (
 
 const (
 	AssistantType_Formal AssistantType = 1
+
+	AssistantStatus_Registered  AssistantStatus = "registered"
+	AssistantStatus_UnderReview AssistantStatus = "under_review"
+	AssistantStatus_Approved    AssistantStatus = "approved"
 )
 
 type (
-	AssistantType int
+	AssistantType   int
+	AssistantStatus string
 
 	Assistant struct {
 		ID            string              `json:"id"`
@@ -27,6 +32,7 @@ type (
 		Description   string              `json:"description"`
 		Tags          []string            `json:"tags"`
 		IsPublic      bool                `json:"isPublic"`
+		Status        AssistantStatus     `json:"status"`
 		CreatedAt     time.Time           `json:"createdAt"`
 		Author        user.User           `json:"author"`
 		Category      category.Category   `json:"category"`

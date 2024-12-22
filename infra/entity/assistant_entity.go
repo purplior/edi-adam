@@ -3,7 +3,7 @@ package entity
 import (
 	"time"
 
-	"github.com/purplior/podoroot/domain/assistant"
+	domain "github.com/purplior/podoroot/domain/assistant"
 	"github.com/purplior/podoroot/domain/assister"
 	"github.com/purplior/podoroot/lib/dt"
 )
@@ -19,6 +19,7 @@ type (
 		Description   string    `gorm:"size:255;not null"` // 80자 이내
 		Tags          []string  `gorm:"serializer:json"`
 		IsPublic      bool      `gorm:"default:false;not null"`
+		Status        string    `gorm:"size:80"`
 		CreatedAt     time.Time `gorm:"autoCreateTime"`
 		Author        User
 		Category      Category
@@ -26,14 +27,15 @@ type (
 	}
 )
 
-func (e Assistant) ToModel() assistant.Assistant {
-	model := assistant.Assistant{
+func (e Assistant) ToModel() domain.Assistant {
+	model := domain.Assistant{
 		ViewID:        e.ViewID,
-		AssistantType: assistant.AssistantType(e.AssistantType),
+		AssistantType: domain.AssistantType(e.AssistantType),
 		Title:         e.Title,
 		Description:   e.Description,
 		Tags:          e.Tags,
 		IsPublic:      e.IsPublic,
+		Status:        domain.AssistantStatus(e.Status),
 		CreatedAt:     e.CreatedAt,
 	}
 
@@ -58,7 +60,7 @@ func (e Assistant) ToModel() assistant.Assistant {
 	return model
 }
 
-func MakeAssistant(m assistant.Assistant) Assistant {
+func MakeAssistant(m domain.Assistant) Assistant {
 	entity := Assistant{
 		ViewID:        m.ViewID,
 		AssistantType: uint(m.AssistantType),
@@ -66,6 +68,7 @@ func MakeAssistant(m assistant.Assistant) Assistant {
 		Description:   m.Description,
 		Tags:          m.Tags,
 		IsPublic:      m.IsPublic,
+		Status:        string(m.Status),
 		CreatedAt:     m.CreatedAt,
 	}
 
