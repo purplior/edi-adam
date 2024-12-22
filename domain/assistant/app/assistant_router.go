@@ -67,6 +67,14 @@ func (r *assistantRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{AdminOnly: true},
 		),
 	)
+
+	assistantRouterGroup.POST(
+		"/admin/approve-one",
+		api.Handler(
+			r.assistantController.ApproveOne_ForAdmin(),
+			api.HandlerFuncOption{AdminOnly: true},
+		),
+	)
 }
 
 func NewAssistantRouter(

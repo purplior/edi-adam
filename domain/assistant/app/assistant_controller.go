@@ -41,6 +41,11 @@ type (
 		 * 쌤비서 수정하기 (어드민용)
 		 */
 		CreateOne_ForAdmin() api.HandlerFunc
+
+		/**
+		 * 쌤비서 공개 승인하기 (어드민용)
+		 */
+		ApproveOne_ForAdmin() api.HandlerFunc
 	}
 )
 
@@ -219,6 +224,27 @@ func (c *assistantController) CreateOne_ForAdmin() api.HandlerFunc {
 		return ctx.SendJSON(response.JSONResponse{
 			Status: response.Status_Created,
 		})
+	}
+}
+
+func (c *assistantController) ApproveOne_ForAdmin() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		assistantID := ctx.QueryParam("id")
+		if len(assistantID) == 0 {
+			return ctx.SendError(exception.ErrBadRequest)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		if err := c.assistantService.ApproveOne(
+			innerCtx,
+			assistantID,
+		); err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{})
 	}
 }
 

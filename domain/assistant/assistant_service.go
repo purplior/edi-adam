@@ -82,6 +82,11 @@ type (
 			ctx inner.Context,
 			assistant Assistant,
 		) error
+
+		ApproveOne(
+			ctx inner.Context,
+			id string,
+		) error
 	}
 )
 
@@ -367,6 +372,35 @@ func (s *assistantService) CreateOne(
 	)
 
 	return err
+}
+
+func (s *assistantService) ApproveOne(
+	ctx inner.Context,
+	id string,
+) error {
+	assistant, err := s.assistantRepository.FindOne_ByID(
+		ctx,
+		id,
+		AssistantJoinOption{},
+	)
+	if err != nil {
+		return err
+	}
+	if assistant.Status != AssistantStatus_UnderReview {
+		return exception.ErrBadRequest
+	}
+
+	assistant.Status = AssistantStatus_Approved
+	assistant.IsPublic = true
+	err = s.assistantRepository.UpdateOne(
+		ctx,
+		assistant,
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func NewAssistantService(
