@@ -69,10 +69,7 @@ type (
 	}
 )
 
-func (m *Assistant) ToInfo() (
-	AssistantInfo,
-	error,
-) {
+func (m *Assistant) ToInfo() AssistantInfo {
 	return AssistantInfo{
 		ViewID:        m.ViewID,
 		Title:         m.Title,
@@ -82,7 +79,7 @@ func (m *Assistant) ToInfo() (
 		AuthorInfo:    m.Author.ToInfo(),
 		CategoryInfo:  m.Category.ToInfo(),
 		CreatedAt:     m.CreatedAt,
-	}, nil
+	}
 }
 
 func (m *Assistant) ToDetail() (

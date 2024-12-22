@@ -8,8 +8,10 @@ import (
 	domain "github.com/purplior/podoroot/domain/me"
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/domain/shared/pagination"
 	"github.com/purplior/podoroot/domain/user"
 	"github.com/purplior/podoroot/domain/wallet"
+	"github.com/purplior/podoroot/lib/dt"
 	"github.com/purplior/podoroot/lib/validator"
 )
 
@@ -34,6 +36,11 @@ type (
 		 * 나의 포도 확인하기
 		 */
 		GetMyPodo() api.HandlerFunc
+
+		/**
+		 * 나의 어시 확인하기
+		 */
+		GetMyAssistantInfos() api.HandlerFunc
 
 		/**
 		 * 내 어시 등록하기
@@ -138,6 +145,47 @@ func (c *meController) GetMyPodo() api.HandlerFunc {
 				Podo int `json:"podo"`
 			}{
 				Podo: wallet.Podo,
+			},
+		})
+	}
+}
+
+func (c *meController) GetMyAssistantInfos() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		if ctx.Identity == nil {
+			return ctx.SendError(exception.ErrUnauthorized)
+		}
+
+		page := dt.Int(ctx.QueryParam("p"))
+		if page < 1 {
+			return ctx.SendError(exception.ErrBadRequest)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		assistants, pageMeta, err := c.assistantService.GetPaginatedList_ByAuthor(
+			innerCtx,
+			ctx.Identity.ID,
+			page,
+			10,
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		assistantInfos := make([]assistant.AssistantInfo, len(assistants))
+		for i, assistant := range assistants {
+			assistantInfos[i] = assistant.ToInfo()
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				AssistantInfos []assistant.AssistantInfo `json:"assistantInfos"`
+				PageMeta       pagination.PaginationMeta `json:"pageMeta"`
+			}{
+				AssistantInfos: assistantInfos,
+				PageMeta:       pageMeta,
 			},
 		})
 	}

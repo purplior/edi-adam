@@ -45,6 +45,14 @@ func (r *meRouter) Attach(router *echo.Group) {
 	)
 
 	meRouterGroup.GET(
+		"/assistant-infos",
+		api.Handler(
+			r.meController.GetMyAssistantInfos(),
+			api.HandlerFuncOption{},
+		),
+	)
+
+	meRouterGroup.GET(
 		"/temp/at",
 		api.Handler(
 			r.meController.GetTempAccessToken(),

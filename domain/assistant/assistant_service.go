@@ -44,15 +44,6 @@ type (
 			error,
 		)
 
-		GetInfoList_ByAuthor(
-			ctx inner.Context,
-			authorID string,
-			joinOption AssistantJoinOption,
-		) (
-			[]AssistantInfo,
-			error,
-		)
-
 		GetInfoList_ByCategory(
 			ctx inner.Context,
 			categoryAlias string,
@@ -279,34 +270,6 @@ func (s *assistantService) GetDetailOne_ByViewID(
 	return assistant.ToDetail()
 }
 
-func (s *assistantService) GetInfoList_ByAuthor(
-	ctx inner.Context,
-	authorID string,
-	joinOption AssistantJoinOption,
-) (
-	[]AssistantInfo,
-	error,
-) {
-	assistants, err := s.assistantRepository.FindList_ByAuthorID(
-		ctx,
-		authorID,
-		joinOption,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	assistantInfos := make([]AssistantInfo, len(assistants))
-	for i, assistant := range assistants {
-		assistantInfos[i], err = assistant.ToInfo()
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return assistantInfos, nil
-}
-
 func (s *assistantService) GetInfoList_ByCategory(
 	ctx inner.Context,
 	categoryAlias string,
@@ -326,10 +289,7 @@ func (s *assistantService) GetInfoList_ByCategory(
 
 	assistantInfos := make([]AssistantInfo, len(assistants))
 	for i, assistant := range assistants {
-		assistantInfos[i], err = assistant.ToInfo()
-		if err != nil {
-			return nil, err
-		}
+		assistantInfos[i] = assistant.ToInfo()
 	}
 
 	return assistantInfos, nil

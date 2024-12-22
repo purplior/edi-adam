@@ -97,37 +97,6 @@ func (r *assistantRepository) FindOne_ByViewID(
 	return e.ToModel(), nil
 }
 
-func (r *assistantRepository) FindList_ByAuthorID(
-	ctx inner.Context,
-	authorID string,
-	joinOption domain.AssistantJoinOption,
-) (
-	[]domain.Assistant,
-	error,
-) {
-	var entities []entity.Assistant
-
-	db := r.client.DBWithContext(ctx)
-	query := db.
-		Where("author_id = ? AND is_public = ?", authorID, true).
-		Order("created_at asc")
-	if joinOption.WithAuthor {
-		query = query.Preload("Author")
-	}
-
-	result := query.Find(&entities)
-	if result.Error != nil {
-		return []domain.Assistant{}, database.ToDomainError(result.Error)
-	}
-
-	assistants := make([]domain.Assistant, len(entities))
-	for i, entity := range entities {
-		assistants[i] = entity.ToModel()
-	}
-
-	return assistants, nil
-}
-
 func (r *assistantRepository) FindList_ByCategoryAlias(
 	ctx inner.Context,
 	categoryAlias string,
@@ -192,7 +161,7 @@ func (r *assistantRepository) FindPaginatedList_ByAuthorID(
 				rdb = db.Where("author_id = ?", authorID)
 			}
 
-			return rdb.Order("created_at DESC")
+			return rdb.Order("created_at DESC").Preload("Category")
 		},
 		func(db *podosql.DB) *podosql.DB {
 			if len(authorID) > 0 {

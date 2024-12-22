@@ -33,15 +33,6 @@ type (
 			error,
 		)
 
-		FindList_ByAuthorID(
-			ctx inner.Context,
-			authorID string,
-			joinOption AssistantJoinOption,
-		) (
-			[]Assistant,
-			error,
-		)
-
 		FindList_ByCategoryAlias(
 			ctx inner.Context,
 			categoryAlias string,
