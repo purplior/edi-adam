@@ -8,6 +8,7 @@ import (
 	"github.com/purplior/podoroot/infra/database/podosql"
 	"github.com/purplior/podoroot/infra/entity"
 	"github.com/purplior/podoroot/infra/repoutil"
+	"github.com/purplior/podoroot/lib/dt"
 )
 
 type (
@@ -104,6 +105,23 @@ func (r *assisterRepository) InsertOne(
 	}
 
 	return e.ToModel(), nil
+}
+
+func (r *assisterRepository) DeleteAll_ByIDs(
+	ctx inner.Context,
+	ids []string,
+) error {
+	db := r.client.DBWithContext(ctx)
+	eIDs := make([]uint, len(ids))
+	for i, id := range ids {
+		eIDs[i] = dt.UInt(id)
+	}
+
+	if err := db.Delete(&entity.Assister{}, eIDs).Error; err != nil {
+		return database.ToDomainError(err)
+	}
+
+	return nil
 }
 
 func NewAssisterRepository(

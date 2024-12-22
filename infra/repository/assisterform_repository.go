@@ -110,6 +110,33 @@ func (r *assisterFormRepository) UpdateOne(
 	return database.ToDomainError(err)
 }
 
+func (r *assisterFormRepository) DeleteAll_ByAssisterIDs(
+	ctx inner.Context,
+	assisterIDs []string,
+) error {
+	eIDs := make([]int, len(assisterIDs))
+	for i, assisterID := range assisterIDs {
+		eIDs[i] = dt.Int(assisterID)
+	}
+
+	_, err := r.client.
+		MyCollection(podomongo.Collection_AssisterForm).
+		DeleteMany(
+			ctx.Value(),
+			bson.M{
+				"assisterId": bson.M{
+					"$in": eIDs,
+				},
+			},
+		)
+
+	if err != nil {
+		return database.ToDomainError(err)
+	}
+
+	return nil
+}
+
 func NewAssisterFormRepository(
 	client *podomongo.Client,
 ) domain.AssisterFormRepository {

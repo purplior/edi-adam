@@ -45,6 +45,11 @@ type (
 			ctx inner.Context,
 			assisterForm AssisterForm,
 		) error
+
+		RemoveAll_ByAssisterIDs(
+			ctx inner.Context,
+			assisterIDs []string,
+		) error
 	}
 )
 
@@ -128,6 +133,16 @@ func (s *assisterFormService) CreateOne(
 	_, err := s.assisterFormRepository.InsertOne(ctx, assisterForm)
 
 	return err
+}
+
+func (s *assisterFormService) RemoveAll_ByAssisterIDs(
+	ctx inner.Context,
+	assisterIDs []string,
+) error {
+	return s.assisterFormRepository.DeleteAll_ByAssisterIDs(
+		ctx,
+		assisterIDs,
+	)
 }
 
 func NewAssisterFormService(

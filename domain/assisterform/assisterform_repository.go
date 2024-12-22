@@ -32,5 +32,10 @@ type (
 			ctx inner.Context,
 			assisterForm AssisterForm,
 		) error
+
+		DeleteAll_ByAssisterIDs(
+			ctx inner.Context,
+			assisterIDs []string,
+		) error
 	}
 )

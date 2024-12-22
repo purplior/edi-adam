@@ -3,6 +3,7 @@ package assistant
 import (
 	"github.com/purplior/podoroot/domain/assister"
 	"github.com/purplior/podoroot/domain/assisterform"
+	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
 	"github.com/purplior/podoroot/domain/shared/pagination"
 	"github.com/purplior/podoroot/lib/strgen"
@@ -18,6 +19,12 @@ type (
 			Assistant,
 			error,
 		)
+
+		RemoveOne_ByID(
+			ctx inner.Context,
+			authorID string,
+			id string,
+		) error
 
 		GetOne_ByID(
 			ctx inner.Context,
@@ -163,6 +170,71 @@ func (s *assistantService) RegisterOne(
 	}
 
 	return _assistant, nil
+}
+
+func (s *assistantService) RemoveOne_ByID(
+	ctx inner.Context,
+	authorID string,
+	id string,
+) error {
+	assistant, err := s.assistantRepository.FindOne_ByID(
+		ctx,
+		id,
+		AssistantJoinOption{
+			WithAssisters: true,
+		},
+	)
+	if err != nil {
+		return err
+	}
+	if assistant.AuthorID != authorID {
+		return exception.ErrBadRequest
+	}
+
+	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
+		return err
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			panic(r)
+		}
+	}()
+
+	assisterIDs := make([]string, len(assistant.Assisters))
+	for i, assister := range assistant.Assisters {
+		assisterIDs[i] = assister.ID
+	}
+
+	if err := s.assisterService.RemoveAll_ByIDs(
+		ctx,
+		assisterIDs,
+	); err != nil {
+		return err
+	}
+
+	if err := s.assisterformService.RemoveAll_ByAssisterIDs(
+		ctx,
+		assisterIDs,
+	); err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		return err
+	}
+
+	if err := s.assistantRepository.DeleteOne_ByID(
+		ctx,
+		id,
+	); err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		return err
+	}
+
+	if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *assistantService) GetOne_ByID(

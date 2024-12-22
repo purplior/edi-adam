@@ -68,6 +68,11 @@ type (
 			ctx inner.Context,
 			assister Assister,
 		) error
+
+		RemoveAll_ByIDs(
+			ctx inner.Context,
+			ids []string,
+		) error
 	}
 )
 
@@ -371,6 +376,13 @@ func (s *assisterService) CreateOne(
 	)
 
 	return err
+}
+
+func (s *assisterService) RemoveAll_ByIDs(
+	ctx inner.Context,
+	ids []string,
+) error {
+	return s.assisterRepository.DeleteAll_ByIDs(ctx, ids)
 }
 
 func NewAssisterService(

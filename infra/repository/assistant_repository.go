@@ -8,6 +8,7 @@ import (
 	"github.com/purplior/podoroot/infra/database/podosql"
 	"github.com/purplior/podoroot/infra/entity"
 	"github.com/purplior/podoroot/infra/repoutil"
+	"github.com/purplior/podoroot/lib/dt"
 )
 
 type (
@@ -221,6 +222,22 @@ func (r *assistantRepository) UpdateOne(
 	db := r.client.DBWithContext(ctx)
 
 	result := db.Save(e)
+	if result.Error != nil {
+		return database.ToDomainError(result.Error)
+	}
+
+	return nil
+}
+
+func (r *assistantRepository) DeleteOne_ByID(
+	ctx inner.Context,
+	id string,
+) error {
+	db := r.client.DBWithContext(ctx)
+
+	result := db.Delete(&entity.Assistant{
+		ID: dt.UInt(id),
+	})
 	if result.Error != nil {
 		return database.ToDomainError(result.Error)
 	}

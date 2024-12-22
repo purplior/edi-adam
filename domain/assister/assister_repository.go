@@ -38,5 +38,10 @@ type (
 			Assister,
 			error,
 		)
+
+		DeleteAll_ByIDs(
+			ctx inner.Context,
+			ids []string,
+		) error
 	}
 )

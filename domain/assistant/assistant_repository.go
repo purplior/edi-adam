@@ -66,5 +66,10 @@ type (
 			ctx inner.Context,
 			assistant Assistant,
 		) error
+
+		DeleteOne_ByID(
+			ctx inner.Context,
+			id string,
+		) error
 	}
 )

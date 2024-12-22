@@ -59,6 +59,14 @@ func (r *meRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{},
 		),
 	)
+
+	meRouterGroup.DELETE(
+		"/assistant/:id",
+		api.Handler(
+			r.meController.RemoveMyAssistant(),
+			api.HandlerFuncOption{},
+		),
+	)
 }
 
 func NewMeRouter(

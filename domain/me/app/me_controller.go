@@ -39,6 +39,11 @@ type (
 		 * 내 어시 등록하기
 		 */
 		RegisterMyAssistant() api.HandlerFunc
+
+		/**
+		 * 내 어시 제거하기
+		 */
+		RemoveMyAssistant() api.HandlerFunc
 	}
 )
 
@@ -167,6 +172,32 @@ func (c *meController) RegisterMyAssistant() api.HandlerFunc {
 		return ctx.SendJSON(response.JSONResponse{
 			Status: response.Status_Created,
 		})
+	}
+}
+
+func (c *meController) RemoveMyAssistant() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		if ctx.Identity == nil {
+			return ctx.SendError(exception.ErrUnauthorized)
+		}
+
+		assistantID := ctx.Param("id")
+		if len(assistantID) == 0 {
+			return ctx.SendError(exception.ErrBadRequest)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		if err := c.assistantService.RemoveOne_ByID(
+			innerCtx,
+			ctx.Identity.ID,
+			assistantID,
+		); err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{})
 	}
 }
 
