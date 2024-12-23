@@ -75,6 +75,7 @@ func (c *Client) MigrateDB() error {
 		entity.Assister{},
 		entity.Mission{},
 		entity.Challenge{},
+		entity.CustomerVoice{},
 		entity.EmailVerification{},
 	)
 }

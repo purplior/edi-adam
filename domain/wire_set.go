@@ -7,6 +7,7 @@ import (
 	assisterform "github.com/purplior/podoroot/domain/assisterform/app"
 	auth "github.com/purplior/podoroot/domain/auth/app"
 	challenge "github.com/purplior/podoroot/domain/challenge/app"
+	customervoice "github.com/purplior/podoroot/domain/customervoice/app"
 	ledger "github.com/purplior/podoroot/domain/ledger/app"
 	me "github.com/purplior/podoroot/domain/me/app"
 	mission "github.com/purplior/podoroot/domain/mission/app"
@@ -21,6 +22,7 @@ var New = wire.NewSet(
 	assisterform.New,
 	auth.New,
 	challenge.New,
+	customervoice.New,
 	ledger.New,
 	me.New,
 	mission.New,
