@@ -35,6 +35,15 @@ type (
 			error,
 		)
 
+		GetOne_ByViewID(
+			ctx inner.Context,
+			viewID string,
+			joinOption AssistantJoinOption,
+		) (
+			Assistant,
+			error,
+		)
+
 		GetDetailOne_ByViewID(
 			ctx inner.Context,
 			viewID string,
@@ -248,6 +257,17 @@ func (s *assistantService) GetOne_ByID(
 	error,
 ) {
 	return s.assistantRepository.FindOne_ByID(ctx, id, joinOption)
+}
+
+func (s *assistantService) GetOne_ByViewID(
+	ctx inner.Context,
+	viewID string,
+	joinOption AssistantJoinOption,
+) (
+	Assistant,
+	error,
+) {
+	return s.assistantRepository.FindOne_ByViewID(ctx, viewID, joinOption)
 }
 
 func (s *assistantService) GetDetailOne_ByViewID(

@@ -82,7 +82,7 @@ func Start() error {
 	challengeController := app5.NewChallengeController(challengeService, contextManager)
 	challengeRouter := app5.NewChallengeRouter(challengeController)
 	meService := me.NewMeService()
-	meController := app6.NewMeController(meService, assistantService, authService, userService, walletService, contextManager)
+	meController := app6.NewMeController(meService, assistantService, assisterFormService, authService, userService, walletService, contextManager)
 	meRouter := app6.NewMeRouter(meController)
 	missionRepository := repository.NewMissionRepository(client)
 	missionService := mission.NewMissionService(missionRepository, challengeService, walletService, contextManager)

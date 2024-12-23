@@ -60,6 +60,14 @@ func (r *meRouter) Attach(router *echo.Group) {
 		),
 	)
 
+	meRouterGroup.GET(
+		"/assistant/by_view/:view_id",
+		api.Handler(
+			r.meController.GetMyAssistant(),
+			api.HandlerFuncOption{},
+		),
+	)
+
 	meRouterGroup.POST(
 		"/assistant",
 		api.Handler(

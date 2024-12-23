@@ -4,6 +4,7 @@ import (
 	"github.com/purplior/podoroot/application/api"
 	"github.com/purplior/podoroot/application/response"
 	"github.com/purplior/podoroot/domain/assistant"
+	"github.com/purplior/podoroot/domain/assisterform"
 	"github.com/purplior/podoroot/domain/auth"
 	domain "github.com/purplior/podoroot/domain/me"
 	"github.com/purplior/podoroot/domain/shared/exception"
@@ -38,9 +39,14 @@ type (
 		GetMyPodo() api.HandlerFunc
 
 		/**
-		 * 나의 어시 확인하기
+		 * 나의 어시목록 확인하기
 		 */
 		GetMyAssistantInfos() api.HandlerFunc
+
+		/**
+		 * 나의 어시 확인하기
+		 */
+		GetMyAssistant() api.HandlerFunc
 
 		/**
 		 * 내 어시 등록하기
@@ -56,12 +62,13 @@ type (
 
 type (
 	meController struct {
-		meService        domain.MeService
-		assistantService assistant.AssistantService
-		authService      auth.AuthService
-		userService      user.UserService
-		walletService    wallet.WalletService
-		cm               inner.ContextManager
+		meService           domain.MeService
+		assistantService    assistant.AssistantService
+		assisterFormService assisterform.AssisterFormService
+		authService         auth.AuthService
+		userService         user.UserService
+		walletService       wallet.WalletService
+		cm                  inner.ContextManager
 	}
 )
 
@@ -191,6 +198,59 @@ func (c *meController) GetMyAssistantInfos() api.HandlerFunc {
 	}
 }
 
+func (c *meController) GetMyAssistant() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		if ctx.Identity == nil {
+			return ctx.SendError(exception.ErrUnauthorized)
+		}
+
+		viewID := ctx.Param("view_id")
+		if len(viewID) == 0 {
+			return ctx.SendError(exception.ErrBadRequest)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		_assistant, err := c.assistantService.GetOne_ByViewID(
+			innerCtx,
+			viewID,
+			assistant.AssistantJoinOption{
+				WithCategory:  true,
+				WithAssisters: true,
+			},
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+		if _assistant.AuthorID != ctx.Identity.ID || len(_assistant.Assisters) == 0 {
+			return ctx.SendError(exception.ErrBadRequest)
+		}
+
+		assisterForm, err := c.assisterFormService.GetOne_ByAssisterID(
+			innerCtx,
+			_assistant.Assisters[0].ID,
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				Assistant     assistant.Assistant                 `json:"assistant"`
+				Fields        []assisterform.AssisterField        `json:"fields"`
+				QueryMessages []assisterform.AssisterQueryMessage `json:"queryMessages"`
+				Tests         []assisterform.AssisterInput        `json:"tests"`
+			}{
+				Assistant:     _assistant,
+				Fields:        assisterForm.Fields,
+				QueryMessages: assisterForm.QueryMessages,
+				Tests:         assisterForm.Tests,
+			},
+		})
+	}
+}
+
 func (c *meController) RegisterMyAssistant() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		if ctx.Identity == nil {
@@ -252,17 +312,19 @@ func (c *meController) RemoveMyAssistant() api.HandlerFunc {
 func NewMeController(
 	meService domain.MeService,
 	assistantService assistant.AssistantService,
+	assisterFormService assisterform.AssisterFormService,
 	authService auth.AuthService,
 	userService user.UserService,
 	walletService wallet.WalletService,
 	cm inner.ContextManager,
 ) MeController {
 	return &meController{
-		meService:        meService,
-		assistantService: assistantService,
-		authService:      authService,
-		userService:      userService,
-		walletService:    walletService,
-		cm:               cm,
+		meService:           meService,
+		assistantService:    assistantService,
+		assisterFormService: assisterFormService,
+		authService:         authService,
+		userService:         userService,
+		walletService:       walletService,
+		cm:                  cm,
 	}
 }

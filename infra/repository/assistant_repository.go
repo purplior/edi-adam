@@ -88,6 +88,12 @@ func (r *assistantRepository) FindOne_ByViewID(
 		}
 	}
 
+	if joinOption.WithCategory {
+		if err := db.Preload("Category").Find(&e).Error; err != nil {
+			return domain.Assistant{}, database.ToDomainError(err)
+		}
+	}
+
 	if joinOption.WithAssisters {
 		if err := db.Preload("Assisters").Find(&e).Error; err != nil {
 			return domain.Assistant{}, database.ToDomainError(err)
