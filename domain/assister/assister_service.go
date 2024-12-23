@@ -1,6 +1,9 @@
 package assister
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/purplior/podoroot/domain/assisterform"
 	"github.com/purplior/podoroot/domain/ledger"
 	"github.com/purplior/podoroot/domain/shared/exception"
@@ -128,24 +131,13 @@ func (s *assisterService) Request(
 		return "", err
 	}
 
-	info, err := s.createQueryInformation(
-		form,
-		inputs,
-	)
+	messageData, err := s.createMessageData(form, inputs)
 	if err != nil {
 		return "", err
 	}
-
-	queryMessages := form.QueryMessages
-	queryMessages = append(queryMessages, assisterform.AssisterQueryMessage{
-		Role:    assisterform.QueryMessageRole_User,
-		Content: info,
-	})
-
-	messageLen := len(queryMessages)
-	messages := make([]map[string]string, messageLen)
-	for i, message := range queryMessages {
-		messages[i] = message.CreatePayload()
+	messages, err := s.createMessagesOfGPT(form, messageData)
+	if err != nil {
+		return "", err
 	}
 
 	if !isFree {
@@ -206,25 +198,13 @@ func (s *assisterService) RequestStream(
 		return err
 	}
 
-	info, err := s.createQueryInformation(
-		form,
-		inputs,
-	)
-
+	messageData, err := s.createMessageData(form, inputs)
 	if err != nil {
 		return err
 	}
-
-	queryMessages := form.QueryMessages
-	queryMessages = append(queryMessages, assisterform.AssisterQueryMessage{
-		Role:    assisterform.QueryMessageRole_User,
-		Content: info,
-	})
-
-	messageLen := len(queryMessages)
-	messages := make([]map[string]string, messageLen)
-	for i, message := range queryMessages {
-		messages[i] = message.CreatePayload()
+	messages, err := s.createMessagesOfGPT(form, messageData)
+	if err != nil {
+		return err
 	}
 
 	if !isFree {
@@ -301,64 +281,6 @@ func (s *assisterService) GetPaginatedList_ByAssistant(
 	)
 }
 
-func (s *assisterService) createQueryInformation(
-	form assisterform.AssisterForm,
-	inputs []assisterform.AssisterInput,
-) (string, error) {
-	content := "## "
-
-	for _, input := range inputs {
-		content += "\n\n### " + input.Name
-
-		for i, v := range input.Values {
-			field, ok := form.FindField(input.Name)
-			if !ok {
-				continue
-			}
-
-			switch field.Type {
-			case assisterform.AssisterFieldType_Keyword:
-				{
-					value := v.(string)
-
-					if i > 0 {
-						content += ","
-					} else {
-						content += "\n"
-					}
-					content += value
-				}
-			case assisterform.AssisterFieldType_Paragraph:
-				{
-					value := v.(string)
-					if len(value) == 0 {
-					}
-
-					content += "\n" + dt.Str(i+1) + ". " + value
-				}
-			case assisterform.AssisterFieldType_ParagraphGroup:
-				{
-					vIObjects := v.([]interface{})
-					vIObjectsLen := len(vIObjects)
-					if vIObjectsLen == 0 {
-					}
-
-					content += "\n" + dt.Str(i+1) + ". " + field.Name
-					for _, vIObj := range vIObjects {
-						vObj := vIObj.(map[string]interface{})
-						childName := dt.Str(vObj["name"])
-						childValue := dt.Str(vObj["value"])
-
-						content += "\n\t- " + childName + ": " + childValue
-					}
-				}
-			}
-		}
-	}
-
-	return content, nil
-}
-
 func (s *assisterService) PutOne(
 	ctx inner.Context,
 	assister Assister,
@@ -383,6 +305,85 @@ func (s *assisterService) RemoveAll_ByIDs(
 	ids []string,
 ) error {
 	return s.assisterRepository.DeleteAll_ByIDs(ctx, ids)
+}
+
+func (s *assisterService) createMessageData(
+	form assisterform.AssisterForm,
+	inputs []assisterform.AssisterInput,
+) (map[string]string, error) {
+	fieldTypeMap := map[string]assisterform.AssisterFieldType{}
+	for _, field := range form.Fields {
+		fieldTypeMap[field.Name] = field.Type
+	}
+
+	data := map[string]string{}
+	for _, input := range inputs {
+		fieldType, ok := fieldTypeMap[input.Name]
+		if !ok {
+			return nil, ErrInvalidAssisterInput
+		}
+
+		values := ""
+
+		switch fieldType {
+		case assisterform.AssisterFieldType_Keyword:
+			for i, value := range input.Values {
+				if i > 0 {
+					values += ","
+				}
+				values += value.(string)
+			}
+		case assisterform.AssisterFieldType_Paragraph:
+			for i, value := range input.Values {
+				if i > 0 {
+					values += "\n"
+				}
+				values += "- " + value.(string)
+			}
+		case assisterform.AssisterFieldType_ParagraphGroup:
+			for i, value := range input.Values {
+				if i > 0 {
+					values += "\n"
+				}
+				values += dt.Str(i+1) + ". "
+
+				childrenInterface := value.([]interface{})
+				for _, childInterface := range childrenInterface {
+					child := childInterface.(map[string]interface{})
+					childName := child["name"].(string)
+					childValue := child["value"].(string)
+
+					values += "\n\t- " + childName + ": " + childValue
+				}
+			}
+		}
+
+		data[input.Name] = values
+	}
+
+	return data, nil
+}
+
+func (s *assisterService) createMessagesOfGPT(
+	form assisterform.AssisterForm,
+	data map[string]string,
+) ([]map[string]string, error) {
+	messages := make([]map[string]string, len(form.QueryMessages))
+
+	for i, queryMessage := range form.QueryMessages {
+		template := queryMessage.Content
+		for key, val := range data {
+			placeholder := fmt.Sprintf("{{ %s }}", key)
+			template = strings.ReplaceAll(template, placeholder, val)
+		}
+
+		messages[i] = map[string]string{
+			"role":    string(queryMessage.Role),
+			"content": template,
+		}
+	}
+
+	return messages, nil
 }
 
 func NewAssisterService(

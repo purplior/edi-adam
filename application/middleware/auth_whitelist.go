@@ -13,7 +13,7 @@ const (
 	Method_Delete AuthWhiteListMethod = http.MethodDelete
 
 	Action_Skip         AuthWhiteListAction = "skip"
-	Action_SkipAndParse AuthWhiteListAction = "skip_and_parse"
+	Action_SkipButParse AuthWhiteListAction = "skip_but_parse"
 	Action_Verify       AuthWhiteListAction = "verify"
 )
 
@@ -47,7 +47,7 @@ var (
 				"detail": {
 					Type:   Type_AllChildren,
 					Method: Method_Get,
-					Action: Action_Skip,
+					Action: Action_SkipButParse,
 				},
 				"podo-list": {
 					Type:   Type_AllChildren,
@@ -61,7 +61,7 @@ var (
 				"exec": {
 					Type:   Type_Exact,
 					Method: Method_Post,
-					Action: Action_SkipAndParse,
+					Action: Action_SkipButParse,
 				},
 			},
 		},
