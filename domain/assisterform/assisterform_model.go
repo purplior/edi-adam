@@ -58,6 +58,17 @@ type (
 	}
 )
 
+func (r AssisterFormRegisterRequest) ToModalForInsert() AssisterForm {
+	return AssisterForm{
+		AssisterID:    r.AssisterID,
+		Origin:        r.Origin,
+		Model:         r.Model,
+		Fields:        r.Fields,
+		Tests:         r.Tests,
+		QueryMessages: r.QueryMessages,
+	}
+}
+
 func MakeAssisterFieldFromMap(m map[string]interface{}) (
 	AssisterField,
 	error,

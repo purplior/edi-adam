@@ -51,7 +51,7 @@ func NewAuthMiddleware() echo.MiddlewareFunc {
 						Message: "unauthorized",
 					})
 				}
-			case Action_SkipAndParse:
+			case Action_SkipButParse:
 				if err == nil {
 					return next(&api.Context{
 						Context:  c,

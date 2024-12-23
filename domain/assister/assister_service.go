@@ -349,9 +349,9 @@ func (s *assisterService) createMessageData(
 
 				childrenInterface := value.([]interface{})
 				for _, childInterface := range childrenInterface {
-					child := childInterface.(map[string]string)
-					childName := child["name"]
-					childValue := child["value"]
+					child := childInterface.(map[string]interface{})
+					childName := child["name"].(string)
+					childValue := child["value"].(string)
 
 					values += "\n\t- " + childName + ": " + childValue
 				}

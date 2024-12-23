@@ -68,10 +68,7 @@ func (s *assisterFormService) RegisterOne(
 ) {
 	return s.assisterFormRepository.InsertOne(
 		ctx,
-		AssisterForm{
-			Fields:        request.Fields,
-			QueryMessages: request.QueryMessages,
-		},
+		request.ToModalForInsert(),
 	)
 }
 
