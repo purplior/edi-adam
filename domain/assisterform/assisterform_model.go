@@ -46,7 +46,14 @@ type (
 	}
 
 	AssisterInput struct {
-		Name   string        `json:"name"`
+		Name string `json:"name"`
+		/**
+		 * Keyword, Paragraph: []string
+		 * ParagraphGroup: [][]{
+		 *   name string
+		 *   value string
+		 * }
+		 */
 		Values []interface{} `json:"values"`
 	}
 )
@@ -130,10 +137,3 @@ type (
 		Content string                   `json:"content"`
 	}
 )
-
-func (m AssisterQueryMessage) CreatePayload() map[string]string {
-	return map[string]string{
-		"role":    string(m.Role),
-		"content": m.Content,
-	}
-}

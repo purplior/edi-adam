@@ -1,6 +1,13 @@
 package assister
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var (
+	ErrInvalidAssisterInput error = errors.New("invalid assister input")
+)
 
 type (
 	Assister struct {
