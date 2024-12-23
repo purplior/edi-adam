@@ -7,6 +7,7 @@ var New = wire.NewSet(
 	NewAssisterRepository,
 	NewAssisterFormRepository,
 	NewChallengeRepository,
+	NewCustomerVoiceRepository,
 	NewEmailVerificationRepository,
 	NewLedgerRepository,
 	NewMissionRepository,
