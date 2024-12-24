@@ -76,6 +76,14 @@ func (r *meRouter) Attach(router *echo.Group) {
 		),
 	)
 
+	meRouterGroup.PATCH(
+		"/assistant/:id",
+		api.Handler(
+			r.meController.UpdateMyAssistant(),
+			api.HandlerFuncOption{},
+		),
+	)
+
 	meRouterGroup.DELETE(
 		"/assistant/:id",
 		api.Handler(

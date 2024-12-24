@@ -20,6 +20,12 @@ type (
 			error,
 		)
 
+		UpdateOne(
+			ctx inner.Context,
+			authorID string,
+			request UpdateOneRequest,
+		) error
+
 		RemoveOne_ByID(
 			ctx inner.Context,
 			authorID string,
@@ -181,6 +187,97 @@ func (s *assistantService) RegisterOne(
 	}
 
 	return _assistant, nil
+}
+
+func (s *assistantService) UpdateOne(
+	ctx inner.Context,
+	authorID string,
+	request UpdateOneRequest,
+) error {
+	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
+		return err
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			panic(r)
+		}
+	}()
+
+	_assistant, err := s.assistantRepository.FindOne_ByID(
+		ctx,
+		request.ID,
+		AssistantJoinOption{
+			WithAssisters: true,
+		},
+	)
+	if err != nil {
+		return err
+	}
+	if _assistant.IsPublic || len(_assistant.Assisters) == 0 {
+		return exception.ErrBadRequest
+	}
+	if _assistant.AuthorID != authorID {
+		return exception.ErrUnauthorized
+	}
+
+	_assister := _assistant.Assisters[0]
+	_assisterForm, err := s.assisterformService.GetOne_ByAssisterID(
+		ctx,
+		_assister.ID,
+	)
+	if err != nil {
+		return err
+	}
+
+	status := AssistantStatus_Registered
+	if request.IsPublic {
+		status = AssistantStatus_UnderReview
+	}
+	err = s.assistantRepository.UpdateOne(
+		ctx,
+		Assistant{
+			ID:            request.ID,
+			ViewID:        _assistant.ViewID,
+			AuthorID:      authorID,
+			CategoryID:    request.CategoryID,
+			AssistantType: _assistant.AssistantType,
+			Title:         request.Title,
+			Description:   request.Description,
+			Tags:          request.Tags,
+			IsPublic:      false,
+			Status:        status,
+			CreatedAt:     _assistant.CreatedAt,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	err = s.assisterformService.UpdateOne(
+		ctx,
+		assisterform.AssisterForm{
+			ID:            _assisterForm.ID,
+			AssisterID:    _assister.AssistantID,
+			Origin:        _assisterForm.Origin,
+			Model:         _assisterForm.Model,
+			Fields:        request.Fields,
+			Tests:         request.Tests,
+			QueryMessages: request.QueryMessages,
+			CreatedAt:     _assistant.CreatedAt,
+		},
+	)
+	if err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		return err
+	}
+
+	if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *assistantService) RemoveOne_ByID(

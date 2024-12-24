@@ -240,7 +240,7 @@ func (c *assisterController) PutOne_ForAdmin() api.HandlerFunc {
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		if err := c.assisterService.PutOne(
+		if err := c.assisterService.UpdateOne(
 			innerCtx,
 			dto.Assister,
 		); err != nil {

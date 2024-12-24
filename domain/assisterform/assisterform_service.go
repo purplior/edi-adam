@@ -36,7 +36,7 @@ type (
 			error,
 		)
 
-		PutOne(
+		UpdateOne(
 			ctx inner.Context,
 			assisterForm AssisterForm,
 		) error
@@ -116,7 +116,7 @@ func (s *assisterFormService) GetViewOne_ByAssister(
 	return assisterForm.ToView(), err
 }
 
-func (s *assisterFormService) PutOne(
+func (s *assisterFormService) UpdateOne(
 	ctx inner.Context,
 	assisterForm AssisterForm,
 ) error {

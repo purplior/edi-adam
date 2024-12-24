@@ -189,3 +189,28 @@ func CheckValidAssistantRegisterRequest(
 
 	return nil
 }
+
+func CheckValidAssistantUpdateRequest(
+	request assistant.UpdateOneRequest,
+) error {
+	if !checkValidAssistantTitle(request.Title) {
+		return ErrInvalidAssistantTitle
+	}
+	if !checkValidAssistantDescription(request.Description) {
+		return ErrInvalidAssistantDescription
+	}
+	if !checkValidAssistantTags(request.Tags) {
+		return ErrInvalidTags
+	}
+	if !checkValidAssistantFields(request.Fields) {
+		return ErrInvalidFields
+	}
+	if !checkValidAssistantQueryMessages(
+		request.Fields,
+		request.QueryMessages,
+	) {
+		return ErrInvalidQueryMessages
+	}
+
+	return nil
+}

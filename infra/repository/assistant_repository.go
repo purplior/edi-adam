@@ -196,7 +196,7 @@ func (r *assistantRepository) UpdateOne(
 	e := entity.MakeAssistant(assistant)
 	db := r.client.DBWithContext(ctx)
 
-	result := db.Save(e)
+	result := db.Save(&e)
 	if result.Error != nil {
 		return database.ToDomainError(result.Error)
 	}

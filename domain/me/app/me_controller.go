@@ -54,6 +54,11 @@ type (
 		RegisterMyAssistant() api.HandlerFunc
 
 		/**
+		 * 내 어시 수정하기
+		 */
+		UpdateMyAssistant() api.HandlerFunc
+
+		/**
 		 * 내 어시 제거하기
 		 */
 		RemoveMyAssistant() api.HandlerFunc
@@ -280,6 +285,43 @@ func (c *meController) RegisterMyAssistant() api.HandlerFunc {
 		return ctx.SendJSON(response.JSONResponse{
 			Status: response.Status_Created,
 		})
+	}
+}
+
+func (c *meController) UpdateMyAssistant() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		if ctx.Identity == nil {
+			return ctx.SendError(exception.ErrUnauthorized)
+		}
+
+		assistantID := ctx.Param("id")
+		if len(assistantID) == 0 {
+			return ctx.SendError(exception.ErrBadRequest)
+		}
+
+		var request assistant.UpdateOneRequest
+		if err := ctx.Bind(&request); err != nil {
+			return ctx.SendError(err)
+		}
+
+		request.ID = assistantID
+
+		if err := validator.CheckValidAssistantUpdateRequest(request); err != nil {
+			return ctx.SendError(err)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		if err := c.assistantService.UpdateOne(
+			innerCtx,
+			ctx.Identity.ID,
+			request,
+		); err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{})
 	}
 }
 

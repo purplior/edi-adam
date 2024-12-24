@@ -62,7 +62,7 @@ type (
 			error,
 		)
 
-		PutOne(
+		UpdateOne(
 			ctx inner.Context,
 			assister Assister,
 		) error
@@ -281,7 +281,7 @@ func (s *assisterService) GetPaginatedList_ByAssistant(
 	)
 }
 
-func (s *assisterService) PutOne(
+func (s *assisterService) UpdateOne(
 	ctx inner.Context,
 	assister Assister,
 ) error {

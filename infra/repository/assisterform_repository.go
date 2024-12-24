@@ -106,8 +106,11 @@ func (r *assisterFormRepository) UpdateOne(
 				"$set": e,
 			},
 		)
+	if err != nil {
+		return database.ToDomainError(err)
+	}
 
-	return database.ToDomainError(err)
+	return nil
 }
 
 func (r *assisterFormRepository) DeleteAll_ByAssisterIDs(

@@ -141,7 +141,7 @@ func (c *assisterFormController) PutOne_ForAdmin() api.HandlerFunc {
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		if err := c.assisterFormService.PutOne(
+		if err := c.assisterFormService.UpdateOne(
 			innerCtx,
 			dto.AssisterForm,
 		); err != nil {

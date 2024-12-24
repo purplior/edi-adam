@@ -45,17 +45,20 @@ type (
 	}
 
 	AssistantInfo struct {
+		ID            string                `json:"id"`
 		ViewID        string                `json:"viewId"`
 		Title         string                `json:"title"`
 		AssistantType AssistantType         `json:"assistantType"`
 		Description   string                `json:"description"`
 		Tags          []string              `json:"tags"`
+		Status        AssistantStatus       `json:"status"`
 		AuthorInfo    user.UserInfo         `json:"authorInfo"`
 		CategoryInfo  category.CategoryInfo `json:"categoryInfo"`
 		CreatedAt     time.Time             `json:"createdAt"`
 	}
 
 	AssistantDetail struct {
+		ID            string                  `json:"id"`
 		ViewID        string                  `json:"viewId"`
 		AssistantType AssistantType           `json:"assistantType"`
 		AuthorInfo    user.UserInfo           `json:"authorInfo"`
@@ -71,11 +74,13 @@ type (
 
 func (m *Assistant) ToInfo() AssistantInfo {
 	return AssistantInfo{
+		ID:            m.ID,
 		ViewID:        m.ViewID,
 		Title:         m.Title,
 		AssistantType: m.AssistantType,
 		Description:   m.Description,
 		Tags:          m.Tags,
+		Status:        m.Status,
 		AuthorInfo:    m.Author.ToInfo(),
 		CategoryInfo:  m.Category.ToInfo(),
 		CreatedAt:     m.CreatedAt,
@@ -92,6 +97,7 @@ func (m *Assistant) ToDetail() (
 	}
 
 	return AssistantDetail{
+		ID:            m.ID,
 		ViewID:        m.ViewID,
 		AuthorInfo:    m.Author.ToInfo(),
 		AssistantType: m.AssistantType,
@@ -107,6 +113,18 @@ func (m *Assistant) ToDetail() (
 
 type (
 	RegisterOneRequest struct {
+		Title         string                              `json:"title"`
+		Description   string                              `json:"description"`
+		CategoryID    string                              `json:"categoryId"`
+		Tags          []string                            `json:"tags"`
+		Fields        []assisterform.AssisterField        `json:"fields"`
+		QueryMessages []assisterform.AssisterQueryMessage `json:"queryMessages"`
+		Tests         []assisterform.AssisterInput        `json:"tests"`
+		IsPublic      bool                                `json:"isPublic"`
+	}
+
+	UpdateOneRequest struct {
+		ID            string                              `json:"id"`
 		Title         string                              `json:"title"`
 		Description   string                              `json:"description"`
 		CategoryID    string                              `json:"categoryId"`
