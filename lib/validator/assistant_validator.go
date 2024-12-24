@@ -73,12 +73,45 @@ func checkValidAssistantDescription(
 	return hasKoreanOrEnglish.MatchString(description)
 }
 
+func checkValidAssistantTag(tag string) bool {
+	// 1. 길이 검사 (1~10자)
+	length := utf8.RuneCountInString(tag)
+	if length < 1 || length > 10 {
+		return false
+	}
+
+	// 2. 허용된 문자만 사용되었는지 확인
+	//    허용 문자: 한글(가-힣, ㄱ-ㅎ, ㅏ-ㅣ)과 공백(\s)
+	allowedChars := regexp.MustCompile(`^[가-힣ㄱ-ㅎㅏ-ㅣ\s]+$`)
+	if !allowedChars.MatchString(tag) {
+		return false
+	}
+
+	// 3. 연속된 두 개 이상의 공백이 없어야 함
+	if regexp.MustCompile(`\s{2}`).MatchString(tag) {
+		return false
+	}
+
+	// 모든 조건을 만족하면 true
+	return true
+}
+
 func checkValidAssistantTags(
 	tags []string,
 ) bool {
-	isTag := len(tags) > 0 && len(tags[0]) > 0
+	tagLen := len(tags)
+	if tagLen <= 0 && tagLen > 4 {
+		return false
+	}
 
-	return isTag
+	for _, tag := range tags {
+		isValid := checkValidAssistantTag(tag)
+		if !isValid {
+			return false
+		}
+	}
+
+	return true
 }
 
 func checkValidAssisterFieldName(input string) bool {
