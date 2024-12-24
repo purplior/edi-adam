@@ -49,6 +49,11 @@ type (
 		GetMyAssistant() api.HandlerFunc
 
 		/**
+		 * 나의 어시 상세 확인하기
+		 */
+		GetMyAssistantDetail() api.HandlerFunc
+
+		/**
 		 * 내 어시 등록하기
 		 */
 		RegisterMyAssistant() api.HandlerFunc
@@ -251,6 +256,45 @@ func (c *meController) GetMyAssistant() api.HandlerFunc {
 				Fields:        assisterForm.Fields,
 				QueryMessages: assisterForm.QueryMessages,
 				Tests:         assisterForm.Tests,
+			},
+		})
+	}
+}
+
+func (c *meController) GetMyAssistantDetail() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		if ctx.Identity == nil {
+			return ctx.SendError(exception.ErrUnauthorized)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		assistantViewID := ctx.Param("view_id")
+		if len(assistantViewID) == 0 {
+			return ctx.SendError(exception.ErrBadRequest)
+		}
+
+		assistantDetail, err := c.assistantService.GetDetailOne_ByViewID(
+			innerCtx,
+			assistantViewID,
+			assistant.AssistantJoinOption{
+				WithAuthor:    true,
+				WithAssisters: true,
+			},
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+		if assistantDetail.AuthorInfo.ID != ctx.Identity.ID {
+			return ctx.SendError(exception.ErrUnauthorized)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				AssistantDetail assistant.AssistantDetail `json:"assistantDetail"`
+			}{
+				AssistantDetail: assistantDetail,
 			},
 		})
 	}

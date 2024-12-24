@@ -78,9 +78,7 @@ func (c *assistantController) GetDetailOne() api.HandlerFunc {
 			return ctx.SendError(err)
 		}
 		if !assistantDetail.IsPublic {
-			if ctx.Identity == nil || ctx.Identity.ID != assistantDetail.AuthorInfo.ID {
-				return ctx.SendError(exception.ErrUnauthorized)
-			}
+			return ctx.SendError(exception.ErrUnauthorized)
 		}
 
 		return ctx.SendJSON(response.JSONResponse{
