@@ -295,7 +295,7 @@ func (s *assistantService) RemoveOne_ByID(
 	if err != nil {
 		return err
 	}
-	if assistant.AuthorID != authorID {
+	if assistant.Status != AssistantStatus_Registered || assistant.AuthorID != authorID {
 		return exception.ErrBadRequest
 	}
 
