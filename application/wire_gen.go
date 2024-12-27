@@ -100,7 +100,7 @@ func Start() error {
 	missionService := mission.NewMissionService(missionRepository, challengeService, walletService, contextManager)
 	missionController := app9.NewMissionController(missionService, contextManager)
 	missionRouter := app9.NewMissionRouter(missionController)
-	userController := app10.NewUserController()
+	userController := app10.NewUserController(userService, contextManager)
 	userRouter := app10.NewUserRouter(userController)
 	emailVerificationController := app11.NewEmailVerificationController(emailVerificationService, contextManager)
 	verificationRouter := app11.NewVerificationRouter(emailVerificationController)

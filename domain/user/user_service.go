@@ -1,6 +1,7 @@
 package user
 
 import (
+	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
 )
 
@@ -29,6 +30,14 @@ type (
 		) (
 			newUser User,
 			err error,
+		)
+
+		CheckNicknameExistence(
+			ctx inner.Context,
+			nickname string,
+		) (
+			bool,
+			error,
 		)
 	}
 
@@ -79,6 +88,28 @@ func (s *userService) RegisterOne(
 	}
 
 	return s.userRepository.InsertOne(ctx, user)
+}
+
+func (s *userService) CheckNicknameExistence(
+	ctx inner.Context,
+	nickname string,
+) (
+	bool,
+	error,
+) {
+	_, err := s.userRepository.FindOne_ByNickname(
+		ctx,
+		nickname,
+	)
+	if err != nil {
+		if err == exception.ErrNoRecord {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	return true, nil
 }
 
 func NewUserService(

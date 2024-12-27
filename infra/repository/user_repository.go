@@ -56,6 +56,26 @@ func (r *userRepository) FindOne_ByAccount(
 	return e.ToModel(), nil
 }
 
+func (r *userRepository) FindOne_ByNickname(
+	ctx inner.Context,
+	nickname string,
+) (
+	domain.User,
+	error,
+) {
+	var e entity.User
+
+	db := r.client.DBWithContext(ctx)
+	err := db.
+		Where("nickname = ?", nickname).
+		First(&e).Error
+	if err != nil {
+		return domain.User{}, database.ToDomainError(err)
+	}
+
+	return e.ToModel(), nil
+}
+
 func (r *userRepository) InsertOne(
 	ctx inner.Context,
 	userForInsert domain.User,

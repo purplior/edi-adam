@@ -21,6 +21,14 @@ type (
 			error,
 		)
 
+		FindOne_ByNickname(
+			ctx inner.Context,
+			nickname string,
+		) (
+			User,
+			error,
+		)
+
 		InsertOne(
 			ctx inner.Context,
 			user User,

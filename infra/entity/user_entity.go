@@ -15,7 +15,7 @@ type (
 		AccountPassword  string `gorm:"size:255;not null"`
 		AvatarTheme      int    `gorm:"default:1"`
 		AvatarText       string `gorm:"size:10"`
-		Nickname         string `gorm:"size:100"`
+		Nickname         string `gorm:"size:100;unique"`
 		Role             int    `gorm:"default:100"`
 		IsMarketingAgree bool
 		CreatedAt        time.Time       `gorm:"autoCreateTime"`

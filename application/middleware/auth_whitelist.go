@@ -74,5 +74,14 @@ var (
 				},
 			},
 		},
+		"user": {
+			Children: map[string]AuthWhiteListItem{
+				"nickname-check": {
+					Type:   Type_AllChildren,
+					Method: Method_Get,
+					Action: Action_Skip,
+				},
+			},
+		},
 	}
 )
