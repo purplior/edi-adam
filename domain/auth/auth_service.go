@@ -121,13 +121,14 @@ func (s *authService) SignUp_ByEmailVerification(
 	me, err := s.userService.RegisterOne(
 		ctx,
 		user.User{
-			JoinMethod:      user.JoinMethod_Email,
-			AccountID:       verification.Email,
-			AccountPassword: request.Password,
-			AvatarTheme:     1,
-			AvatarText:      strgen.ExtractInitialChar(request.Nickname),
-			Nickname:        request.Nickname,
-			Role:            user.Role_User,
+			JoinMethod:       user.JoinMethod_Email,
+			AccountID:        verification.Email,
+			AccountPassword:  request.Password,
+			AvatarTheme:      1,
+			AvatarText:       strgen.ExtractInitialChar(request.Nickname),
+			Nickname:         request.Nickname,
+			Role:             user.Role_User,
+			IsMarketingAgree: request.IsMarketingAgree,
 		},
 	)
 	if err != nil {

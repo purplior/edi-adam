@@ -9,15 +9,16 @@ import (
 
 type (
 	User struct {
-		ID              string    `json:"id"`
-		JoinMethod      string    `json:"joinMethod"`
-		AccountID       string    `json:"accountId"`
-		AccountPassword string    `json:"accountPassword"`
-		AvatarTheme     int       `json:"avatarTheme"`
-		AvatarText      string    `json:"avatarText"`
-		Nickname        string    `json:"nickname"`
-		Role            int       `json:"role"`
-		CreatedAt       time.Time `json:"createdAt"`
+		ID               string    `json:"id"`
+		JoinMethod       string    `json:"joinMethod"`
+		AccountID        string    `json:"accountId"`
+		AccountPassword  string    `json:"accountPassword"`
+		AvatarTheme      int       `json:"avatarTheme"`
+		AvatarText       string    `json:"avatarText"`
+		Nickname         string    `json:"nickname"`
+		Role             int       `json:"role"`
+		IsMarketingAgree bool      `json:"isMarketingAgree"`
+		CreatedAt        time.Time `json:"createdAt"`
 	}
 
 	UserInfo struct {

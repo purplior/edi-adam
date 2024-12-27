@@ -76,8 +76,9 @@ type (
 	}
 
 	SignUpByEmailVerificationRequest struct {
-		VerificationID string `json:"verificationId"`
-		Password       string `json:"password"`
-		Nickname       string `json:"nickname"`
+		VerificationID   string `json:"verificationId"`
+		Password         string `json:"password"`
+		Nickname         string `json:"nickname"`
+		IsMarketingAgree bool   `json:"isMarketingAgree"`
 	}
 )
