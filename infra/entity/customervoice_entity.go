@@ -11,15 +11,15 @@ type (
 	CustomerVoice struct {
 		ID        uint `gorm:"primaryKey;autoIncrement"`
 		UserID    uint
-		Title     string    `gorm:"size:255"`
-		Content   string    `gorm:"size:1000"`
-		CreatedAt time.Time `gorm:"autoCreateTime"`
+		Type      domain.CustomerVoiceType `gorm:"size:80"`
+		Content   string                   `gorm:"size:2000"`
+		CreatedAt time.Time                `gorm:"autoCreateTime"`
 	}
 )
 
 func (e CustomerVoice) ToModel() domain.CustomerVoice {
 	model := domain.CustomerVoice{
-		Title:     e.Title,
+		Type:      e.Type,
 		Content:   e.Content,
 		CreatedAt: e.CreatedAt,
 	}
@@ -36,7 +36,7 @@ func (e CustomerVoice) ToModel() domain.CustomerVoice {
 
 func MakeCustomerVoice(m domain.CustomerVoice) CustomerVoice {
 	entity := CustomerVoice{
-		Title:     m.Title,
+		Type:      m.Type,
 		Content:   m.Content,
 		CreatedAt: m.CreatedAt,
 	}

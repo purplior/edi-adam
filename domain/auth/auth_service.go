@@ -79,7 +79,9 @@ func (s *authService) SignIn_ByEmailVerification(
 	if err != nil {
 		return IdentityToken{}, Identity{}, exception.ErrUnauthorized
 	}
-
+	if existedUser.IsInactivated {
+		return IdentityToken{}, Identity{}, exception.ErrUnauthorized
+	}
 	if err := existedUser.ComparePassword(request.Password); err != nil {
 		return IdentityToken{}, Identity{}, exception.ErrUnauthorized
 	}

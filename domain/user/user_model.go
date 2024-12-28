@@ -18,7 +18,9 @@ type (
 		Nickname         string    `json:"nickname"`
 		Role             int       `json:"role"`
 		IsMarketingAgree bool      `json:"isMarketingAgree"`
+		IsInactivated    bool      `json:"isInactivated"`
 		CreatedAt        time.Time `json:"createdAt"`
+		InactivatedAt    time.Time `json:"inactivatedAt"`
 	}
 
 	UserInfo struct {

@@ -18,7 +18,9 @@ type (
 		Nickname         string `gorm:"size:100;unique"`
 		Role             int    `gorm:"default:100"`
 		IsMarketingAgree bool
+		IsInactivated    bool
 		CreatedAt        time.Time       `gorm:"autoCreateTime"`
+		InactivatedAt    time.Time       `gorm:""`
 		Wallet           Wallet          `gorm:"foreignKey:OwnerID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 		Categories       []Category      `gorm:"foreignKey:CreatorID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 		Assistants       []Assistant     `gorm:"foreignKey:AuthorID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
@@ -37,7 +39,9 @@ func (e User) ToModel() user.User {
 		Nickname:         e.Nickname,
 		Role:             e.Role,
 		IsMarketingAgree: e.IsMarketingAgree,
+		IsInactivated:    e.IsInactivated,
 		CreatedAt:        e.CreatedAt,
+		InactivatedAt:    e.InactivatedAt,
 	}
 
 	if e.ID > 0 {
@@ -57,7 +61,9 @@ func MakeUser(m user.User) User {
 		Nickname:         m.Nickname,
 		Role:             m.Role,
 		IsMarketingAgree: m.IsMarketingAgree,
+		IsInactivated:    m.IsInactivated,
 		CreatedAt:        m.CreatedAt,
+		InactivatedAt:    m.InactivatedAt,
 	}
 
 	if len(m.ID) > 0 {

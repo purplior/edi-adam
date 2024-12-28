@@ -1,6 +1,10 @@
 package user
 
-import "github.com/purplior/podoroot/domain/shared/inner"
+import (
+	"time"
+
+	"github.com/purplior/podoroot/domain/shared/inner"
+)
 
 type (
 	UserRepository interface {
@@ -36,5 +40,12 @@ type (
 			User,
 			error,
 		)
+
+		UpdateOne_InactivatedFields(
+			ctx inner.Context,
+			userID string,
+			isInactivated bool,
+			inactivatedAt time.Time,
+		) error
 	}
 )

@@ -90,7 +90,7 @@ func Start() error {
 	challengeController := app6.NewChallengeController(challengeService, contextManager)
 	challengeRouter := app6.NewChallengeRouter(challengeController)
 	customerVoiceRepository := repository.NewCustomerVoiceRepository(client)
-	customerVoiceService := customervoice.NewCustomerVoiceService(customerVoiceRepository)
+	customerVoiceService := customervoice.NewCustomerVoiceService(customerVoiceRepository, userService, contextManager)
 	customerVoiceController := app7.NewCustomerVoiceController(customerVoiceService, contextManager)
 	customerVoiceRouter := app7.NewCustomerVoiceRouter(customerVoiceController)
 	meService := me.NewMeService()

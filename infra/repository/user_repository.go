@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/purplior/podoroot/domain/shared/inner"
 	domain "github.com/purplior/podoroot/domain/user"
 	"github.com/purplior/podoroot/infra/database"
@@ -93,6 +95,24 @@ func (r *userRepository) InsertOne(
 	}
 
 	return e.ToModel(), nil
+}
+
+func (r *userRepository) UpdateOne_InactivatedFields(
+	ctx inner.Context,
+	userID string,
+	isInactivated bool,
+	inactivatedAt time.Time,
+) error {
+	db := r.client.DBWithContext(ctx)
+	err := db.Model(&entity.User{}).
+		Where("id = ?", userID).
+		Updates(map[string]interface{}{
+			"is_inactivated": isInactivated,
+			"inactivated_at": inactivatedAt,
+		}).
+		Error
+
+	return err
 }
 
 func NewUserRepository(

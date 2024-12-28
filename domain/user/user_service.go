@@ -3,6 +3,7 @@ package user
 import (
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/lib/mydate"
 )
 
 type (
@@ -39,6 +40,11 @@ type (
 			bool,
 			error,
 		)
+
+		Inactive(
+			ctx inner.Context,
+			userID string,
+		) error
 	}
 
 	userService struct {
@@ -110,6 +116,18 @@ func (s *userService) CheckNicknameExistence(
 	}
 
 	return true, nil
+}
+
+func (s *userService) Inactive(
+	ctx inner.Context,
+	userID string,
+) error {
+	return s.userRepository.UpdateOne_InactivatedFields(
+		ctx,
+		userID,
+		true,
+		mydate.Now(),
+	)
 }
 
 func NewUserService(
