@@ -14,6 +14,7 @@ type (
 
 func (m Category) ToInfo() CategoryInfo {
 	return CategoryInfo{
+		ID:    m.ID,
 		Alias: m.Alias,
 		Label: m.Label,
 	}
@@ -21,6 +22,7 @@ func (m Category) ToInfo() CategoryInfo {
 
 type (
 	CategoryInfo struct {
+		ID    string `json:"id"`
 		Alias string `json:"alias"`
 		Label string `json:"label"`
 	}

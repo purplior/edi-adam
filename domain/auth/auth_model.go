@@ -70,12 +70,12 @@ type (
 		RefreshToken string `json:"refreshToken"`
 	}
 
-	SignInByEmailVerificationRequest struct {
+	SignInRequest struct {
 		AccountID string `json:"accountId"`
 		Password  string `json:"password"`
 	}
 
-	SignUpByEmailVerificationRequest struct {
+	SignUpRequest struct {
 		VerificationID   string `json:"verificationId"`
 		Password         string `json:"password"`
 		Nickname         string `json:"nickname"`

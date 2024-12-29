@@ -17,6 +17,11 @@ type (
 		SignIn_ByEmailVerification() api.HandlerFunc
 
 		/**
+		 * 휴대폰 번호로 로그인
+		 */
+		SignIn_ByPhoneNumberVerification() api.HandlerFunc
+
+		/**
 		 * 이메일로 로그인 (어드민용)
 		 */
 		SignIn_ByEmailVerification_ForAdmin() api.HandlerFunc
@@ -25,6 +30,11 @@ type (
 		 * 이메일로 회원가입
 		 */
 		SignUp_ByEmailVerification() api.HandlerFunc
+
+		/**
+		 * 휴대폰 번호로 회원가입
+		 */
+		SignUp_ByPhoneNumberVerification() api.HandlerFunc
 
 		/**
 		 * 토큰 재발급
@@ -42,7 +52,7 @@ type (
 
 func (c *authController) SignIn_ByEmailVerification() api.HandlerFunc {
 	return func(ctx *api.Context) error {
-		var dto domain.SignInByEmailVerificationRequest
+		var dto domain.SignInRequest
 		if err := ctx.Bind(&dto); err != nil {
 			return ctx.SendError(err)
 		}
@@ -70,9 +80,39 @@ func (c *authController) SignIn_ByEmailVerification() api.HandlerFunc {
 	}
 }
 
+func (c *authController) SignIn_ByPhoneNumberVerification() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		var dto domain.SignInRequest
+		if err := ctx.Bind(&dto); err != nil {
+			return ctx.SendError(err)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		identityToken, identity, err := c.authService.SignIn_ByPhoneNumberVerification(
+			innerCtx,
+			dto,
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				Token    domain.IdentityToken `json:"token"`
+				Identity domain.Identity      `json:"identity"`
+			}{
+				Token:    identityToken,
+				Identity: identity,
+			},
+		})
+	}
+}
+
 func (c *authController) SignIn_ByEmailVerification_ForAdmin() api.HandlerFunc {
 	return func(ctx *api.Context) error {
-		var dto domain.SignInByEmailVerificationRequest
+		var dto domain.SignInRequest
 		if err := ctx.Bind(&dto); err != nil {
 			return ctx.SendError(err)
 		}
@@ -105,7 +145,7 @@ func (c *authController) SignIn_ByEmailVerification_ForAdmin() api.HandlerFunc {
 
 func (c *authController) SignUp_ByEmailVerification() api.HandlerFunc {
 	return func(ctx *api.Context) error {
-		var dto domain.SignUpByEmailVerificationRequest
+		var dto domain.SignUpRequest
 		if err := ctx.Bind(&dto); err != nil {
 			return ctx.SendError(err)
 		}
@@ -114,6 +154,28 @@ func (c *authController) SignUp_ByEmailVerification() api.HandlerFunc {
 		defer cancel()
 
 		err := c.authService.SignUp_ByEmailVerification(
+			innerCtx,
+			dto,
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{})
+	}
+}
+
+func (c *authController) SignUp_ByPhoneNumberVerification() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		var dto domain.SignUpRequest
+		if err := ctx.Bind(&dto); err != nil {
+			return ctx.SendError(err)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		err := c.authService.SignUp_ByPhoneNumberVerification(
 			innerCtx,
 			dto,
 		)

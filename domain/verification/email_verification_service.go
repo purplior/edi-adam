@@ -40,12 +40,12 @@ type (
 		)
 	}
 
-	service struct {
+	emailVerificationService struct {
 		emailVerificationRepository EmailVerificationRepository
 	}
 )
 
-func (s *service) Consume(
+func (s *emailVerificationService) Consume(
 	ctx inner.Context,
 	id string,
 ) (EmailVerification, error) {
@@ -70,7 +70,7 @@ func (s *service) Consume(
 	return emailVerification, nil
 }
 
-func (s *service) RequestCode(
+func (s *emailVerificationService) RequestCode(
 	ctx inner.Context,
 	email string,
 	isTestMode bool,
@@ -107,7 +107,7 @@ func (s *service) RequestCode(
 	return ver, nil
 }
 
-func (s *service) VerifyCode(
+func (s *emailVerificationService) VerifyCode(
 	ctx inner.Context,
 	email string,
 	code string,
@@ -160,7 +160,7 @@ func makeRequestCodeBody(code string) string {
 func NewEmailVerificationService(
 	emailVerificationRepository EmailVerificationRepository,
 ) EmailVerificationService {
-	return &service{
+	return &emailVerificationService{
 		emailVerificationRepository: emailVerificationRepository,
 	}
 }

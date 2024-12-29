@@ -27,6 +27,10 @@ func (s *categoryService) GetMainCategoryList(
 ) {
 	return s.categoryRepository.FindListByIDs(ctx, []string{
 		"1",
+		"2",
+		"5",
+		"3",
+		"4",
 	})
 }
 

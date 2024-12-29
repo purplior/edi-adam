@@ -7,6 +7,7 @@ import (
 )
 
 const (
+	MissionReward_Podo3000 MissionReward = "podo_3000"
 	MissionReward_Podo5000 MissionReward = "podo_5000"
 )
 

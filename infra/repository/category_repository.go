@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"fmt"
+	"strings"
+
 	domain "github.com/purplior/podoroot/domain/category"
 	"github.com/purplior/podoroot/domain/shared/inner"
 	"github.com/purplior/podoroot/infra/database"
@@ -29,7 +32,10 @@ func (r *categoryRepository) FindListByIDs(
 	}
 
 	var entities []entity.Category
-	if err := db.Find(&entities, eIDs).Error; err != nil {
+	orderStr := fmt.Sprintf("FIELD(id, %s)", strings.Join(ids, ","))
+	if err := db.Where("id IN ?", eIDs).
+		Order(orderStr).
+		Find(&entities).Error; err != nil {
 		return nil, database.ToDomainError(err)
 	}
 

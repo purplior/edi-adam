@@ -17,10 +17,11 @@ type (
 		AvatarText       string `gorm:"size:10"`
 		Nickname         string `gorm:"size:100;unique"`
 		Role             int    `gorm:"default:100"`
+		PhoneNumber      string `gorm:"size:20"`
 		IsMarketingAgree bool
 		IsInactivated    bool
-		CreatedAt        time.Time       `gorm:"autoCreateTime"`
-		InactivatedAt    time.Time       `gorm:""`
+		CreatedAt        time.Time `gorm:"autoCreateTime"`
+		InactivatedAt    *time.Time
 		Wallet           Wallet          `gorm:"foreignKey:OwnerID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 		Categories       []Category      `gorm:"foreignKey:CreatorID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 		Assistants       []Assistant     `gorm:"foreignKey:AuthorID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
@@ -38,6 +39,7 @@ func (e User) ToModel() user.User {
 		AvatarText:       e.AvatarText,
 		Nickname:         e.Nickname,
 		Role:             e.Role,
+		PhoneNumber:      e.PhoneNumber,
 		IsMarketingAgree: e.IsMarketingAgree,
 		IsInactivated:    e.IsInactivated,
 		CreatedAt:        e.CreatedAt,
@@ -60,6 +62,7 @@ func MakeUser(m user.User) User {
 		AvatarText:       m.AvatarText,
 		Nickname:         m.Nickname,
 		Role:             m.Role,
+		PhoneNumber:      m.PhoneNumber,
 		IsMarketingAgree: m.IsMarketingAgree,
 		IsInactivated:    m.IsInactivated,
 		CreatedAt:        m.CreatedAt,

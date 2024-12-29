@@ -11,6 +11,7 @@ import (
 )
 
 var (
+	ErrInvalid                     = errors.New("잘못된 형식이에요")
 	ErrInvalidAssistantTitle       = errors.New("잘못된 형식의 제목이에요")
 	ErrInvalidAssistantDescription = errors.New("잘못된 형식의 설명이에요")
 	ErrInvalidTags                 = errors.New("잘못된 형식의 태그에요")

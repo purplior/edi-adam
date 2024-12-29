@@ -97,6 +97,19 @@ func (s *missionService) ReceiveOne(
 	}
 
 	switch mission.Reward {
+	case MissionReward_Podo3000:
+		{
+			if err := s.walletService.Charge(
+				ctx,
+				userID,
+				3000,
+				ledger.LedgerAction_ReceiveByMission,
+				mission.ID,
+			); err != nil {
+				s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+				return err
+			}
+		}
 	case MissionReward_Podo5000:
 		{
 			if err := s.walletService.Charge(

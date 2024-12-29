@@ -45,9 +45,25 @@ func (r *authRouter) Attach(router *echo.Group) {
 	)
 
 	authRouterGroup.POST(
+		"/phone/sign-in",
+		api.Handler(
+			r.authController.SignIn_ByPhoneNumberVerification(),
+			api.HandlerFuncOption{},
+		),
+	)
+
+	authRouterGroup.POST(
 		"/email/sign-up",
 		api.Handler(
 			r.authController.SignUp_ByEmailVerification(),
+			api.HandlerFuncOption{},
+		),
+	)
+
+	authRouterGroup.POST(
+		"/phone/sign-up",
+		api.Handler(
+			r.authController.SignUp_ByPhoneNumberVerification(),
 			api.HandlerFuncOption{},
 		),
 	)
