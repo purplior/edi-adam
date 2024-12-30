@@ -62,7 +62,7 @@ func (ctx Context) SendError(err error) error {
 		message = err.Error()
 	}
 
-	if config.Phase() == constant.Phase_Local {
+	if config.Phase() != constant.Phase_Production {
 		log.Println(err)
 		log.Printf("Error: %v\nStack Trace:\n%s", err, debug.Stack())
 	}

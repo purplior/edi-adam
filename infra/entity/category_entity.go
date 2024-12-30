@@ -9,10 +9,9 @@ import (
 
 type (
 	Category struct {
-		ID         uint   `gorm:"primaryKey;autoIncrement"`
-		Alias      string `gorm:"unique;size:30"`
-		Label      string `gorm:"size:50"`
-		CreatorID  uint
+		ID         uint        `gorm:"primaryKey;autoIncrement"`
+		Alias      string      `gorm:"unique;size:30"`
+		Label      string      `gorm:"unique;size:50"`
 		CreatedAt  time.Time   `gorm:"autoCreateTime"`
 		Assistants []Assistant `gorm:"foreignKey:CategoryID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	}
@@ -28,9 +27,6 @@ func (e Category) ToModel() domain.Category {
 	if e.ID > 0 {
 		m.ID = dt.Str(e.ID)
 	}
-	if e.CreatorID > 0 {
-		m.CreatorID = dt.Str(e.CreatorID)
-	}
 
 	return m
 }
@@ -44,9 +40,6 @@ func MakeCategory(m domain.Category) Category {
 
 	if len(m.ID) > 0 {
 		e.ID = dt.UInt(m.ID)
-	}
-	if len(m.CreatorID) > 0 {
-		e.CreatorID = dt.UInt(m.CreatorID)
 	}
 
 	return e

@@ -18,8 +18,8 @@ func Init() error {
 	switch phase {
 	case constant.Phase_Local:
 		envFilePath = ".env.local"
-	case constant.Phase_Stage:
-		envFilePath = ".env.stage"
+	case constant.Phase_Alpha:
+		envFilePath = ".env.alpha"
 	case constant.Phase_Production:
 		envFilePath = ".env.prod"
 	default:
@@ -121,7 +121,7 @@ var (
 
 	phaseStringToEnumMap = map[string]constant.Phase{
 		"local": constant.Phase_Local,
-		"stage": constant.Phase_Stage,
+		"alpha": constant.Phase_Alpha,
 		"prod":  constant.Phase_Production,
 	}
 )

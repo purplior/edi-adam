@@ -7,7 +7,6 @@ type (
 		ID        string    `json:"id"`
 		Alias     string    `json:"alias"`
 		Label     string    `json:"label"`
-		CreatorID string    `json:"creatorId"`
 		CreatedAt time.Time `json:"createdAt"`
 	}
 )

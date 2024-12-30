@@ -23,7 +23,6 @@ type (
 		CreatedAt        time.Time `gorm:"autoCreateTime"`
 		InactivatedAt    *time.Time
 		Wallet           Wallet          `gorm:"foreignKey:OwnerID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-		Categories       []Category      `gorm:"foreignKey:CreatorID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 		Assistants       []Assistant     `gorm:"foreignKey:AuthorID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 		Challenges       []Challenge     `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 		CustomerVoices   []CustomerVoice `gorm:"foreignKey:UserID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`

@@ -7,6 +7,6 @@ type (
 const (
 	Phase_Invalid Phase = iota
 	Phase_Local
-	Phase_Stage
+	Phase_Alpha
 	Phase_Production
 )

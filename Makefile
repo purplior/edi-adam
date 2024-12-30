@@ -17,7 +17,12 @@ wire:
 build:
 	go build -ldflags="-s -w" -o $(BUILD_DIR)/$(APP_NAME) $(MAIN_FILE)
 
-local:
+alpha:
 	make wire
 	make build
-	APP_PHASE=local $(BUILD_DIR)/$(APP_NAME)
+	APP_PHASE=alpha $(BUILD_DIR)/$(APP_NAME)
+
+prod:
+	make wire
+	make build
+	APP_PHASE=alpha $(BUILD_DIR)/$(APP_NAME)
