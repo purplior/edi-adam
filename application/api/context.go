@@ -54,6 +54,8 @@ func (ctx Context) SendError(err error) error {
 		status = response.Status_NotFound
 	case exception.ErrNoSignedUpPhone:
 		status = response.Status_Unprocessable
+	case exception.ErrPhoneVerificationExceed:
+		status = response.Status_Unprocessable
 	}
 
 	if status != response.Status_InternalServerError {

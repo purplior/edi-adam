@@ -50,6 +50,19 @@ func (c *phoneVerificationController) RequestCode() api.HandlerFunc {
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
+		_user, err := c.userService.GetOne_ByAccount(
+			innerCtx,
+			user.JoinMethod_PhoneNumber,
+			dto.PhoneNumber,
+		)
+		if err != nil {
+			if err != exception.ErrNoRecord {
+				return ctx.SendError(exception.ErrNoSignedUpPhone)
+			}
+		} else if len(_user.ID) > 0 {
+			return ctx.SendError(exception.ErrAlreadySignedUp)
+		}
+
 		verification, err := c.phoneVerificationService.RequestCode(
 			innerCtx,
 			dto.PhoneNumber,

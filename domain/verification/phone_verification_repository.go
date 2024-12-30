@@ -20,12 +20,20 @@ type (
 			error,
 		)
 
-		FindRecentOneByPhoneNumber(
+		FindRecentOne_ByPhoneNumber(
 			ctx inner.Context,
 			phoneNumber string,
 		) (
 			PhoneVerification,
 			error,
+		)
+
+		FindCount_ByPhoneNumber(
+			ctx inner.Context,
+			phoneNumber string,
+		) (
+			count int,
+			err error,
 		)
 
 		UpdateOne_IsVerified(

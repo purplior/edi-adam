@@ -42,6 +42,7 @@ type (
 
 	phoneVerificationService struct {
 		phoneVerificationRepository PhoneVerificationRepository
+		maxCount                    int
 	}
 )
 
@@ -79,6 +80,17 @@ func (s *phoneVerificationService) RequestCode(
 		return PhoneVerification{}, err
 	}
 
+	count, err := s.phoneVerificationRepository.FindCount_ByPhoneNumber(
+		ctx,
+		phoneNumber,
+	)
+	if err != nil {
+		return PhoneVerification{}, err
+	}
+	if count >= s.maxCount {
+		return PhoneVerification{}, exception.ErrPhoneVerificationExceed
+	}
+
 	code := strgen.RandomNumber(6)
 	verification := PhoneVerification{
 		PhoneNumber: phoneNumber,
@@ -110,7 +122,7 @@ func (s *phoneVerificationService) VerifyCode(
 	PhoneVerification,
 	error,
 ) {
-	verification, err := s.phoneVerificationRepository.FindRecentOneByPhoneNumber(ctx, phoneNumber)
+	verification, err := s.phoneVerificationRepository.FindRecentOne_ByPhoneNumber(ctx, phoneNumber)
 	if err != nil {
 		return PhoneVerification{}, err
 	}
@@ -141,5 +153,6 @@ func NewPhoneVerificationService(
 ) PhoneVerificationService {
 	return &phoneVerificationService{
 		phoneVerificationRepository: phoneVerificationRepository,
+		maxCount:                    5,
 	}
 }

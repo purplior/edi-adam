@@ -1,12 +1,14 @@
 package repository
 
 import (
+	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
 	domain "github.com/purplior/podoroot/domain/verification"
 	"github.com/purplior/podoroot/infra/database"
 	"github.com/purplior/podoroot/infra/database/podosql"
 	"github.com/purplior/podoroot/infra/entity"
 	"github.com/purplior/podoroot/lib/dt"
+	"github.com/purplior/podoroot/lib/mydate"
 )
 
 type (
@@ -52,7 +54,7 @@ func (r *phoneVerificationRepository) FindOneById(
 	return e.ToModel(), nil
 }
 
-func (r *phoneVerificationRepository) FindRecentOneByPhoneNumber(
+func (r *phoneVerificationRepository) FindRecentOne_ByPhoneNumber(
 	ctx inner.Context,
 	phoneNumber string,
 ) (
@@ -72,6 +74,35 @@ func (r *phoneVerificationRepository) FindRecentOneByPhoneNumber(
 	}
 
 	return e.ToModel(), nil
+}
+
+func (r *phoneVerificationRepository) FindCount_ByPhoneNumber(
+	ctx inner.Context,
+	phoneNumber string,
+) (
+	int,
+	error,
+) {
+	startAt := mydate.DayStartFromNow(0)
+	endAt := mydate.DayEndFromNow(0)
+
+	var count int64
+	db := r.client.DBWithContext(ctx)
+	err := db.Model(&entity.PhoneVerification{}).
+		Where("phone_number = ? AND created_at >= ? AND created_at < ?", phoneNumber, startAt, endAt).
+		Count(&count).
+		Error
+
+	if err != nil {
+		domainErr := database.ToDomainError(err)
+		if domainErr == exception.ErrNoRecord {
+			return 0, nil
+		}
+
+		return 0, domainErr
+	}
+
+	return int(count), nil
 }
 
 func (r *phoneVerificationRepository) UpdateOne_IsVerified(
