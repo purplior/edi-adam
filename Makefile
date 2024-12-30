@@ -25,4 +25,4 @@ alpha:
 prod:
 	make wire
 	make build
-	APP_PHASE=alpha $(BUILD_DIR)/$(APP_NAME)
+	APP_PHASE=prod $(BUILD_DIR)/$(APP_NAME)

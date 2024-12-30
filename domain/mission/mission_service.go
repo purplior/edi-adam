@@ -11,7 +11,7 @@ import (
 
 type (
 	MissionService interface {
-		GetPaginatedList_ByUserID(
+		GetPaginatedList_OnlyPublic_ByUserID(
 			ctx inner.Context,
 			userID string,
 			page int,
@@ -39,7 +39,7 @@ type (
 	}
 )
 
-func (s *missionService) GetPaginatedList_ByUserID(
+func (s *missionService) GetPaginatedList_OnlyPublic_ByUserID(
 	ctx inner.Context,
 	userID string,
 	page int,
@@ -49,12 +49,49 @@ func (s *missionService) GetPaginatedList_ByUserID(
 	pagination.PaginationMeta,
 	error,
 ) {
-	return s.missionRepository.FindPaginatedList_ByUserID(
+	missions, pageMeta, err := s.missionRepository.FindPaginatedList_OnlyPublic_ByUserID(
 		ctx,
 		userID,
 		page,
 		pageSize,
 	)
+	if err != nil {
+		return nil, pagination.PaginationMeta{}, err
+	}
+
+	missionIDs := make([]string, len(missions))
+	for i, mission := range missions {
+		missionIDs[i] = mission.ID
+	}
+
+	challenges, err := s.challengeService.GetList_ByUserIDAndMissionIDs(
+		ctx,
+		userID,
+		missionIDs,
+	)
+	if err != nil {
+		return nil, pagination.PaginationMeta{}, err
+	}
+
+	if len(challenges) > 0 {
+		j := 0
+		for i, mission := range missions {
+			if mission.ID != challenges[j].ID {
+				continue
+			}
+
+			missions[i].Challenges = []challenge.Challenge{
+				challenges[j],
+			}
+			j++
+
+			if j >= len(challenges) {
+				break
+			}
+		}
+	}
+
+	return missions, pageMeta, err
 }
 
 func (s *missionService) ReceiveOne(

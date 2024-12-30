@@ -34,7 +34,7 @@ func (c *missionController) GetPaginatedList() api.HandlerFunc {
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		missions, meta, err := c.missionService.GetPaginatedList_ByUserID(
+		missions, meta, err := c.missionService.GetPaginatedList_OnlyPublic_ByUserID(
 			innerCtx,
 			ctx.Identity.ID,
 			dt.Int(ctx.QueryParam("p")),

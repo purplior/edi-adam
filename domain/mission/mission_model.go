@@ -15,13 +15,12 @@ type (
 	MissionReward string
 
 	Mission struct {
-		ID                string                `json:"id"`
-		Title             string                `json:"title"`
-		Description       string                `json:"description"`
-		Reward            MissionReward         `json:"reward"`
-		RewardDescription string                `json:"rewardDescription"`
-		IsPublic          bool                  `json:"isPublic"`
-		Challenges        []challenge.Challenge `json:"challenges"`
-		CreatedAt         time.Time             `json:"createdAt"`
+		ID          string                `json:"id"`
+		Title       string                `json:"title"`
+		Description string                `json:"description"`
+		Reward      MissionReward         `json:"reward"`
+		IsPublic    bool                  `json:"isPublic"`
+		Challenges  []challenge.Challenge `json:"challenges"`
+		CreatedAt   time.Time             `json:"createdAt"`
 	}
 )

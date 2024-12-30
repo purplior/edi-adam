@@ -8,6 +8,15 @@ import (
 
 type (
 	ChallengeService interface {
+		GetList_ByUserIDAndMissionIDs(
+			ctx inner.Context,
+			userID string,
+			missionIDs []string,
+		) (
+			[]Challenge,
+			error,
+		)
+
 		PatchOne_ReceivedStatus(
 			ctx inner.Context,
 			id string,
@@ -27,6 +36,21 @@ type (
 		cm                  inner.ContextManager
 	}
 )
+
+func (s *challengeService) GetList_ByUserIDAndMissionIDs(
+	ctx inner.Context,
+	userID string,
+	missionIDs []string,
+) (
+	[]Challenge,
+	error,
+) {
+	return s.challengeRepository.FindList_ByUserIDAndMissionIDs(
+		ctx,
+		userID,
+		missionIDs,
+	)
+}
 
 func (s *challengeService) PatchOne_ReceivedStatus(
 	ctx inner.Context,

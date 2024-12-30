@@ -33,6 +33,15 @@ type (
 			error,
 		)
 
+		FindList_ByUserIDAndMissionIDs(
+			ctx inner.Context,
+			userID string,
+			missionIDs []string,
+		) (
+			[]Challenge,
+			error,
+		)
+
 		UpdateOne_ReceivedStatus_ByID(
 			ctx inner.Context,
 			id string,

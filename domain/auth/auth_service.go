@@ -216,6 +216,14 @@ func (s *authService) SignUp_ByEmailVerification(
 		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
 		return err
 	}
+	if err := s.challengeService.AchieveOne_ByUserAndMission(
+		ctx,
+		me.ID,
+		constant.MissionID_SignUpOpenEvent,
+	); err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		return err
+	}
 
 	if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
 		return err

@@ -44,7 +44,7 @@ func (r *missionRepository) FindOne_ByIDAndUserID(
 	return e.ToModel(), nil
 }
 
-func (r *missionRepository) FindPaginatedList_ByUserID(
+func (r *missionRepository) FindPaginatedList_OnlyPublic_ByUserID(
 	ctx inner.Context,
 	userID string,
 	page int,
@@ -59,14 +59,16 @@ func (r *missionRepository) FindPaginatedList_ByUserID(
 	db := r.client.DBWithContext(ctx)
 
 	if err := db.Model(&entity.Mission{}).
+		Where("is_public = ?", true).
 		Count(&totalCount).Error; err != nil {
 		return nil, pagination.PaginationMeta{}, database.ToDomainError(err)
 	}
 
 	offset := (page - 1) * pageSize
-	if err := db.Preload("Challenges", "challenges.user_id = ?", userID).
+	if err := db.
 		Offset(offset).
 		Limit(pageSize).
+		Where("is_public", true).
 		Find(&entities).Error; err != nil {
 		return nil, pagination.PaginationMeta{}, database.ToDomainError(err)
 	}

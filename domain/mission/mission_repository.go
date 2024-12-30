@@ -16,7 +16,7 @@ type (
 			error,
 		)
 
-		FindPaginatedList_ByUserID(
+		FindPaginatedList_OnlyPublic_ByUserID(
 			ctx inner.Context,
 			userID string,
 			page int,
