@@ -31,6 +31,7 @@ type (
 		Title         string              `json:"title"`
 		Description   string              `json:"description"`
 		Tags          []string            `json:"tags"`
+		MetaTags      []string            `json:"metaTags"`
 		IsPublic      bool                `json:"isPublic"`
 		Status        AssistantStatus     `json:"status"`
 		CreatedAt     time.Time           `json:"createdAt"`
@@ -65,6 +66,7 @@ type (
 		Title         string                  `json:"title"`
 		Description   string                  `json:"description"`
 		Tags          []string                `json:"tags"`
+		MetaTags      []string                `json:"metaTags"`
 		IsPublic      bool                    `json:"isPublic"`
 		Status        AssistantStatus         `json:"status"`
 		AssisterInfos []assister.AssisterInfo `json:"assisterInfos"`
@@ -104,6 +106,7 @@ func (m *Assistant) ToDetail() (
 		Title:         m.Title,
 		Description:   m.Description,
 		Tags:          m.Tags,
+		MetaTags:      m.MetaTags,
 		IsPublic:      m.IsPublic,
 		Status:        m.Status,
 		AssisterInfos: assisterInfos,

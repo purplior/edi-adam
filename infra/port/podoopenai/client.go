@@ -42,7 +42,7 @@ type (
 )
 
 const (
-	BufferUnit = 40
+	BufferUnit = 20
 )
 
 func (c *Client) RequestChatCompletions(

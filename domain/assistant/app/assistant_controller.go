@@ -232,9 +232,13 @@ func (c *assistantController) CreateOne_ForAdmin() api.HandlerFunc {
 
 func (c *assistantController) ApproveOne_ForAdmin() api.HandlerFunc {
 	return func(ctx *api.Context) error {
-		assistantID := ctx.QueryParam("id")
-		if len(assistantID) == 0 {
-			return ctx.SendError(exception.ErrBadRequest)
+		var dto struct {
+			ID       string   `json:"id"`
+			MetaTags []string `json:"metaTags"`
+		}
+
+		if err := ctx.Bind(&dto); err != nil {
+			return ctx.SendError(err)
 		}
 
 		innerCtx, cancel := c.cm.NewContext()
@@ -242,7 +246,8 @@ func (c *assistantController) ApproveOne_ForAdmin() api.HandlerFunc {
 
 		if err := c.assistantService.ApproveOne(
 			innerCtx,
-			assistantID,
+			dto.ID,
+			dto.MetaTags,
 		); err != nil {
 			return ctx.SendError(err)
 		}

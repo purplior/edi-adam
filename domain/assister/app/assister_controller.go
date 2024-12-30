@@ -10,6 +10,7 @@ import (
 	"github.com/purplior/podoroot/domain/assisterform"
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/domain/shared/logger"
 	"github.com/purplior/podoroot/domain/shared/pagination"
 	"github.com/purplior/podoroot/infra/port/podoopenai"
 	"github.com/purplior/podoroot/lib/dt"
@@ -59,9 +60,9 @@ type (
 
 func (c *assisterController) ExecuteAsResult() api.HandlerFunc {
 	return func(ctx *api.Context) error {
-		userId := ""
+		userID := ""
 		if ctx.Identity != nil {
-			userId = ctx.Identity.ID
+			userID = ctx.Identity.ID
 		}
 
 		assisterID := ctx.QueryParam("aid")
@@ -81,7 +82,7 @@ func (c *assisterController) ExecuteAsResult() api.HandlerFunc {
 
 		result, err := c.assisterService.Request(
 			innerCtx,
-			userId,
+			userID,
 			assisterID,
 			dto.Inputs,
 		)
@@ -101,9 +102,9 @@ func (c *assisterController) ExecuteAsResult() api.HandlerFunc {
 
 func (c *assisterController) ExecuteAsStream() api.HandlerFunc {
 	return func(ctx *api.Context) error {
-		userId := ""
+		userID := ""
 		if ctx.Identity != nil {
-			userId = ctx.Identity.ID
+			userID = ctx.Identity.ID
 		}
 
 		assisterID := ctx.QueryParam("aid")
@@ -127,7 +128,7 @@ func (c *assisterController) ExecuteAsStream() api.HandlerFunc {
 
 			err := c.assisterService.RequestStream(
 				innerCtx,
-				userId,
+				userID,
 				assisterID,
 				dto.Inputs,
 				func() error {
@@ -155,6 +156,8 @@ func (c *assisterController) ExecuteAsStream() api.HandlerFunc {
 			)
 
 			if err != nil {
+				logger.Debug("%s", err.Error())
+
 				switch err {
 				case podoopenai.ErrOnStream:
 					return nil

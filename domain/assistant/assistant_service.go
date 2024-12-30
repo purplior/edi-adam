@@ -92,6 +92,7 @@ type (
 		ApproveOne(
 			ctx inner.Context,
 			id string,
+			metaTags []string,
 		) error
 	}
 )
@@ -454,6 +455,7 @@ func (s *assistantService) CreateOne(
 func (s *assistantService) ApproveOne(
 	ctx inner.Context,
 	id string,
+	metaTags []string,
 ) error {
 	assistant, err := s.assistantRepository.FindOne_ByID(
 		ctx,
@@ -468,6 +470,7 @@ func (s *assistantService) ApproveOne(
 	}
 
 	assistant.Status = AssistantStatus_Approved
+	assistant.MetaTags = metaTags
 	assistant.IsPublic = true
 	err = s.assistantRepository.UpdateOne(
 		ctx,

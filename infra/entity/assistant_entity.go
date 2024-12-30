@@ -18,6 +18,7 @@ type (
 		Title         string    `gorm:"size:80;not null"`  // 20자 이내
 		Description   string    `gorm:"size:255;not null"` // 80자 이내
 		Tags          []string  `gorm:"serializer:json"`
+		MetaTags      []string  `gorm:"serializer:json"`
 		IsPublic      bool      `gorm:"default:false;not null"`
 		Status        string    `gorm:"size:80"`
 		CreatedAt     time.Time `gorm:"autoCreateTime"`
@@ -34,6 +35,7 @@ func (e Assistant) ToModel() domain.Assistant {
 		Title:         e.Title,
 		Description:   e.Description,
 		Tags:          e.Tags,
+		MetaTags:      e.MetaTags,
 		IsPublic:      e.IsPublic,
 		Status:        domain.AssistantStatus(e.Status),
 		CreatedAt:     e.CreatedAt,
@@ -67,6 +69,7 @@ func MakeAssistant(m domain.Assistant) Assistant {
 		Title:         m.Title,
 		Description:   m.Description,
 		Tags:          m.Tags,
+		MetaTags:      m.MetaTags,
 		IsPublic:      m.IsPublic,
 		Status:        string(m.Status),
 		CreatedAt:     m.CreatedAt,
