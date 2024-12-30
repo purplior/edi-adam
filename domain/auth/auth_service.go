@@ -69,6 +69,13 @@ type (
 			accessToken string,
 			err error,
 		)
+
+		ResetPassword_ByPhoneNumberVerification(
+			ctx inner.Context,
+			request ResetPasswordRequest,
+		) (
+			err error,
+		)
 	}
 
 	authService struct {
@@ -241,7 +248,7 @@ func (s *authService) SignUp_ByPhoneNumberVerification(
 		}
 	}()
 
-	// 1. 이메일 검증
+	// 1. 휴대전화 검증
 	verification, err := s.phoneVerificationService.Consume(
 		ctx,
 		request.VerificationID,
@@ -343,6 +350,58 @@ func (s *authService) GetTempAccessToken(
 	atExpires := time.Now().Add(time.Hour).Unix()
 
 	return s.makeAccessToken(atPayload, atExpires)
+}
+
+func (s *authService) ResetPassword_ByPhoneNumberVerification(
+	ctx inner.Context,
+	request ResetPasswordRequest,
+) error {
+	if err := validator.CheckValidPassword(request.Password); err != nil {
+		return err
+	}
+
+	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
+		return err
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			panic(r)
+		}
+	}()
+
+	verification, err := s.phoneVerificationService.Consume(
+		ctx,
+		request.VerificationID,
+	)
+	if err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		return err
+	}
+
+	_user := user.User{
+		AccountPassword: request.Password,
+	}
+	if err := _user.HashPassword(); err != nil {
+		return err
+	}
+
+	if err := s.userService.UpdateOne_Password_ByAccount(
+		ctx,
+		user.JoinMethod_PhoneNumber,
+		verification.PhoneNumber,
+		_user.AccountPassword,
+	); err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		return err
+	}
+
+	if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *authService) makeAccessToken(

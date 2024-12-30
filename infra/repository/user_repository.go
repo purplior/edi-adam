@@ -115,6 +115,28 @@ func (r *userRepository) UpdateOne_InactivatedFields(
 	return err
 }
 
+func (r *userRepository) UpdateOne_Password_ByAccount(
+	ctx inner.Context,
+	joinMethod string,
+	accountID string,
+	newPassword string,
+) error {
+	db := r.client.DBWithContext(ctx)
+	err := db.Model(&entity.User{}).
+		Where("join_method = ?", joinMethod).
+		Where("account_id = ?", accountID).
+		Updates(map[string]interface{}{
+			"account_password": newPassword,
+		}).
+		Error
+
+	if err != nil {
+		return database.ToDomainError(err)
+	}
+
+	return nil
+}
+
 func NewUserRepository(
 	client *podosql.Client,
 ) domain.UserRepository {

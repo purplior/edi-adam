@@ -8,6 +8,7 @@ var (
 	Status_Unauthorized        = 401
 	Status_NotFound            = 404
 	Status_NotAcceptable       = 406
+	Status_Unprocessable       = 422
 
 	Message_ErrorNormal = "internal server error"
 )

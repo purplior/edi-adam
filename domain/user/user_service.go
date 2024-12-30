@@ -45,6 +45,13 @@ type (
 			ctx inner.Context,
 			userID string,
 		) error
+
+		UpdateOne_Password_ByAccount(
+			ctx inner.Context,
+			joinMethod string,
+			accountID string,
+			newPassword string,
+		) error
 	}
 
 	userService struct {
@@ -127,6 +134,20 @@ func (s *userService) Inactive(
 		userID,
 		true,
 		mydate.Now(),
+	)
+}
+
+func (s *userService) UpdateOne_Password_ByAccount(
+	ctx inner.Context,
+	joinMethod string,
+	accountID string,
+	newPassword string,
+) error {
+	return s.userRepository.UpdateOne_Password_ByAccount(
+		ctx,
+		joinMethod,
+		accountID,
+		newPassword,
 	)
 }
 

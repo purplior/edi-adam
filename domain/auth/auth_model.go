@@ -81,4 +81,9 @@ type (
 		Nickname         string `json:"nickname"`
 		IsMarketingAgree bool   `json:"isMarketingAgree"`
 	}
+
+	ResetPasswordRequest struct {
+		VerificationID string `json:"verificationId"`
+		Password       string `json:"password"`
+	}
 )

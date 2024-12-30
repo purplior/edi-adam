@@ -29,7 +29,7 @@ func (ctx Context) SendJSON(jsonResponse response.JSONResponse) error {
 
 func (ctx Context) SendError(err error) error {
 	status := response.Status_InternalServerError
-	message := "internal server error"
+	message := "일시적인 서버 오류가 발생했어요"
 
 	switch err {
 	case exception.ErrBadRequest:
@@ -52,14 +52,11 @@ func (ctx Context) SendError(err error) error {
 		status = response.Status_Unauthorized
 	case exception.ErrNoRecord:
 		status = response.Status_NotFound
+	case exception.ErrNoSignedUpPhone:
+		status = response.Status_Unprocessable
 	}
 
-	switch status {
-	case response.Status_BadRequest:
-		message = err.Error()
-	case response.Status_NotAcceptable:
-		message = err.Error()
-	case response.Status_Unauthorized:
+	if status != response.Status_InternalServerError {
 		message = err.Error()
 	}
 

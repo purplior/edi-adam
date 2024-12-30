@@ -67,6 +67,14 @@ func (r *authRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{},
 		),
 	)
+
+	authRouterGroup.POST(
+		"/reset-password",
+		api.Handler(
+			r.authController.ResetPassword_ByPhoneNumberVerification(),
+			api.HandlerFuncOption{},
+		),
+	)
 }
 
 func NewAuthRouter(

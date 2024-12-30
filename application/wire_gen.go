@@ -105,7 +105,7 @@ func Start() error {
 	userController := app10.NewUserController(userService, contextManager)
 	userRouter := app10.NewUserRouter(userController)
 	emailVerificationController := app11.NewEmailVerificationController(emailVerificationService, contextManager)
-	phoneVerificationController := app11.NewPhoneVerificationController(phoneVerificationService, contextManager)
+	phoneVerificationController := app11.NewPhoneVerificationController(phoneVerificationService, userService, contextManager)
 	verificationRouter := app11.NewVerificationRouter(emailVerificationController, phoneVerificationController)
 	routerRouter := router.New(assistantRouter, assisterRouter, assisterFormRouter, authRouter, categoryRouter, challengeRouter, customerVoiceRouter, meRouter, missionRouter, userRouter, verificationRouter)
 	error2 := StartApplication(databaseManager, routerRouter)

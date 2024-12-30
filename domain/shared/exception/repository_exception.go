@@ -2,16 +2,13 @@ package exception
 
 import (
 	"errors"
-
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var (
 	ErrNoDefaultDB        = errors.New("no default db")
-	ErrNoDocuments        = mongo.ErrNoDocuments
 	ErrNoRecord           = errors.New("no record")
 	ErrDBProcess          = errors.New("db process")
-	ErrInvalidTransaction = errors.New("invalid tx")
-	ErrInTransaction      = errors.New("tx in tx")
-	ErrNoTransaction      = errors.New("no tx")
+	ErrInvalidTransaction = errors.New("invalid transaction")
+	ErrInTransaction      = errors.New("in transaction")
+	ErrNoTransaction      = errors.New("no transaction")
 )

@@ -47,5 +47,12 @@ type (
 			isInactivated bool,
 			inactivatedAt time.Time,
 		) error
+
+		UpdateOne_Password_ByAccount(
+			ctx inner.Context,
+			joinMethod string,
+			accountID string,
+			newPassword string,
+		) error
 	}
 )

@@ -40,6 +40,11 @@ type (
 		 * 토큰 재발급
 		 */
 		RefreshIdentityToken() api.HandlerFunc
+
+		/**
+		 * 휴대폰 번호로 비밀번호 초기화
+		 */
+		ResetPassword_ByPhoneNumberVerification() api.HandlerFunc
 	}
 )
 
@@ -206,6 +211,28 @@ func (c *authController) RefreshIdentityToken() api.HandlerFunc {
 		return ctx.SendJSON(response.JSONResponse{
 			Data: newIdentityToken,
 		})
+	}
+}
+
+func (c *authController) ResetPassword_ByPhoneNumberVerification() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		var dto domain.ResetPasswordRequest
+		if err := ctx.Bind(&dto); err != nil {
+			return ctx.SendError(err)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		err := c.authService.ResetPassword_ByPhoneNumberVerification(
+			innerCtx,
+			dto,
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{})
 	}
 }
 

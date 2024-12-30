@@ -52,6 +52,14 @@ func (r *verificationRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{},
 		),
 	)
+
+	verificationRouterGroup.POST(
+		"/joined-phone/request-code",
+		api.Handler(
+			r.phoneVerificationController.RequestCodeOfJoinedUser(),
+			api.HandlerFuncOption{},
+		),
+	)
 }
 
 func NewVerificationRouter(
