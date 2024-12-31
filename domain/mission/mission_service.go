@@ -76,7 +76,7 @@ func (s *missionService) GetPaginatedList_OnlyPublic_ByUserID(
 	if len(challenges) > 0 {
 		j := 0
 		for i, mission := range missions {
-			if mission.ID != challenges[j].ID {
+			if mission.ID != challenges[j].MissionID {
 				continue
 			}
 

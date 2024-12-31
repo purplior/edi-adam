@@ -1,6 +1,8 @@
 package user
 
 import (
+	"strings"
+
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
 	"github.com/purplior/podoroot/lib/mydate"
@@ -110,6 +112,10 @@ func (s *userService) CheckNicknameExistence(
 	bool,
 	error,
 ) {
+	if strings.Contains(nickname, "포도쌤") {
+		return false, exception.ErrNotAllowedNickname
+	}
+
 	_, err := s.userRepository.FindOne_ByNickname(
 		ctx,
 		nickname,

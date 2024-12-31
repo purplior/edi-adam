@@ -6,6 +6,7 @@ import (
 	"github.com/purplior/podoroot/domain/assistant"
 	"github.com/purplior/podoroot/domain/assisterform"
 	"github.com/purplior/podoroot/domain/auth"
+	"github.com/purplior/podoroot/domain/bookmark"
 	domain "github.com/purplior/podoroot/domain/me"
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
@@ -67,6 +68,11 @@ type (
 		 * 내 어시 제거하기
 		 */
 		RemoveMyAssistant() api.HandlerFunc
+
+		/**
+		 * 북마크 토글하기
+		 */
+		ToggleBookmarkOne() api.HandlerFunc
 	}
 )
 
@@ -78,6 +84,7 @@ type (
 		authService         auth.AuthService
 		userService         user.UserService
 		walletService       wallet.WalletService
+		bookmarkService     bookmark.BookmarkService
 		cm                  inner.ContextManager
 	}
 )
@@ -395,6 +402,38 @@ func (c *meController) RemoveMyAssistant() api.HandlerFunc {
 	}
 }
 
+func (c *meController) ToggleBookmarkOne() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		if ctx.Identity == nil {
+			return ctx.SendError(exception.ErrUnauthorized)
+		}
+
+		var dto struct {
+			AssistantID string `json:"assistantId"`
+			Toggle      bool   `json:"toggle"`
+		}
+		if err := ctx.Bind(&dto); err != nil {
+			return ctx.SendError(err)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		userID := ctx.Identity.ID
+
+		if err := c.bookmarkService.ToggleOne(
+			innerCtx,
+			userID,
+			dto.AssistantID,
+			dto.Toggle,
+		); err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{})
+	}
+}
+
 func NewMeController(
 	meService domain.MeService,
 	assistantService assistant.AssistantService,
@@ -402,6 +441,7 @@ func NewMeController(
 	authService auth.AuthService,
 	userService user.UserService,
 	walletService wallet.WalletService,
+	bookmarkService bookmark.BookmarkService,
 	cm inner.ContextManager,
 ) MeController {
 	return &meController{
@@ -411,6 +451,7 @@ func NewMeController(
 		authService:         authService,
 		userService:         userService,
 		walletService:       walletService,
+		bookmarkService:     bookmarkService,
 		cm:                  cm,
 	}
 }

@@ -78,6 +78,7 @@ func (c *Client) MigrateDB() error {
 		entity.CustomerVoice{},
 		entity.EmailVerification{},
 		entity.PhoneVerification{},
+		entity.Bookmark{},
 	)
 }
 

@@ -99,6 +99,14 @@ func (r *meRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{},
 		),
 	)
+
+	meRouterGroup.POST(
+		"/bookmark",
+		api.Handler(
+			r.meController.ToggleBookmarkOne(),
+			api.HandlerFuncOption{},
+		),
+	)
 }
 
 func NewMeRouter(

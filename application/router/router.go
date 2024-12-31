@@ -6,6 +6,7 @@ import (
 	assister "github.com/purplior/podoroot/domain/assister/app"
 	assisterform "github.com/purplior/podoroot/domain/assisterform/app"
 	auth "github.com/purplior/podoroot/domain/auth/app"
+	bookmark "github.com/purplior/podoroot/domain/bookmark/app"
 	category "github.com/purplior/podoroot/domain/category/app"
 	challenge "github.com/purplior/podoroot/domain/challenge/app"
 	customervoice "github.com/purplior/podoroot/domain/customervoice/app"
@@ -25,6 +26,7 @@ type (
 		assisterRouter      assister.AssisterRouter
 		assisterFormRouter  assisterform.AssisterFormRouter
 		authRouter          auth.AuthRouter
+		bookmarkRouter      bookmark.BookmarkRouter
 		categoryRouter      category.CategoryRouter
 		challengeRouter     challenge.ChallengeRouter
 		customerVoiceRouter customervoice.CustomerVoiceRouter
@@ -42,6 +44,7 @@ func (r *router) Attach(app *echo.Echo) {
 	r.assisterRouter.Attach(api)
 	r.assisterFormRouter.Attach(api)
 	r.authRouter.Attach(api)
+	r.bookmarkRouter.Attach(api)
 	r.categoryRouter.Attach(api)
 	r.challengeRouter.Attach(api)
 	r.customerVoiceRouter.Attach(api)
@@ -56,6 +59,7 @@ func New(
 	assisterRouter assister.AssisterRouter,
 	assisterFormRouter assisterform.AssisterFormRouter,
 	authRouter auth.AuthRouter,
+	bookmarkRouter bookmark.BookmarkRouter,
 	categoryRouter category.CategoryRouter,
 	challengeRouter challenge.ChallengeRouter,
 	customerVoiceRouter customervoice.CustomerVoiceRouter,
@@ -69,6 +73,7 @@ func New(
 		assisterRouter:      assisterRouter,
 		assisterFormRouter:  assisterFormRouter,
 		authRouter:          authRouter,
+		bookmarkRouter:      bookmarkRouter,
 		categoryRouter:      categoryRouter,
 		challengeRouter:     challengeRouter,
 		customerVoiceRouter: customerVoiceRouter,

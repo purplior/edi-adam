@@ -2,6 +2,7 @@ package validator
 
 import (
 	"regexp"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -17,6 +18,10 @@ func CheckValidPhoneNumber(phoneNumber string) error {
 }
 
 func CheckValidNickname(nickname string) error {
+	if strings.Contains(nickname, "포도쌤") {
+		return ErrInvalid
+	}
+
 	length := utf8.RuneCountInString(nickname)
 
 	if length < 2 || length > 10 {

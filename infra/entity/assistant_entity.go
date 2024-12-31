@@ -25,6 +25,7 @@ type (
 		Author        User
 		Category      Category
 		Assisters     []Assister `gorm:"foreignKey:AssistantID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+		Bookmarks     []Bookmark `gorm:"foreignKey:AssistantID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	}
 )
 

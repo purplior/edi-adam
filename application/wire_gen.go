@@ -21,21 +21,23 @@ import (
 	app3 "github.com/purplior/podoroot/domain/assisterform/app"
 	"github.com/purplior/podoroot/domain/auth"
 	app4 "github.com/purplior/podoroot/domain/auth/app"
+	"github.com/purplior/podoroot/domain/bookmark"
+	app5 "github.com/purplior/podoroot/domain/bookmark/app"
 	"github.com/purplior/podoroot/domain/category"
-	app5 "github.com/purplior/podoroot/domain/category/app"
+	app6 "github.com/purplior/podoroot/domain/category/app"
 	"github.com/purplior/podoroot/domain/challenge"
-	app6 "github.com/purplior/podoroot/domain/challenge/app"
+	app7 "github.com/purplior/podoroot/domain/challenge/app"
 	"github.com/purplior/podoroot/domain/customervoice"
-	app7 "github.com/purplior/podoroot/domain/customervoice/app"
+	app8 "github.com/purplior/podoroot/domain/customervoice/app"
 	"github.com/purplior/podoroot/domain/ledger"
 	"github.com/purplior/podoroot/domain/me"
-	app8 "github.com/purplior/podoroot/domain/me/app"
+	app9 "github.com/purplior/podoroot/domain/me/app"
 	"github.com/purplior/podoroot/domain/mission"
-	app9 "github.com/purplior/podoroot/domain/mission/app"
+	app10 "github.com/purplior/podoroot/domain/mission/app"
 	"github.com/purplior/podoroot/domain/user"
-	app10 "github.com/purplior/podoroot/domain/user/app"
+	app11 "github.com/purplior/podoroot/domain/user/app"
 	"github.com/purplior/podoroot/domain/verification"
-	app11 "github.com/purplior/podoroot/domain/verification/app"
+	app12 "github.com/purplior/podoroot/domain/verification/app"
 	"github.com/purplior/podoroot/domain/wallet"
 	"github.com/purplior/podoroot/infra"
 	"github.com/purplior/podoroot/infra/database"
@@ -85,29 +87,33 @@ func Start() error {
 	authService := auth.NewAuthService(emailVerificationService, phoneVerificationService, userService, walletService, challengeService, contextManager)
 	authController := app4.NewAuthController(authService, contextManager)
 	authRouter := app4.NewAuthRouter(authController)
+	bookmarkRepository := repository.NewBookmarkRepository(client)
+	bookmarkService := bookmark.NewBookmarkService(bookmarkRepository)
+	bookmarkController := app5.NewBookmarkController(bookmarkService, contextManager)
+	bookmarkRouter := app5.NewBookmarkRouter(bookmarkController)
 	categoryRepository := repository.NewCategoryRepository(client)
 	categoryService := category.NewCategoryService(categoryRepository)
-	categoryController := app5.NewCategoryController(categoryService, contextManager)
-	categoryRouter := app5.NewCategoryRouter(categoryController)
-	challengeController := app6.NewChallengeController(challengeService, contextManager)
-	challengeRouter := app6.NewChallengeRouter(challengeController)
+	categoryController := app6.NewCategoryController(categoryService, contextManager)
+	categoryRouter := app6.NewCategoryRouter(categoryController)
+	challengeController := app7.NewChallengeController(challengeService, contextManager)
+	challengeRouter := app7.NewChallengeRouter(challengeController)
 	customerVoiceRepository := repository.NewCustomerVoiceRepository(client)
 	customerVoiceService := customervoice.NewCustomerVoiceService(customerVoiceRepository, userService, contextManager)
-	customerVoiceController := app7.NewCustomerVoiceController(customerVoiceService, contextManager)
-	customerVoiceRouter := app7.NewCustomerVoiceRouter(customerVoiceController)
+	customerVoiceController := app8.NewCustomerVoiceController(customerVoiceService, contextManager)
+	customerVoiceRouter := app8.NewCustomerVoiceRouter(customerVoiceController)
 	meService := me.NewMeService()
-	meController := app8.NewMeController(meService, assistantService, assisterFormService, authService, userService, walletService, contextManager)
-	meRouter := app8.NewMeRouter(meController)
+	meController := app9.NewMeController(meService, assistantService, assisterFormService, authService, userService, walletService, bookmarkService, contextManager)
+	meRouter := app9.NewMeRouter(meController)
 	missionRepository := repository.NewMissionRepository(client)
 	missionService := mission.NewMissionService(missionRepository, challengeService, walletService, contextManager)
-	missionController := app9.NewMissionController(missionService, contextManager)
-	missionRouter := app9.NewMissionRouter(missionController)
-	userController := app10.NewUserController(userService, contextManager)
-	userRouter := app10.NewUserRouter(userController)
-	emailVerificationController := app11.NewEmailVerificationController(emailVerificationService, contextManager)
-	phoneVerificationController := app11.NewPhoneVerificationController(phoneVerificationService, userService, contextManager)
-	verificationRouter := app11.NewVerificationRouter(emailVerificationController, phoneVerificationController)
-	routerRouter := router.New(assistantRouter, assisterRouter, assisterFormRouter, authRouter, categoryRouter, challengeRouter, customerVoiceRouter, meRouter, missionRouter, userRouter, verificationRouter)
+	missionController := app10.NewMissionController(missionService, contextManager)
+	missionRouter := app10.NewMissionRouter(missionController)
+	userController := app11.NewUserController(userService, contextManager)
+	userRouter := app11.NewUserRouter(userController)
+	emailVerificationController := app12.NewEmailVerificationController(emailVerificationService, contextManager)
+	phoneVerificationController := app12.NewPhoneVerificationController(phoneVerificationService, userService, contextManager)
+	verificationRouter := app12.NewVerificationRouter(emailVerificationController, phoneVerificationController)
+	routerRouter := router.New(assistantRouter, assisterRouter, assisterFormRouter, authRouter, bookmarkRouter, categoryRouter, challengeRouter, customerVoiceRouter, meRouter, missionRouter, userRouter, verificationRouter)
 	error2 := StartApplication(databaseManager, routerRouter)
 	return error2
 }
@@ -123,17 +129,17 @@ func StartApplication(
 		log.Println("[#] 데이터베이스를 초기화 하는데 실패 했어요")
 		return err
 	}
-	app12 := echo.New()
-	app12.
+	app13 := echo.New()
+	app13.
 		Use(middleware.New()...)
 	router2.
-		Attach(app12)
+		Attach(app13)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		if err := app12.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
+		if err := app13.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
 			log.Println("[#] 서버를 시작 하는데 실패 했어요")
 			panic(err)
 		}
@@ -149,7 +155,7 @@ func StartApplication(
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := app12.Shutdown(ctx); err != nil {
+	if err := app13.Shutdown(ctx); err != nil {
 		log.Println("[#] 서버를 종료 하는데 실패 했어요")
 		return err
 	}

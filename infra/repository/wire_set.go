@@ -6,6 +6,7 @@ var New = wire.NewSet(
 	NewAssistantRepository,
 	NewAssisterRepository,
 	NewAssisterFormRepository,
+	NewBookmarkRepository,
 	NewCategoryRepository,
 	NewChallengeRepository,
 	NewCustomerVoiceRepository,
