@@ -27,5 +27,6 @@ type (
 		BeginTX(ctx Context, target TX) error
 		CommitTX(ctx Context, target TX) error
 		RollbackTX(ctx Context, target TX)
+		ClearTX(ctx Context, target TX)
 	}
 )

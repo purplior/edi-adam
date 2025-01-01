@@ -4,7 +4,7 @@ import "github.com/purplior/podoroot/domain/shared/inner"
 
 type (
 	CategoryRepository interface {
-		FindListByIDs(
+		FindList_ByIDs(
 			ctx inner.Context,
 			ids []string,
 		) (

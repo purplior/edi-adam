@@ -3,6 +3,7 @@ package repository
 import (
 	domain "github.com/purplior/podoroot/domain/bookmark"
 	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/domain/shared/pagination"
 	"github.com/purplior/podoroot/infra/database"
 	"github.com/purplior/podoroot/infra/database/podosql"
 	"github.com/purplior/podoroot/infra/entity"
@@ -38,6 +39,19 @@ func (r *bookmarkRepository) FindOne_ByUserIDAndAssistantID(
 	}
 
 	return e.ToModel(), nil
+}
+
+func (r *bookmarkRepository) FindPaginatedList_ByUserID(
+	ctx inner.Context,
+	userID string,
+	pageRequest pagination.PaginationRequest,
+) (
+	[]domain.Bookmark,
+	pagination.PaginationMeta,
+	error,
+) {
+	// TODO:
+	return nil, pagination.PaginationMeta{}, nil
 }
 
 func (r *bookmarkRepository) InsertOne(

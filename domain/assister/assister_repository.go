@@ -1,9 +1,6 @@
 package assister
 
-import (
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/domain/shared/pagination"
-)
+import "github.com/purplior/podoroot/domain/shared/inner"
 
 type (
 	AssisterRepository interface {
@@ -15,22 +12,6 @@ type (
 			error,
 		)
 
-		FindPaginatedList_ByAssistantID(
-			ctx inner.Context,
-			assistantID string,
-			page int,
-			pageSize int,
-		) (
-			[]Assister,
-			pagination.PaginationMeta,
-			error,
-		)
-
-		UpdateOne(
-			ctx inner.Context,
-			assister Assister,
-		) error
-
 		InsertOne(
 			ctx inner.Context,
 			assister Assister,
@@ -39,9 +20,14 @@ type (
 			error,
 		)
 
-		DeleteAll_ByIDs(
+		UpdateOne(
 			ctx inner.Context,
-			ids []string,
+			assister Assister,
+		) error
+
+		DeleteOne_ByID(
+			ctx inner.Context,
+			id string,
 		) error
 	}
 )

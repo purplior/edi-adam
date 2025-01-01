@@ -4,7 +4,6 @@ import (
 	"github.com/labstack/echo/v4"
 	assistant "github.com/purplior/podoroot/domain/assistant/app"
 	assister "github.com/purplior/podoroot/domain/assister/app"
-	assisterform "github.com/purplior/podoroot/domain/assisterform/app"
 	auth "github.com/purplior/podoroot/domain/auth/app"
 	bookmark "github.com/purplior/podoroot/domain/bookmark/app"
 	category "github.com/purplior/podoroot/domain/category/app"
@@ -24,7 +23,6 @@ type (
 	router struct {
 		assistantRouter     assistant.AssistantRouter
 		assisterRouter      assister.AssisterRouter
-		assisterFormRouter  assisterform.AssisterFormRouter
 		authRouter          auth.AuthRouter
 		bookmarkRouter      bookmark.BookmarkRouter
 		categoryRouter      category.CategoryRouter
@@ -42,7 +40,6 @@ func (r *router) Attach(app *echo.Echo) {
 
 	r.assistantRouter.Attach(api)
 	r.assisterRouter.Attach(api)
-	r.assisterFormRouter.Attach(api)
 	r.authRouter.Attach(api)
 	r.bookmarkRouter.Attach(api)
 	r.categoryRouter.Attach(api)
@@ -57,7 +54,6 @@ func (r *router) Attach(app *echo.Echo) {
 func New(
 	assistantRouter assistant.AssistantRouter,
 	assisterRouter assister.AssisterRouter,
-	assisterFormRouter assisterform.AssisterFormRouter,
 	authRouter auth.AuthRouter,
 	bookmarkRouter bookmark.BookmarkRouter,
 	categoryRouter category.CategoryRouter,
@@ -71,7 +67,6 @@ func New(
 	return &router{
 		assistantRouter:     assistantRouter,
 		assisterRouter:      assisterRouter,
-		assisterFormRouter:  assisterFormRouter,
 		authRouter:          authRouter,
 		bookmarkRouter:      bookmarkRouter,
 		categoryRouter:      categoryRouter,

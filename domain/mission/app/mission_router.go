@@ -20,7 +20,7 @@ type (
 func (r *missionRouter) Attach(router *echo.Group) {
 	missionRouterGroup := router.Group("/missions")
 
-	missionRouterGroup.GET("/paginated", api.Handler(
+	missionRouterGroup.GET("/plist", api.Handler(
 		r.missionController.GetPaginatedList(),
 		api.HandlerFuncOption{},
 	))

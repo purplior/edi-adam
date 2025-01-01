@@ -72,7 +72,6 @@ func (c *Client) MigrateDB() error {
 		entity.Category{},
 		entity.Ledger{},
 		entity.Assistant{},
-		entity.Assister{},
 		entity.Mission{},
 		entity.Challenge{},
 		entity.CustomerVoice{},

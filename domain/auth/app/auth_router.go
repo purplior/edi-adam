@@ -29,41 +29,17 @@ func (r *authRouter) Attach(router *echo.Group) {
 	)
 
 	authRouterGroup.POST(
-		"/admin/email/sign-in",
+		"/sign-in",
 		api.Handler(
-			r.authController.SignIn_ByEmailVerification_ForAdmin(),
-			api.HandlerFuncOption{AdminOnly: true},
-		),
-	)
-
-	authRouterGroup.POST(
-		"/email/sign-in",
-		api.Handler(
-			r.authController.SignIn_ByEmailVerification(),
+			r.authController.SignIn(),
 			api.HandlerFuncOption{},
 		),
 	)
 
 	authRouterGroup.POST(
-		"/phone/sign-in",
+		"/sign-up",
 		api.Handler(
-			r.authController.SignIn_ByPhoneNumberVerification(),
-			api.HandlerFuncOption{},
-		),
-	)
-
-	authRouterGroup.POST(
-		"/email/sign-up",
-		api.Handler(
-			r.authController.SignUp_ByEmailVerification(),
-			api.HandlerFuncOption{},
-		),
-	)
-
-	authRouterGroup.POST(
-		"/phone/sign-up",
-		api.Handler(
-			r.authController.SignUp_ByPhoneNumberVerification(),
+			r.authController.SignUp(),
 			api.HandlerFuncOption{},
 		),
 	)
@@ -71,7 +47,7 @@ func (r *authRouter) Attach(router *echo.Group) {
 	authRouterGroup.POST(
 		"/reset-password",
 		api.Handler(
-			r.authController.ResetPassword_ByPhoneNumberVerification(),
+			r.authController.ResetPassword(),
 			api.HandlerFuncOption{},
 		),
 	)

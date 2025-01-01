@@ -1,6 +1,9 @@
 package bookmark
 
-import "github.com/purplior/podoroot/domain/shared/inner"
+import (
+	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/domain/shared/pagination"
+)
 
 type (
 	BookmarkRepository interface {
@@ -10,6 +13,16 @@ type (
 			assistantID string,
 		) (
 			Bookmark,
+			error,
+		)
+
+		FindPaginatedList_ByUserID(
+			ctx inner.Context,
+			userID string,
+			pageRequest pagination.PaginationRequest,
+		) (
+			[]Bookmark,
+			pagination.PaginationMeta,
 			error,
 		)
 

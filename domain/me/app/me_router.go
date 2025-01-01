@@ -45,14 +45,6 @@ func (r *meRouter) Attach(router *echo.Group) {
 	)
 
 	meRouterGroup.GET(
-		"/assistant-infos",
-		api.Handler(
-			r.meController.GetMyAssistantInfos(),
-			api.HandlerFuncOption{},
-		),
-	)
-
-	meRouterGroup.GET(
 		"/temp/at",
 		api.Handler(
 			r.meController.GetTempAccessToken(),
@@ -61,17 +53,25 @@ func (r *meRouter) Attach(router *echo.Group) {
 	)
 
 	meRouterGroup.GET(
-		"/assistant/by_view/:view_id",
+		"/assistant/one",
 		api.Handler(
-			r.meController.GetMyAssistant(),
+			r.meController.GetMyAssistantOne(),
 			api.HandlerFuncOption{},
 		),
 	)
 
 	meRouterGroup.GET(
-		"/assistant/detail_by_view/:view_id",
+		"/assistant/detail-one",
 		api.Handler(
-			r.meController.GetMyAssistantDetail(),
+			r.meController.GetMyAssistantDetailOne(),
+			api.HandlerFuncOption{},
+		),
+	)
+
+	meRouterGroup.GET(
+		"/assistant/info-plist",
+		api.Handler(
+			r.meController.GetMyAssistantInfoPaginatedList(),
 			api.HandlerFuncOption{},
 		),
 	)
@@ -79,23 +79,7 @@ func (r *meRouter) Attach(router *echo.Group) {
 	meRouterGroup.POST(
 		"/assistant",
 		api.Handler(
-			r.meController.RegisterMyAssistant(),
-			api.HandlerFuncOption{},
-		),
-	)
-
-	meRouterGroup.PATCH(
-		"/assistant/:id",
-		api.Handler(
-			r.meController.UpdateMyAssistant(),
-			api.HandlerFuncOption{},
-		),
-	)
-
-	meRouterGroup.DELETE(
-		"/assistant/:id",
-		api.Handler(
-			r.meController.RemoveMyAssistant(),
+			r.meController.RegisterMyAssistantOne(),
 			api.HandlerFuncOption{},
 		),
 	)
@@ -104,6 +88,30 @@ func (r *meRouter) Attach(router *echo.Group) {
 		"/bookmark",
 		api.Handler(
 			r.meController.ToggleBookmarkOne(),
+			api.HandlerFuncOption{},
+		),
+	)
+
+	meRouterGroup.PATCH(
+		"/assistant/:id",
+		api.Handler(
+			r.meController.UpdateMyAssistantOne(),
+			api.HandlerFuncOption{},
+		),
+	)
+
+	meRouterGroup.DELETE(
+		"/assistant/:id",
+		api.Handler(
+			r.meController.RemoveMyAssistantOne(),
+			api.HandlerFuncOption{},
+		),
+	)
+
+	meRouterGroup.GET(
+		"/bookmark/one",
+		api.Handler(
+			r.meController.GetMyBookmarkOne(),
 			api.HandlerFuncOption{},
 		),
 	)

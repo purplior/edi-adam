@@ -7,7 +7,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/purplior/podoroot/domain/assistant"
-	"github.com/purplior/podoroot/domain/assisterform"
+	"github.com/purplior/podoroot/domain/assister"
 )
 
 var (
@@ -122,7 +122,7 @@ func checkValidAssisterFieldName(input string) bool {
 }
 
 func checkValidAssistantFields(
-	fields []assisterform.AssisterField,
+	fields []assister.AssisterField,
 ) bool {
 	checkingMap := map[string]bool{}
 
@@ -141,11 +141,11 @@ func checkValidAssistantFields(
 			return false
 		}
 
-		if field.Type == assisterform.AssisterFieldType_ParagraphGroup {
+		if field.Type == assister.AssisterFieldType_ParagraphGroup {
 			mapChildren := field.Option["children"].([]interface{})
-			children := make([]assisterform.AssisterField, len(mapChildren))
+			children := make([]assister.AssisterField, len(mapChildren))
 			for i, mapChild := range mapChildren {
-				child, err := assisterform.MakeAssisterFieldFromMap(mapChild.(map[string]interface{}))
+				child, err := assister.MakeAssisterFieldFromMap(mapChild.(map[string]interface{}))
 				if err != nil {
 					return false
 				}
@@ -166,8 +166,8 @@ func checkValidAssistantFields(
 }
 
 func checkValidAssistantQueryMessages(
-	fields []assisterform.AssisterField,
-	queryMessages []assisterform.AssisterQueryMessage,
+	fields []assister.AssisterField,
+	queryMessages []assister.AssisterQueryMessage,
 ) bool {
 	names := make([]string, len(fields))
 	for i, field := range fields {

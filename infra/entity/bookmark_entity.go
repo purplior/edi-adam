@@ -13,6 +13,7 @@ type (
 		UserID      uint      `gorm:"uniqueIndex:idx_user_assistant"`
 		AssistantID uint      `gorm:"uniqueIndex:idx_user_assistant"`
 		CreatedAt   time.Time `gorm:"autoCreateTime"`
+		Assistant   Assistant
 	}
 )
 

@@ -22,28 +22,12 @@ var (
 
 type (
 	AuthService interface {
-		SignIn_ByEmailVerification(
-			ctx inner.Context,
-			request SignInRequest,
-		) (
-			identityToken IdentityToken,
-			identity Identity,
-			err error,
-		)
-
 		SignIn_ByPhoneNumberVerification(
 			ctx inner.Context,
 			request SignInRequest,
 		) (
 			identityToken IdentityToken,
 			identity Identity,
-			err error,
-		)
-
-		SignUp_ByEmailVerification(
-			ctx inner.Context,
-			request SignUpRequest,
-		) (
 			err error,
 		)
 
@@ -88,37 +72,6 @@ type (
 	}
 )
 
-func (s *authService) SignIn_ByEmailVerification(
-	ctx inner.Context,
-	request SignInRequest,
-) (
-	IdentityToken,
-	Identity,
-	error,
-) {
-	existedUser, err := s.userService.GetOne_ByAccount(
-		ctx,
-		user.JoinMethod_Email,
-		request.AccountID,
-	)
-	if err != nil {
-		return IdentityToken{}, Identity{}, exception.ErrUnauthorized
-	}
-	if existedUser.IsInactivated {
-		return IdentityToken{}, Identity{}, exception.ErrUnauthorized
-	}
-	if err := existedUser.ComparePassword(request.Password); err != nil {
-		return IdentityToken{}, Identity{}, exception.ErrUnauthorized
-	}
-
-	identityToken, identity, err := s.makeToken(existedUser)
-	if err != nil {
-		return IdentityToken{}, Identity{}, exception.ErrUnauthorized
-	}
-
-	return identityToken, identity, nil
-}
-
 func (s *authService) SignIn_ByPhoneNumberVerification(
 	ctx inner.Context,
 	request SignInRequest,
@@ -148,88 +101,6 @@ func (s *authService) SignIn_ByPhoneNumberVerification(
 	}
 
 	return identityToken, identity, nil
-}
-
-func (s *authService) SignUp_ByEmailVerification(
-	ctx inner.Context,
-	request SignUpRequest,
-) error {
-	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
-		return err
-	}
-
-	defer func() {
-		if r := recover(); r != nil {
-			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
-			panic(r)
-		}
-	}()
-
-	// 1. 이메일 검증
-	verification, err := s.emailVerificationService.Consume(
-		ctx,
-		request.VerificationID,
-	)
-	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
-		return err
-	}
-
-	// 2. 계정 생성
-	me, err := s.userService.RegisterOne(
-		ctx,
-		user.User{
-			JoinMethod:       user.JoinMethod_Email,
-			AccountID:        verification.Email,
-			AccountPassword:  request.Password,
-			AvatarTheme:      1,
-			AvatarText:       strgen.ExtractInitialChar(request.Nickname),
-			Nickname:         request.Nickname,
-			Role:             user.Role_User,
-			IsMarketingAgree: request.IsMarketingAgree,
-		},
-	)
-	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
-		return err
-	}
-
-	// 3. 지갑 생성
-	_, err = s.walletService.RegisterOne(
-		ctx,
-		wallet.Wallet{
-			OwnerID: me.ID,
-			Podo:    0,
-		},
-	)
-	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
-		return err
-	}
-
-	// 4. 회원가입 미션 달성
-	if err := s.challengeService.AchieveOne_ByUserAndMission(
-		ctx,
-		me.ID,
-		constant.MissionID_SignUp,
-	); err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
-		return err
-	}
-	if err := s.challengeService.AchieveOne_ByUserAndMission(
-		ctx,
-		me.ID,
-		constant.MissionID_SignUpOpenEvent,
-	); err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
-		return err
-	}
-
-	if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (s *authService) SignUp_ByPhoneNumberVerification(

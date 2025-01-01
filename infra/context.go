@@ -110,6 +110,10 @@ func (c *contextManager) RollbackTX(ctx inner.Context, target inner.TX) {
 	ctx.ClearTX(target)
 }
 
+func (c *contextManager) ClearTX(ctx inner.Context, target inner.TX) {
+	ctx.ClearTX(target)
+}
+
 func NewContextManager(
 	podosqlClient *podosql.Client,
 ) inner.ContextManager {

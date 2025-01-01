@@ -21,9 +21,9 @@ func (r *categoryRouter) Attach(router *echo.Group) {
 	categoryRouterGroup := router.Group("/categories")
 
 	categoryRouterGroup.GET(
-		"/main-infos",
+		"/main",
 		api.Handler(
-			r.categoryController.GetMainCategoryInfos(),
+			r.categoryController.GetMainCategoryInfoList(),
 			api.HandlerFuncOption{},
 		),
 	)

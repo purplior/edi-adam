@@ -17,24 +17,6 @@ type (
 	}
 )
 
-func (r *assistantRepository) InsertOne(
-	ctx inner.Context,
-	assistantForInsert domain.Assistant,
-) (
-	domain.Assistant,
-	error,
-) {
-	e := entity.MakeAssistant(assistantForInsert)
-	result := r.client.DBWithContext(ctx).
-		Create(&e)
-
-	if result.Error != nil {
-		return domain.Assistant{}, database.ToDomainError(result.Error)
-	}
-
-	return e.ToModel(), nil
-}
-
 func (r *assistantRepository) FindOne_ByID(
 	ctx inner.Context,
 	id string,
@@ -45,22 +27,20 @@ func (r *assistantRepository) FindOne_ByID(
 ) {
 	var e entity.Assistant
 	db := r.client.DBWithContext(ctx)
+	eID := dt.UInt(id)
 
-	result := db.Model(&e).Where("id = ?", id).First(&e)
-	if result.Error != nil {
-		return domain.Assistant{}, database.ToDomainError(result.Error)
-	}
-
+	query := db
 	if joinOption.WithAuthor {
-		if err := db.Model(&e).Association("Author").Find(&e.Author); err != nil {
-			return domain.Assistant{}, database.ToDomainError(err)
-		}
+		query = query.Preload("Author")
+	}
+	if joinOption.WithCategory {
+		query = query.Preload("Category")
 	}
 
-	if joinOption.WithAssisters {
-		if err := db.Preload("Assisters").Find(&e).Error; err != nil {
-			return domain.Assistant{}, database.ToDomainError(err)
-		}
+	if err := query.
+		Where("id = ?", eID).
+		First(&e).Error; err != nil {
+		return domain.Assistant{}, database.ToDomainError(err)
 	}
 
 	return e.ToModel(), nil
@@ -77,27 +57,18 @@ func (r *assistantRepository) FindOne_ByViewID(
 	var e entity.Assistant
 	db := r.client.DBWithContext(ctx)
 
-	result := db.Model(&e).Where("view_id = ?", viewID).First(&e)
-	if result.Error != nil {
-		return domain.Assistant{}, database.ToDomainError(result.Error)
-	}
-
+	query := db
 	if joinOption.WithAuthor {
-		if err := db.Model(&e).Association("Author").Find(&e.Author); err != nil {
-			return domain.Assistant{}, database.ToDomainError(err)
-		}
+		query = query.Preload("Author")
 	}
-
 	if joinOption.WithCategory {
-		if err := db.Preload("Category").Find(&e).Error; err != nil {
-			return domain.Assistant{}, database.ToDomainError(err)
-		}
+		query = query.Preload("Category")
 	}
 
-	if joinOption.WithAssisters {
-		if err := db.Preload("Assisters").Find(&e).Error; err != nil {
-			return domain.Assistant{}, database.ToDomainError(err)
-		}
+	if err := query.
+		Where("view_id = ?", viewID).
+		First(&e).Error; err != nil {
+		return domain.Assistant{}, database.ToDomainError(err)
 	}
 
 	return e.ToModel(), nil
@@ -114,23 +85,23 @@ func (r *assistantRepository) FindList_ByCategoryAlias(
 	db := r.client.DBWithContext(ctx)
 
 	var categoryEntity entity.Category
-	if result := db.
-		Model(&categoryEntity).
+	if err := db.
 		Where("alias = ?", categoryAlias).
-		First(&categoryEntity); result.Error != nil {
-		return nil, database.ToDomainError(result.Error)
+		First(&categoryEntity).Error; err != nil {
+		return nil, database.ToDomainError(err)
 	}
 
 	var entities []entity.Assistant
-	query := db.
-		Where("category_id = ? AND is_public = ?", categoryEntity.ID, true).
-		Order("created_at asc")
+	query := db
 	if joinOption.WithAuthor {
 		query = query.Preload("Author")
 	}
 
-	if result := query.Find(&entities); result.Error != nil {
-		return nil, database.ToDomainError(result.Error)
+	if err := query.
+		Where("category_id = ? AND is_public = ?", categoryEntity.ID, true).
+		Order("created_at asc").
+		Find(&entities).Error; err != nil {
+		return nil, database.ToDomainError(err)
 	}
 
 	assistants := make([]domain.Assistant, len(entities))
@@ -145,8 +116,7 @@ func (r *assistantRepository) FindList_ByCategoryAlias(
 func (r *assistantRepository) FindPaginatedList_ByAuthorID(
 	ctx inner.Context,
 	authorID string,
-	page int,
-	pageSize int,
+	pageRequest pagination.PaginationRequest,
 ) (
 	[]domain.Assistant,
 	pagination.PaginationMeta,
@@ -155,30 +125,24 @@ func (r *assistantRepository) FindPaginatedList_ByAuthorID(
 	var entities []entity.Assistant
 
 	db := r.client.DBWithContext(ctx)
-	meta, err := repoutil.FindPaginatedList(
+	pageMeta, err := repoutil.FindPaginatedList(
 		db,
-		&entity.Assistant{},
 		&entities,
-		page,
-		pageSize,
-		func(db *podosql.DB) *podosql.DB {
-			rdb := db
-			if len(authorID) > 0 {
-				rdb = db.Where("author_id = ?", authorID)
-			}
-
-			return rdb.Order("created_at DESC").Preload("Category")
-		},
-		func(db *podosql.DB) *podosql.DB {
-			if len(authorID) > 0 {
-				return db.Where("author_id = ?", authorID)
-			}
-
-			return db
+		pageRequest,
+		repoutil.FindPaginatedListOption{
+			Condition: func(db *podosql.DB) *podosql.DB {
+				return db.
+					Preload("Category").
+					Order("created_at DESC").
+					Where("author_id = ?", authorID)
+			},
+			Association: func(db *podosql.DB) *podosql.DB {
+				return db.Preload("Category")
+			},
 		},
 	)
 	if err != nil {
-		return nil, meta, database.ToDomainError(err)
+		return nil, pagination.PaginationMeta{}, database.ToDomainError(err)
 	}
 
 	assistants := make([]domain.Assistant, len(entities))
@@ -186,19 +150,35 @@ func (r *assistantRepository) FindPaginatedList_ByAuthorID(
 		assistants[i] = entity.ToModel()
 	}
 
-	return assistants, meta, nil
+	return assistants, pageMeta, nil
+}
+
+func (r *assistantRepository) InsertOne(
+	ctx inner.Context,
+	assistantForInsert domain.Assistant,
+) (
+	domain.Assistant,
+	error,
+) {
+	db := r.client.DBWithContext(ctx)
+	e := entity.MakeAssistant(assistantForInsert)
+
+	if err := db.Create(&e).Error; err != nil {
+		return domain.Assistant{}, database.ToDomainError(err)
+	}
+
+	return e.ToModel(), nil
 }
 
 func (r *assistantRepository) UpdateOne(
 	ctx inner.Context,
 	assistant domain.Assistant,
 ) error {
-	e := entity.MakeAssistant(assistant)
 	db := r.client.DBWithContext(ctx)
+	e := entity.MakeAssistant(assistant)
 
-	result := db.Save(&e)
-	if result.Error != nil {
-		return database.ToDomainError(result.Error)
+	if err := db.Save(&e).Error; err != nil {
+		return database.ToDomainError(err)
 	}
 
 	return nil
@@ -209,12 +189,12 @@ func (r *assistantRepository) DeleteOne_ByID(
 	id string,
 ) error {
 	db := r.client.DBWithContext(ctx)
+	eID := dt.UInt(id)
 
-	result := db.Delete(&entity.Assistant{
-		ID: dt.UInt(id),
-	})
-	if result.Error != nil {
-		return database.ToDomainError(result.Error)
+	if err := db.
+		Where("id = ?", eID).
+		Delete(&entity.Assistant{}).Error; err != nil {
+		return database.ToDomainError(err)
 	}
 
 	return nil

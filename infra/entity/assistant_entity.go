@@ -4,7 +4,6 @@ import (
 	"time"
 
 	domain "github.com/purplior/podoroot/domain/assistant"
-	"github.com/purplior/podoroot/domain/assister"
 	"github.com/purplior/podoroot/lib/dt"
 )
 
@@ -14,6 +13,7 @@ type (
 		ViewID        string `gorm:"size:36;not null;unique"`
 		AuthorID      uint
 		CategoryID    uint
+		AssisterID    string    `gorm:"size:80"`
 		AssistantType uint      `gorm:"default:0"`
 		Title         string    `gorm:"size:80;not null"`  // 20자 이내
 		Description   string    `gorm:"size:255;not null"` // 80자 이내
@@ -22,9 +22,9 @@ type (
 		IsPublic      bool      `gorm:"default:false;not null"`
 		Status        string    `gorm:"size:80"`
 		CreatedAt     time.Time `gorm:"autoCreateTime"`
+		UpdatedAt     time.Time `gorm:"autoUpdateTime"`
 		Author        User
 		Category      Category
-		Assisters     []Assister `gorm:"foreignKey:AssistantID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 		Bookmarks     []Bookmark `gorm:"foreignKey:AssistantID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	}
 )
@@ -32,6 +32,7 @@ type (
 func (e Assistant) ToModel() domain.Assistant {
 	model := domain.Assistant{
 		ViewID:        e.ViewID,
+		AssisterID:    e.AssisterID,
 		AssistantType: domain.AssistantType(e.AssistantType),
 		Title:         e.Title,
 		Description:   e.Description,
@@ -40,6 +41,7 @@ func (e Assistant) ToModel() domain.Assistant {
 		IsPublic:      e.IsPublic,
 		Status:        domain.AssistantStatus(e.Status),
 		CreatedAt:     e.CreatedAt,
+		UpdatedAt:     e.UpdatedAt,
 	}
 
 	if e.ID > 0 {
@@ -54,18 +56,13 @@ func (e Assistant) ToModel() domain.Assistant {
 		model.Category = e.Category.ToModel()
 	}
 
-	assisters := make([]assister.Assister, len(e.Assisters))
-	for i, e := range e.Assisters {
-		assisters[i] = e.ToModel()
-	}
-	model.Assisters = assisters
-
 	return model
 }
 
 func MakeAssistant(m domain.Assistant) Assistant {
 	entity := Assistant{
 		ViewID:        m.ViewID,
+		AssisterID:    m.AssisterID,
 		AssistantType: uint(m.AssistantType),
 		Title:         m.Title,
 		Description:   m.Description,
@@ -74,6 +71,7 @@ func MakeAssistant(m domain.Assistant) Assistant {
 		IsPublic:      m.IsPublic,
 		Status:        string(m.Status),
 		CreatedAt:     m.CreatedAt,
+		UpdatedAt:     m.UpdatedAt,
 	}
 
 	if len(m.ID) > 0 {

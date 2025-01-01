@@ -4,7 +4,6 @@ import (
 	"github.com/google/wire"
 	assistant "github.com/purplior/podoroot/domain/assistant/app"
 	assister "github.com/purplior/podoroot/domain/assister/app"
-	assisterform "github.com/purplior/podoroot/domain/assisterform/app"
 	auth "github.com/purplior/podoroot/domain/auth/app"
 	bookmark "github.com/purplior/podoroot/domain/bookmark/app"
 	category "github.com/purplior/podoroot/domain/category/app"
@@ -21,7 +20,6 @@ import (
 var New = wire.NewSet(
 	assistant.New,
 	assister.New,
-	assisterform.New,
 	auth.New,
 	bookmark.New,
 	category.New,

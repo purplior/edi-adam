@@ -20,8 +20,6 @@
     "strgen",
     "readpref",
     "repoutil",
-    "assisterform",
-    "assisterforms",
     "openai"
   ],
   "go.formatTool": "goimports",

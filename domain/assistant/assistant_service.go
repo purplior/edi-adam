@@ -1,11 +1,14 @@
 package assistant
 
 import (
+	"fmt"
+
 	"github.com/purplior/podoroot/domain/assister"
-	"github.com/purplior/podoroot/domain/assisterform"
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
 	"github.com/purplior/podoroot/domain/shared/pagination"
+	"github.com/purplior/podoroot/domain/wallet"
+	"github.com/purplior/podoroot/infra/port/podoopenai"
 	"github.com/purplior/podoroot/lib/strgen"
 )
 
@@ -41,6 +44,7 @@ type (
 			error,
 		)
 
+		// @used
 		GetOne_ByViewID(
 			ctx inner.Context,
 			viewID string,
@@ -50,44 +54,25 @@ type (
 			error,
 		)
 
-		GetDetailOne_ByViewID(
-			ctx inner.Context,
-			viewID string,
-			joinOption AssistantJoinOption,
-		) (
-			AssistantDetail,
-			error,
-		)
-
-		GetInfoList_ByCategory(
+		// @used
+		GetList_ByCategoryAlias(
 			ctx inner.Context,
 			categoryAlias string,
 			joinOption AssistantJoinOption,
 		) (
-			[]AssistantInfo,
+			[]Assistant,
 			error,
 		)
 
 		GetPaginatedList_ByAuthor(
 			ctx inner.Context,
 			authorID string,
-			page int,
-			pageSize int,
+			pageRequest pagination.PaginationRequest,
 		) (
 			[]Assistant,
 			pagination.PaginationMeta,
 			error,
 		)
-
-		PutOne(
-			ctx inner.Context,
-			assistant Assistant,
-		) error
-
-		CreateOne(
-			ctx inner.Context,
-			assistant Assistant,
-		) error
 
 		ApproveOne(
 			ctx inner.Context,
@@ -99,9 +84,10 @@ type (
 
 type (
 	assistantService struct {
+		openaiClient        *podoopenai.Client
 		assistantRepository AssistantRepository
 		assisterService     assister.AssisterService
-		assisterformService assisterform.AssisterFormService
+		walletService       wallet.WalletService
 		cm                  inner.ContextManager
 	}
 )
@@ -130,12 +116,29 @@ func (s *assistantService) RegisterOne(
 		status = AssistantStatus_UnderReview
 	}
 
+	_assister, err := s.assisterService.RegisterOne(
+		ctx,
+		assister.AssisterRegisterRequest{
+			Origin:        assister.AssisterOrigin_OpenAI,
+			Model:         assister.AssisterModel_OpenAI_ChatGPT4o,
+			Tests:         request.Tests,
+			Fields:        request.Fields,
+			QueryMessages: request.QueryMessages,
+			Cost:          2,
+		},
+	)
+	if err != nil {
+		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		return Assistant{}, err
+	}
+
 	_assistant, err := s.assistantRepository.InsertOne(
 		ctx,
 		Assistant{
 			ViewID:        strgen.ShortUniqueID(),
 			AuthorID:      authorID,
 			CategoryID:    request.CategoryID,
+			AssisterID:    _assister.ID,
 			AssistantType: AssistantType_Formal,
 			Title:         request.Title,
 			Description:   request.Description,
@@ -149,43 +152,11 @@ func (s *assistantService) RegisterOne(
 		return Assistant{}, err
 	}
 
-	_assister, err := s.assisterService.RegisterOne(
-		ctx,
-		assister.AssisterRegisterRequest{
-			AssistantID:        _assistant.ID,
-			Version:            "v1.0.0",
-			VersionDescription: "- 기본 기능 배포",
-			Cost:               2,
-		},
-	)
-	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
-		return Assistant{}, err
-	}
-
-	_, err = s.assisterformService.RegisterOne(
-		ctx,
-		assisterform.AssisterFormRegisterRequest{
-			AssisterID:    _assister.ID,
-			Origin:        assisterform.AssisterOrigin_OpenAI,
-			Model:         assisterform.AssisterModel_OpenAI_ChatGPT4o,
-			Tests:         request.Tests,
-			Fields:        request.Fields,
-			QueryMessages: request.QueryMessages,
-		},
-	)
-	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
-		return Assistant{}, err
-	}
-
 	if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
 		return Assistant{}, err
 	}
 
-	_assistant.Assisters = []assister.Assister{
-		_assister,
-	}
+	_assistant.Assister = _assister
 
 	return _assistant, nil
 }
@@ -195,6 +166,39 @@ func (s *assistantService) UpdateOne(
 	authorID string,
 	request UpdateOneRequest,
 ) error {
+	_assistant, err := s.assistantRepository.FindOne_ByID(
+		ctx,
+		request.ID,
+		AssistantJoinOption{},
+	)
+	if err != nil {
+		return err
+	}
+	if _assistant.IsPublic {
+		return exception.ErrBadRequest
+	}
+	if _assistant.AuthorID != authorID {
+		return exception.ErrUnauthorized
+	}
+
+	_assister, err := s.assisterService.GetOne_ByID(ctx, _assistant.AssisterID)
+	if err != nil {
+		return err
+	}
+
+	status := AssistantStatus_Registered
+	if request.IsPublic {
+		status = AssistantStatus_UnderReview
+	}
+
+	newAssistant := _assistant.Copy()
+	newAssistant.CategoryID = request.CategoryID
+	newAssistant.Title = request.Title
+	newAssistant.Description = request.Description
+	newAssistant.Tags = request.Tags
+	newAssistant.IsPublic = false
+	newAssistant.Status = status
+
 	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
 		return err
 	}
@@ -206,68 +210,23 @@ func (s *assistantService) UpdateOne(
 		}
 	}()
 
-	_assistant, err := s.assistantRepository.FindOne_ByID(
-		ctx,
-		request.ID,
-		AssistantJoinOption{
-			WithAssisters: true,
-		},
-	)
-	if err != nil {
-		return err
-	}
-	if _assistant.IsPublic || len(_assistant.Assisters) == 0 {
-		return exception.ErrBadRequest
-	}
-	if _assistant.AuthorID != authorID {
-		return exception.ErrUnauthorized
-	}
-
-	_assister := _assistant.Assisters[0]
-	_assisterForm, err := s.assisterformService.GetOne_ByAssisterID(
-		ctx,
-		_assister.ID,
-	)
-	if err != nil {
-		return err
-	}
-
-	status := AssistantStatus_Registered
-	if request.IsPublic {
-		status = AssistantStatus_UnderReview
-	}
 	err = s.assistantRepository.UpdateOne(
 		ctx,
-		Assistant{
-			ID:            request.ID,
-			ViewID:        _assistant.ViewID,
-			AuthorID:      authorID,
-			CategoryID:    request.CategoryID,
-			AssistantType: _assistant.AssistantType,
-			Title:         request.Title,
-			Description:   request.Description,
-			Tags:          request.Tags,
-			IsPublic:      false,
-			Status:        status,
-			CreatedAt:     _assistant.CreatedAt,
-		},
+		newAssistant,
 	)
 	if err != nil {
+		s.cm.ClearTX(ctx, inner.TX_PodoSql)
 		return err
 	}
 
-	err = s.assisterformService.UpdateOne(
+	newAssister := _assister.Copy()
+	newAssister.Fields = request.Fields
+	newAssister.Tests = request.Tests
+	newAssister.QueryMessages = request.QueryMessages
+
+	err = s.assisterService.UpdateOne(
 		ctx,
-		assisterform.AssisterForm{
-			ID:            _assisterForm.ID,
-			AssisterID:    _assister.AssistantID,
-			Origin:        _assisterForm.Origin,
-			Model:         _assisterForm.Model,
-			Fields:        request.Fields,
-			Tests:         request.Tests,
-			QueryMessages: request.QueryMessages,
-			CreatedAt:     _assistant.CreatedAt,
-		},
+		newAssister,
 	)
 	if err != nil {
 		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
@@ -286,17 +245,15 @@ func (s *assistantService) RemoveOne_ByID(
 	authorID string,
 	id string,
 ) error {
-	assistant, err := s.assistantRepository.FindOne_ByID(
+	_assistant, err := s.assistantRepository.FindOne_ByID(
 		ctx,
 		id,
-		AssistantJoinOption{
-			WithAssisters: true,
-		},
+		AssistantJoinOption{},
 	)
 	if err != nil {
 		return err
 	}
-	if assistant.Status != AssistantStatus_Registered || assistant.AuthorID != authorID {
+	if _assistant.Status != AssistantStatus_Registered || _assistant.AuthorID != authorID {
 		return exception.ErrBadRequest
 	}
 
@@ -311,23 +268,11 @@ func (s *assistantService) RemoveOne_ByID(
 		}
 	}()
 
-	assisterIDs := make([]string, len(assistant.Assisters))
-	for i, assister := range assistant.Assisters {
-		assisterIDs[i] = assister.ID
-	}
-
-	if err := s.assisterService.RemoveAll_ByIDs(
+	if err := s.assisterService.RemoveOne_ByID(
 		ctx,
-		assisterIDs,
+		_assistant.AssisterID,
 	); err != nil {
-		return err
-	}
-
-	if err := s.assisterformService.RemoveAll_ByAssisterIDs(
-		ctx,
-		assisterIDs,
-	); err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.ClearTX(ctx, inner.TX_PodoSql)
 		return err
 	}
 
@@ -335,7 +280,7 @@ func (s *assistantService) RemoveOne_ByID(
 		ctx,
 		id,
 	); err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.ClearTX(ctx, inner.TX_PodoSql)
 		return err
 	}
 
@@ -354,7 +299,24 @@ func (s *assistantService) GetOne_ByID(
 	Assistant,
 	error,
 ) {
-	return s.assistantRepository.FindOne_ByID(ctx, id, joinOption)
+	_assistant, err := s.assistantRepository.FindOne_ByID(ctx, id, joinOption)
+	if err != nil {
+		return Assistant{}, err
+	}
+
+	if joinOption.WithAssister {
+		_assister, err := s.assisterService.GetOne_ByID(
+			ctx,
+			_assistant.AssisterID,
+		)
+		if err != nil {
+			return Assistant{}, err
+		}
+
+		_assistant.Assister = _assister
+	}
+
+	return _assistant, nil
 }
 
 func (s *assistantService) GetOne_ByViewID(
@@ -365,35 +327,34 @@ func (s *assistantService) GetOne_ByViewID(
 	Assistant,
 	error,
 ) {
-	return s.assistantRepository.FindOne_ByViewID(ctx, viewID, joinOption)
-}
-
-func (s *assistantService) GetDetailOne_ByViewID(
-	ctx inner.Context,
-	viewID string,
-	joinOption AssistantJoinOption,
-) (
-	AssistantDetail,
-	error,
-) {
-	assistant, err := s.assistantRepository.FindOne_ByViewID(
-		ctx,
-		viewID,
-		joinOption,
-	)
+	_assistant, err := s.assistantRepository.FindOne_ByViewID(ctx, viewID, joinOption)
 	if err != nil {
-		return AssistantDetail{}, err
+		fmt.Println("here..?")
+		return Assistant{}, err
 	}
 
-	return assistant.ToDetail()
+	if joinOption.WithAssister {
+		_assister, err := s.assisterService.GetOne_ByID(
+			ctx,
+			_assistant.AssisterID,
+		)
+		if err != nil {
+			fmt.Println("here..2?")
+			return Assistant{}, err
+		}
+
+		_assistant.Assister = _assister
+	}
+
+	return _assistant, nil
 }
 
-func (s *assistantService) GetInfoList_ByCategory(
+func (s *assistantService) GetList_ByCategoryAlias(
 	ctx inner.Context,
 	categoryAlias string,
 	joinOption AssistantJoinOption,
 ) (
-	[]AssistantInfo,
+	[]Assistant,
 	error,
 ) {
 	assistants, err := s.assistantRepository.FindList_ByCategoryAlias(
@@ -405,19 +366,13 @@ func (s *assistantService) GetInfoList_ByCategory(
 		return nil, err
 	}
 
-	assistantInfos := make([]AssistantInfo, len(assistants))
-	for i, assistant := range assistants {
-		assistantInfos[i] = assistant.ToInfo()
-	}
-
-	return assistantInfos, nil
+	return assistants, nil
 }
 
 func (s *assistantService) GetPaginatedList_ByAuthor(
 	ctx inner.Context,
 	authorID string,
-	page int,
-	pageSize int,
+	pageRequest pagination.PaginationRequest,
 ) (
 	[]Assistant,
 	pagination.PaginationMeta,
@@ -426,30 +381,8 @@ func (s *assistantService) GetPaginatedList_ByAuthor(
 	return s.assistantRepository.FindPaginatedList_ByAuthorID(
 		ctx,
 		authorID,
-		page,
-		pageSize,
+		pageRequest,
 	)
-}
-
-func (s *assistantService) PutOne(
-	ctx inner.Context,
-	assistant Assistant,
-) error {
-	return s.assistantRepository.UpdateOne(ctx, assistant)
-}
-
-func (s *assistantService) CreateOne(
-	ctx inner.Context,
-	assistant Assistant,
-) error {
-	assistant.ViewID = strgen.ShortUniqueID()
-
-	_, err := s.assistantRepository.InsertOne(
-		ctx,
-		assistant,
-	)
-
-	return err
 }
 
 func (s *assistantService) ApproveOne(
@@ -484,15 +417,17 @@ func (s *assistantService) ApproveOne(
 }
 
 func NewAssistantService(
+	openaiClient *podoopenai.Client,
 	assistantRepository AssistantRepository,
 	assisterService assister.AssisterService,
-	assisterformService assisterform.AssisterFormService,
+	walletService wallet.WalletService,
 	cm inner.ContextManager,
 ) AssistantService {
 	return &assistantService{
+		openaiClient:        openaiClient,
 		assistantRepository: assistantRepository,
 		assisterService:     assisterService,
-		assisterformService: assisterformService,
+		walletService:       walletService,
 		cm:                  cm,
 	}
 }

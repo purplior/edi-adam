@@ -18,7 +18,7 @@ type (
 	}
 )
 
-func (r *categoryRepository) FindListByIDs(
+func (r *categoryRepository) FindList_ByIDs(
 	ctx inner.Context,
 	ids []string,
 ) (

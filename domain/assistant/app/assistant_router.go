@@ -21,7 +21,7 @@ func (r *assistantRouter) Attach(router *echo.Group) {
 	assistantRouterGroup := router.Group("/assistants")
 
 	assistantRouterGroup.GET(
-		"/detail/:assistant_view_id",
+		"/detail/one",
 		api.Handler(
 			r.assistantController.GetDetailOne(),
 			api.HandlerFuncOption{},
@@ -29,50 +29,10 @@ func (r *assistantRouter) Attach(router *echo.Group) {
 	)
 
 	assistantRouterGroup.GET(
-		"/category",
+		"/info-list",
 		api.Handler(
-			r.assistantController.GetInfoList_ByCategory(),
+			r.assistantController.GetInfoList(),
 			api.HandlerFuncOption{},
-		),
-	)
-
-	assistantRouterGroup.GET(
-		"/admin/pages",
-		api.Handler(
-			r.assistantController.GetPaginatedList_ForAdmin(),
-			api.HandlerFuncOption{AdminOnly: true},
-		),
-	)
-
-	assistantRouterGroup.GET(
-		"/admin/one",
-		api.Handler(
-			r.assistantController.GetOne_ForAdmin(),
-			api.HandlerFuncOption{AdminOnly: true},
-		),
-	)
-
-	assistantRouterGroup.PUT(
-		"/admin/one",
-		api.Handler(
-			r.assistantController.PutOne_ForAdmin(),
-			api.HandlerFuncOption{AdminOnly: true},
-		),
-	)
-
-	assistantRouterGroup.POST(
-		"/admin/one",
-		api.Handler(
-			r.assistantController.CreateOne_ForAdmin(),
-			api.HandlerFuncOption{AdminOnly: true},
-		),
-	)
-
-	assistantRouterGroup.POST(
-		"/admin/approve-one",
-		api.Handler(
-			r.assistantController.ApproveOne_ForAdmin(),
-			api.HandlerFuncOption{AdminOnly: true},
 		),
 	)
 }

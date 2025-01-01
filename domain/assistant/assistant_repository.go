@@ -7,14 +7,6 @@ import (
 
 type (
 	AssistantRepository interface {
-		InsertOne(
-			ctx inner.Context,
-			assistant Assistant,
-		) (
-			Assistant,
-			error,
-		)
-
 		FindOne_ByID(
 			ctx inner.Context,
 			id string,
@@ -45,11 +37,18 @@ type (
 		FindPaginatedList_ByAuthorID(
 			ctx inner.Context,
 			authorID string,
-			page int,
-			pageSize int,
+			pageRequest pagination.PaginationRequest,
 		) (
 			[]Assistant,
 			pagination.PaginationMeta,
+			error,
+		)
+
+		InsertOne(
+			ctx inner.Context,
+			assistant Assistant,
+		) (
+			Assistant,
 			error,
 		)
 

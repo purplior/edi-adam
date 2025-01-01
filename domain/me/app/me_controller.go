@@ -4,7 +4,7 @@ import (
 	"github.com/purplior/podoroot/application/api"
 	"github.com/purplior/podoroot/application/response"
 	"github.com/purplior/podoroot/domain/assistant"
-	"github.com/purplior/podoroot/domain/assisterform"
+	"github.com/purplior/podoroot/domain/assister"
 	"github.com/purplior/podoroot/domain/auth"
 	"github.com/purplior/podoroot/domain/bookmark"
 	domain "github.com/purplior/podoroot/domain/me"
@@ -42,32 +42,42 @@ type (
 		/**
 		 * 나의 어시목록 확인하기
 		 */
-		GetMyAssistantInfos() api.HandlerFunc
+		GetMyAssistantInfoPaginatedList() api.HandlerFunc
 
 		/**
 		 * 나의 어시 확인하기
 		 */
-		GetMyAssistant() api.HandlerFunc
+		GetMyAssistantOne() api.HandlerFunc
 
 		/**
 		 * 나의 어시 상세 확인하기
 		 */
-		GetMyAssistantDetail() api.HandlerFunc
+		GetMyAssistantDetailOne() api.HandlerFunc
+
+		/**
+		 * 나의 북마크 확인하기
+		 */
+		GetMyBookmarkOne() api.HandlerFunc
+
+		/**
+		 * 나의 북마크 목록 확인하기
+		 */
+		GetMyBookmarkPaginatedList() api.HandlerFunc
 
 		/**
 		 * 내 어시 등록하기
 		 */
-		RegisterMyAssistant() api.HandlerFunc
+		RegisterMyAssistantOne() api.HandlerFunc
 
 		/**
 		 * 내 어시 수정하기
 		 */
-		UpdateMyAssistant() api.HandlerFunc
+		UpdateMyAssistantOne() api.HandlerFunc
 
 		/**
 		 * 내 어시 제거하기
 		 */
-		RemoveMyAssistant() api.HandlerFunc
+		RemoveMyAssistantOne() api.HandlerFunc
 
 		/**
 		 * 북마크 토글하기
@@ -78,14 +88,14 @@ type (
 
 type (
 	meController struct {
-		meService           domain.MeService
-		assistantService    assistant.AssistantService
-		assisterFormService assisterform.AssisterFormService
-		authService         auth.AuthService
-		userService         user.UserService
-		walletService       wallet.WalletService
-		bookmarkService     bookmark.BookmarkService
-		cm                  inner.ContextManager
+		meService        domain.MeService
+		assistantService assistant.AssistantService
+		assisterService  assister.AssisterService
+		authService      auth.AuthService
+		userService      user.UserService
+		walletService    wallet.WalletService
+		bookmarkService  bookmark.BookmarkService
+		cm               inner.ContextManager
 	}
 )
 
@@ -174,7 +184,7 @@ func (c *meController) GetMyPodo() api.HandlerFunc {
 	}
 }
 
-func (c *meController) GetMyAssistantInfos() api.HandlerFunc {
+func (c *meController) GetMyAssistantInfoPaginatedList() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		if ctx.Identity == nil {
 			return ctx.SendError(exception.ErrUnauthorized)
@@ -191,8 +201,10 @@ func (c *meController) GetMyAssistantInfos() api.HandlerFunc {
 		assistants, pageMeta, err := c.assistantService.GetPaginatedList_ByAuthor(
 			innerCtx,
 			ctx.Identity.ID,
-			page,
-			10,
+			pagination.PaginationRequest{
+				Page: page,
+				Size: 16,
+			},
 		)
 		if err != nil {
 			return ctx.SendError(err)
@@ -215,60 +227,58 @@ func (c *meController) GetMyAssistantInfos() api.HandlerFunc {
 	}
 }
 
-func (c *meController) GetMyAssistant() api.HandlerFunc {
+func (c *meController) GetMyAssistantOne() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		if ctx.Identity == nil {
 			return ctx.SendError(exception.ErrUnauthorized)
 		}
 
-		viewID := ctx.Param("view_id")
-		if len(viewID) == 0 {
-			return ctx.SendError(exception.ErrBadRequest)
-		}
-
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		_assistant, err := c.assistantService.GetOne_ByViewID(
-			innerCtx,
-			viewID,
-			assistant.AssistantJoinOption{
-				WithCategory:  true,
-				WithAssisters: true,
-			},
-		)
-		if err != nil {
-			return ctx.SendError(err)
-		}
-		if _assistant.AuthorID != ctx.Identity.ID || len(_assistant.Assisters) == 0 {
-			return ctx.SendError(exception.ErrBadRequest)
-		}
+		var _assistant assistant.Assistant
+		var err error = nil
 
-		assisterForm, err := c.assisterFormService.GetOne_ByAssisterID(
-			innerCtx,
-			_assistant.Assisters[0].ID,
-		)
+		id := ctx.QueryParam("id")
+		viewID := ctx.QueryParam("view_id")
+
+		if len(id) > 0 {
+			_assistant, err = c.assistantService.GetOne_ByID(
+				innerCtx,
+				id,
+				assistant.AssistantJoinOption{
+					WithCategory: true,
+					WithAssister: true,
+				},
+			)
+		} else if len(viewID) > 0 {
+			_assistant, err = c.assistantService.GetOne_ByViewID(
+				innerCtx,
+				viewID,
+				assistant.AssistantJoinOption{
+					WithCategory: true,
+					WithAssister: true,
+				},
+			)
+		}
 		if err != nil {
 			return ctx.SendError(err)
+		}
+		if _assistant.AuthorID != ctx.Identity.ID {
+			return ctx.SendError(exception.ErrBadRequest)
 		}
 
 		return ctx.SendJSON(response.JSONResponse{
 			Data: struct {
-				Assistant     assistant.Assistant                 `json:"assistant"`
-				Fields        []assisterform.AssisterField        `json:"fields"`
-				QueryMessages []assisterform.AssisterQueryMessage `json:"queryMessages"`
-				Tests         []assisterform.AssisterInput        `json:"tests"`
+				Assistant assistant.Assistant `json:"assistant"`
 			}{
-				Assistant:     _assistant,
-				Fields:        assisterForm.Fields,
-				QueryMessages: assisterForm.QueryMessages,
-				Tests:         assisterForm.Tests,
+				Assistant: _assistant,
 			},
 		})
 	}
 }
 
-func (c *meController) GetMyAssistantDetail() api.HandlerFunc {
+func (c *meController) GetMyAssistantDetailOne() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		if ctx.Identity == nil {
 			return ctx.SendError(exception.ErrUnauthorized)
@@ -277,37 +287,120 @@ func (c *meController) GetMyAssistantDetail() api.HandlerFunc {
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		assistantViewID := ctx.Param("view_id")
-		if len(assistantViewID) == 0 {
-			return ctx.SendError(exception.ErrBadRequest)
-		}
+		var _assistant assistant.Assistant
+		var err error = nil
 
-		assistantDetail, err := c.assistantService.GetDetailOne_ByViewID(
-			innerCtx,
-			assistantViewID,
-			assistant.AssistantJoinOption{
-				WithAuthor:    true,
-				WithAssisters: true,
-			},
-		)
+		id := ctx.QueryParam("id")
+		viewID := ctx.QueryParam("view_id")
+
+		if len(id) > 0 {
+			_assistant, err = c.assistantService.GetOne_ByID(
+				innerCtx,
+				id,
+				assistant.AssistantJoinOption{
+					WithCategory: true,
+					WithAssister: true,
+				},
+			)
+		} else if len(viewID) > 0 {
+			_assistant, err = c.assistantService.GetOne_ByViewID(
+				innerCtx,
+				viewID,
+				assistant.AssistantJoinOption{
+					WithCategory: true,
+					WithAssister: true,
+				},
+			)
+		}
 		if err != nil {
 			return ctx.SendError(err)
 		}
-		if assistantDetail.AuthorInfo.ID != ctx.Identity.ID {
-			return ctx.SendError(exception.ErrUnauthorized)
+		if _assistant.AuthorID != ctx.Identity.ID {
+			return ctx.SendError(exception.ErrBadRequest)
 		}
 
 		return ctx.SendJSON(response.JSONResponse{
 			Data: struct {
 				AssistantDetail assistant.AssistantDetail `json:"assistantDetail"`
 			}{
-				AssistantDetail: assistantDetail,
+				AssistantDetail: _assistant.ToDetail(),
 			},
 		})
 	}
 }
 
-func (c *meController) RegisterMyAssistant() api.HandlerFunc {
+func (c *meController) GetMyBookmarkOne() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		if ctx.Identity == nil {
+			return ctx.SendError(exception.ErrUnauthorized)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		assistantID := ctx.QueryParam("assistant_id")
+		if len(assistantID) == 0 {
+			return ctx.SendError(exception.ErrBadRequest)
+		}
+
+		bookmark, err := c.bookmarkService.GetOne_ByUserIDAndAssistantID(
+			innerCtx,
+			ctx.Identity.ID,
+			assistantID,
+		)
+		if err != nil && err != exception.ErrNoRecord {
+			return ctx.SendError(err)
+		}
+
+		isEmpty := len(bookmark.ID) == 0 || err == exception.ErrNoRecord
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				Exist bool `json:"exist"`
+			}{
+				Exist: !isEmpty,
+			},
+		})
+	}
+}
+
+func (c *meController) GetMyBookmarkPaginatedList() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		if ctx.Identity == nil {
+			return ctx.SendError(exception.ErrUnauthorized)
+		}
+
+		page := dt.Int(ctx.QueryParam("p"))
+		pageSize := dt.Int(ctx.QueryParam("ps"))
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		bookmarks, pageMeta, err := c.bookmarkService.GetPaginatedList_ByUserID(
+			innerCtx,
+			ctx.Identity.ID,
+			pagination.PaginationRequest{
+				Page: page,
+				Size: pageSize,
+			},
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				Bookmarks []bookmark.Bookmark       `json:"bookmarks"`
+				PageMeta  pagination.PaginationMeta `json:"pageMeta"`
+			}{
+				Bookmarks: bookmarks,
+				PageMeta:  pageMeta,
+			},
+		})
+	}
+}
+
+func (c *meController) RegisterMyAssistantOne() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		if ctx.Identity == nil {
 			return ctx.SendError(exception.ErrUnauthorized)
@@ -339,7 +432,7 @@ func (c *meController) RegisterMyAssistant() api.HandlerFunc {
 	}
 }
 
-func (c *meController) UpdateMyAssistant() api.HandlerFunc {
+func (c *meController) UpdateMyAssistantOne() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		if ctx.Identity == nil {
 			return ctx.SendError(exception.ErrUnauthorized)
@@ -376,7 +469,7 @@ func (c *meController) UpdateMyAssistant() api.HandlerFunc {
 	}
 }
 
-func (c *meController) RemoveMyAssistant() api.HandlerFunc {
+func (c *meController) RemoveMyAssistantOne() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		if ctx.Identity == nil {
 			return ctx.SendError(exception.ErrUnauthorized)
@@ -437,7 +530,7 @@ func (c *meController) ToggleBookmarkOne() api.HandlerFunc {
 func NewMeController(
 	meService domain.MeService,
 	assistantService assistant.AssistantService,
-	assisterFormService assisterform.AssisterFormService,
+	assisterService assister.AssisterService,
 	authService auth.AuthService,
 	userService user.UserService,
 	walletService wallet.WalletService,
@@ -445,13 +538,13 @@ func NewMeController(
 	cm inner.ContextManager,
 ) MeController {
 	return &meController{
-		meService:           meService,
-		assistantService:    assistantService,
-		assisterFormService: assisterFormService,
-		authService:         authService,
-		userService:         userService,
-		walletService:       walletService,
-		bookmarkService:     bookmarkService,
-		cm:                  cm,
+		meService:        meService,
+		assistantService: assistantService,
+		assisterService:  assisterService,
+		authService:      authService,
+		userService:      userService,
+		walletService:    walletService,
+		bookmarkService:  bookmarkService,
+		cm:               cm,
 	}
 }

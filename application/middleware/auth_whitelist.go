@@ -65,15 +65,6 @@ var (
 				},
 			},
 		},
-		"assisterforms": {
-			Children: map[string]AuthWhiteListItem{
-				"one": {
-					Type:   Type_AllChildren,
-					Method: Method_Get,
-					Action: Action_Skip,
-				},
-			},
-		},
 		"user": {
 			Children: map[string]AuthWhiteListItem{
 				"nickname-check": {

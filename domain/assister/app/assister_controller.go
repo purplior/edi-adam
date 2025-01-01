@@ -7,71 +7,83 @@ import (
 	"github.com/purplior/podoroot/application/api"
 	"github.com/purplior/podoroot/application/response"
 	domain "github.com/purplior/podoroot/domain/assister"
-	"github.com/purplior/podoroot/domain/assisterform"
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
 	"github.com/purplior/podoroot/domain/shared/logger"
-	"github.com/purplior/podoroot/domain/shared/pagination"
 	"github.com/purplior/podoroot/infra/port/podoopenai"
-	"github.com/purplior/podoroot/lib/dt"
 )
 
 type (
 	AssisterController interface {
 		/**
-		 * 쌤비서 실행하기
+		 * 어시 정보 가져오기
 		 */
-		ExecuteAsResult() api.HandlerFunc
+		GetInfoOne() api.HandlerFunc
 
 		/**
-		 * 쌤비서 Stream으로 실행하기
+		 * 어시 실행하기
+		 */
+		Execute() api.HandlerFunc
+
+		/**
+		* 어시 Stream으로 실행하기
 		 */
 		ExecuteAsStream() api.HandlerFunc
-
-		/**
-		 * 쌤비서 실행기 가져오기
-		 */
-		GetOne_ForAdmin() api.HandlerFunc
-
-		/**
-		 * 쌤비서 실행기 목록 가져오기
-		 */
-		GetPaginatedList_ForAdmin() api.HandlerFunc
-
-		/**
-		 * 쌤비서 실행기 수정하기
-		 */
-		PutOne_ForAdmin() api.HandlerFunc
-
-		/**
-		 * 쌤비서 실행기 생성하기 (어드민용)
-		 */
-		CreateOne_ForAdmin() api.HandlerFunc
 	}
 )
 
 type (
 	assisterController struct {
-		execSem         chan struct{}
 		assisterService domain.AssisterService
+		execSem         chan struct{}
 		cm              inner.ContextManager
 	}
 )
 
-func (c *assisterController) ExecuteAsResult() api.HandlerFunc {
+func (c *assisterController) GetInfoOne() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		id := ctx.QueryParam("id")
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		var _assister domain.Assister
+		var err error = exception.ErrNotFound
+
+		if len(id) > 0 {
+			_assister, err = c.assisterService.GetOne_ByID(
+				innerCtx,
+				id,
+			)
+			if err != nil {
+				return ctx.SendError(err)
+			}
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				AssisterInfo domain.AssisterInfo `json:"assisterInfo"`
+			}{
+				AssisterInfo: _assister.ToInfo(),
+			},
+		})
+	}
+}
+
+func (c *assisterController) Execute() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		userID := ""
 		if ctx.Identity != nil {
 			userID = ctx.Identity.ID
 		}
 
-		assisterID := ctx.QueryParam("aid")
-		if len(assisterID) == 0 {
+		id := ctx.QueryParam("id")
+		if len(id) == 0 {
 			return ctx.String(http.StatusBadRequest, exception.ErrBadRequest.Error())
 		}
 
 		var dto struct {
-			Inputs []assisterform.AssisterInput `json:"inputs"`
+			Inputs []domain.AssisterInput `json:"inputs"`
 		}
 		if err := ctx.Bind(&dto); err != nil {
 			return ctx.String(http.StatusBadRequest, exception.ErrBadRequest.Error())
@@ -83,7 +95,7 @@ func (c *assisterController) ExecuteAsResult() api.HandlerFunc {
 		result, err := c.assisterService.Request(
 			innerCtx,
 			userID,
-			assisterID,
+			id,
 			dto.Inputs,
 		)
 		if err != nil {
@@ -113,7 +125,7 @@ func (c *assisterController) ExecuteAsStream() api.HandlerFunc {
 		}
 
 		var dto struct {
-			Inputs []assisterform.AssisterInput `json:"inputs"`
+			Inputs []domain.AssisterInput `json:"inputs"`
 		}
 		if err := ctx.Bind(&dto); err != nil {
 			return ctx.String(http.StatusBadRequest, exception.ErrBadRequest.Error())
@@ -126,7 +138,7 @@ func (c *assisterController) ExecuteAsStream() api.HandlerFunc {
 			innerCtx, cancel := c.cm.NewStreamingContext()
 			defer cancel()
 
-			err := c.assisterService.RequestStream(
+			err := c.assisterService.RequestAsStream(
 				innerCtx,
 				userID,
 				assisterID,
@@ -174,109 +186,6 @@ func (c *assisterController) ExecuteAsStream() api.HandlerFunc {
 		default:
 			return ctx.String(http.StatusTooManyRequests, "현재 이용자가 매우 많아요, 잠시 후 다시 시도해주세요.")
 		}
-	}
-}
-
-func (c *assisterController) GetOne_ForAdmin() api.HandlerFunc {
-	return func(ctx *api.Context) error {
-		assisterID := ctx.QueryParam("id")
-
-		innerCtx, cancel := c.cm.NewContext()
-		defer cancel()
-
-		assister, err := c.assisterService.GetOne_ByID(innerCtx, assisterID)
-		if err != nil {
-			return ctx.SendError(err)
-		}
-
-		return ctx.SendJSON(response.JSONResponse{
-			Data: struct {
-				Assister domain.Assister `json:"assister"`
-			}{
-				Assister: assister,
-			},
-		})
-	}
-}
-
-func (c *assisterController) GetPaginatedList_ForAdmin() api.HandlerFunc {
-	return func(ctx *api.Context) error {
-		assistantID := ctx.QueryParam("assistant_id")
-		page := dt.Int(ctx.QueryParam("p"))
-		pageSize := dt.Int(ctx.QueryParam("ps"))
-
-		innerCtx, cancel := c.cm.NewContext()
-		defer cancel()
-
-		assisters, meta, err := c.assisterService.GetPaginatedList_ByAssistant(
-			innerCtx,
-			assistantID,
-			page,
-			pageSize,
-		)
-		if err != nil {
-			return ctx.SendError(err)
-		}
-
-		return ctx.SendJSON(response.JSONResponse{
-			Data: struct {
-				Assisters []domain.Assister         `json:"assisters"`
-				Meta      pagination.PaginationMeta `json:"meta"`
-			}{
-				Assisters: assisters,
-				Meta:      meta,
-			},
-		})
-	}
-}
-
-func (c *assisterController) PutOne_ForAdmin() api.HandlerFunc {
-	return func(ctx *api.Context) error {
-		var dto struct {
-			Assister domain.Assister `json:"assister"`
-		}
-
-		if err := ctx.Bind(&dto); err != nil {
-			return ctx.SendError(err)
-		}
-
-		innerCtx, cancel := c.cm.NewContext()
-		defer cancel()
-
-		if err := c.assisterService.UpdateOne(
-			innerCtx,
-			dto.Assister,
-		); err != nil {
-			return ctx.SendError(err)
-		}
-
-		return ctx.SendJSON(response.JSONResponse{})
-	}
-}
-
-func (c *assisterController) CreateOne_ForAdmin() api.HandlerFunc {
-	return func(ctx *api.Context) error {
-		var dto struct {
-			Assister domain.Assister `json:"assister"`
-		}
-
-		if err := ctx.Bind(&dto); err != nil {
-			return ctx.SendError(err)
-		}
-
-		innerCtx, cancel := c.cm.NewContext()
-		defer cancel()
-
-		if err := c.assisterService.CreateOne(
-			innerCtx,
-			dto.Assister,
-		); err != nil {
-			return ctx.SendError(err)
-		}
-
-		return ctx.SendJSON(response.JSONResponse{
-			Status: response.Status_Created,
-		})
 	}
 }
 

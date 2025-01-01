@@ -1,5 +1,5 @@
 package podomongo
 
-var (
-	Collection_AssisterForm = "assisterforms"
+const (
+	Collection_Assister = "assisters"
 )

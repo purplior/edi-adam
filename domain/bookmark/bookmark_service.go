@@ -3,10 +3,30 @@ package bookmark
 import (
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/domain/shared/pagination"
 )
 
 type (
 	BookmarkService interface {
+		GetPaginatedList_ByUserID(
+			ctx inner.Context,
+			userID string,
+			pageRequest pagination.PaginationRequest,
+		) (
+			[]Bookmark,
+			pagination.PaginationMeta,
+			error,
+		)
+
+		GetOne_ByUserIDAndAssistantID(
+			ctx inner.Context,
+			userID string,
+			assistantID string,
+		) (
+			Bookmark,
+			error,
+		)
+
 		ToggleOne(
 			ctx inner.Context,
 			userID string,
@@ -23,6 +43,34 @@ type (
 		bookmarkRepository BookmarkRepository
 	}
 )
+
+func (s *bookmarkService) GetOne_ByUserIDAndAssistantID(
+	ctx inner.Context,
+	userID string,
+	assistantID string,
+) (
+	Bookmark,
+	error,
+) {
+	return s.bookmarkRepository.FindOne_ByUserIDAndAssistantID(
+		ctx,
+		userID,
+		assistantID,
+	)
+}
+
+func (s *bookmarkService) GetPaginatedList_ByUserID(
+	ctx inner.Context,
+	userID string,
+	pageRequest pagination.PaginationRequest,
+) (
+	[]Bookmark,
+	pagination.PaginationMeta,
+	error,
+) {
+	// TODO:
+	return nil, pagination.PaginationMeta{}, nil
+}
 
 func (s *bookmarkService) ToggleOne(
 	ctx inner.Context,

@@ -4,37 +4,20 @@ import (
 	"github.com/purplior/podoroot/application/api"
 	"github.com/purplior/podoroot/application/response"
 	domain "github.com/purplior/podoroot/domain/auth"
-	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/domain/user"
 )
 
 type (
 	AuthController interface {
 		/**
-		 * 이메일로 로그인
-		 */
-		SignIn_ByEmailVerification() api.HandlerFunc
-
-		/**
 		 * 휴대폰 번호로 로그인
 		 */
-		SignIn_ByPhoneNumberVerification() api.HandlerFunc
-
-		/**
-		 * 이메일로 로그인 (어드민용)
-		 */
-		SignIn_ByEmailVerification_ForAdmin() api.HandlerFunc
-
-		/**
-		 * 이메일로 회원가입
-		 */
-		SignUp_ByEmailVerification() api.HandlerFunc
+		SignIn() api.HandlerFunc
 
 		/**
 		 * 휴대폰 번호로 회원가입
 		 */
-		SignUp_ByPhoneNumberVerification() api.HandlerFunc
+		SignUp() api.HandlerFunc
 
 		/**
 		 * 토큰 재발급
@@ -44,7 +27,7 @@ type (
 		/**
 		 * 휴대폰 번호로 비밀번호 초기화
 		 */
-		ResetPassword_ByPhoneNumberVerification() api.HandlerFunc
+		ResetPassword() api.HandlerFunc
 	}
 )
 
@@ -55,37 +38,7 @@ type (
 	}
 )
 
-func (c *authController) SignIn_ByEmailVerification() api.HandlerFunc {
-	return func(ctx *api.Context) error {
-		var dto domain.SignInRequest
-		if err := ctx.Bind(&dto); err != nil {
-			return ctx.SendError(err)
-		}
-
-		innerCtx, cancel := c.cm.NewContext()
-		defer cancel()
-
-		identityToken, identity, err := c.authService.SignIn_ByEmailVerification(
-			innerCtx,
-			dto,
-		)
-		if err != nil {
-			return ctx.SendError(err)
-		}
-
-		return ctx.SendJSON(response.JSONResponse{
-			Data: struct {
-				Token    domain.IdentityToken `json:"token"`
-				Identity domain.Identity      `json:"identity"`
-			}{
-				Token:    identityToken,
-				Identity: identity,
-			},
-		})
-	}
-}
-
-func (c *authController) SignIn_ByPhoneNumberVerification() api.HandlerFunc {
+func (c *authController) SignIn() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		var dto domain.SignInRequest
 		if err := ctx.Bind(&dto); err != nil {
@@ -115,62 +68,7 @@ func (c *authController) SignIn_ByPhoneNumberVerification() api.HandlerFunc {
 	}
 }
 
-func (c *authController) SignIn_ByEmailVerification_ForAdmin() api.HandlerFunc {
-	return func(ctx *api.Context) error {
-		var dto domain.SignInRequest
-		if err := ctx.Bind(&dto); err != nil {
-			return ctx.SendError(err)
-		}
-
-		innerCtx, cancel := c.cm.NewContext()
-		defer cancel()
-
-		identityToken, identity, err := c.authService.SignIn_ByEmailVerification(
-			innerCtx,
-			dto,
-		)
-		if err != nil {
-			return ctx.SendError(err)
-		}
-		if identity.Role != user.Role_Master {
-			return ctx.SendError(exception.ErrUnauthorized)
-		}
-
-		return ctx.SendJSON(response.JSONResponse{
-			Data: struct {
-				Token    domain.IdentityToken `json:"token"`
-				Identity domain.Identity      `json:"identity"`
-			}{
-				Token:    identityToken,
-				Identity: identity,
-			},
-		})
-	}
-}
-
-func (c *authController) SignUp_ByEmailVerification() api.HandlerFunc {
-	return func(ctx *api.Context) error {
-		var dto domain.SignUpRequest
-		if err := ctx.Bind(&dto); err != nil {
-			return ctx.SendError(err)
-		}
-
-		innerCtx, cancel := c.cm.NewContext()
-		defer cancel()
-
-		err := c.authService.SignUp_ByEmailVerification(
-			innerCtx,
-			dto,
-		)
-		if err != nil {
-			return ctx.SendError(err)
-		}
-
-		return ctx.SendJSON(response.JSONResponse{})
-	}
-}
-
-func (c *authController) SignUp_ByPhoneNumberVerification() api.HandlerFunc {
+func (c *authController) SignUp() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		var dto domain.SignUpRequest
 		if err := ctx.Bind(&dto); err != nil {
@@ -214,7 +112,7 @@ func (c *authController) RefreshIdentityToken() api.HandlerFunc {
 	}
 }
 
-func (c *authController) ResetPassword_ByPhoneNumberVerification() api.HandlerFunc {
+func (c *authController) ResetPassword() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		var dto domain.ResetPasswordRequest
 		if err := ctx.Bind(&dto); err != nil {

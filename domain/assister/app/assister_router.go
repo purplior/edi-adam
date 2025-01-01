@@ -20,35 +20,29 @@ type (
 func (r *assisterRouter) Attach(router *echo.Group) {
 	assisterRouterGroup := router.Group("/assisters")
 
-	assisterRouterGroup.POST("/exec/result", api.Handler(
-		r.assisterController.ExecuteAsResult(),
-		api.HandlerFuncOption{},
-	))
+	assisterRouterGroup.GET(
+		"/info-one",
+		api.Handler(
+			r.assisterController.GetInfoOne(),
+			api.HandlerFuncOption{},
+		),
+	)
 
-	assisterRouterGroup.POST("/exec/stream", api.Handler(
-		r.assisterController.ExecuteAsStream(),
-		api.HandlerFuncOption{},
-	))
+	assisterRouterGroup.POST(
+		"/exec",
+		api.Handler(
+			r.assisterController.Execute(),
+			api.HandlerFuncOption{},
+		),
+	)
 
-	assisterRouterGroup.GET("/admin/one", api.Handler(
-		r.assisterController.GetOne_ForAdmin(),
-		api.HandlerFuncOption{AdminOnly: true},
-	))
-
-	assisterRouterGroup.GET("/admin/pages", api.Handler(
-		r.assisterController.GetPaginatedList_ForAdmin(),
-		api.HandlerFuncOption{AdminOnly: true},
-	))
-
-	assisterRouterGroup.PUT("/admin/one", api.Handler(
-		r.assisterController.PutOne_ForAdmin(),
-		api.HandlerFuncOption{AdminOnly: true},
-	))
-
-	assisterRouterGroup.POST("/admin/one", api.Handler(
-		r.assisterController.CreateOne_ForAdmin(),
-		api.HandlerFuncOption{AdminOnly: true},
-	))
+	assisterRouterGroup.POST(
+		"/exec-stream",
+		api.Handler(
+			r.assisterController.ExecuteAsStream(),
+			api.HandlerFuncOption{},
+		),
+	)
 }
 
 func NewAssisterRouter(

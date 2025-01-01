@@ -9,7 +9,7 @@ import (
 
 type (
 	CategoryController interface {
-		GetMainCategoryInfos() api.HandlerFunc
+		GetMainCategoryInfoList() api.HandlerFunc
 	}
 )
 
@@ -20,7 +20,7 @@ type (
 	}
 )
 
-func (c *categoryController) GetMainCategoryInfos() api.HandlerFunc {
+func (c *categoryController) GetMainCategoryInfoList() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
