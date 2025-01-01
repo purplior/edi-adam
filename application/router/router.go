@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/labstack/echo/v4"
+	admin "github.com/purplior/podoroot/application/admin"
 	assistant "github.com/purplior/podoroot/domain/assistant/app"
 	assister "github.com/purplior/podoroot/domain/assister/app"
 	auth "github.com/purplior/podoroot/domain/auth/app"
@@ -21,6 +22,7 @@ type (
 	}
 
 	router struct {
+		adminRouter         admin.AdminRouter
 		assistantRouter     assistant.AssistantRouter
 		assisterRouter      assister.AssisterRouter
 		authRouter          auth.AuthRouter
@@ -36,22 +38,26 @@ type (
 )
 
 func (r *router) Attach(app *echo.Echo) {
-	api := app.Group("/api/:version")
+	adminGroup := app.Group("/_admin")
+	r.adminRouter.Attach(adminGroup)
 
-	r.assistantRouter.Attach(api)
-	r.assisterRouter.Attach(api)
-	r.authRouter.Attach(api)
-	r.bookmarkRouter.Attach(api)
-	r.categoryRouter.Attach(api)
-	r.challengeRouter.Attach(api)
-	r.customerVoiceRouter.Attach(api)
-	r.meRouter.Attach(api)
-	r.missionRouter.Attach(api)
-	r.userRouter.Attach(api)
-	r.verificationRouter.Attach(api)
+	apiGroup := app.Group("/api/:version")
+
+	r.assistantRouter.Attach(apiGroup)
+	r.assisterRouter.Attach(apiGroup)
+	r.authRouter.Attach(apiGroup)
+	r.bookmarkRouter.Attach(apiGroup)
+	r.categoryRouter.Attach(apiGroup)
+	r.challengeRouter.Attach(apiGroup)
+	r.customerVoiceRouter.Attach(apiGroup)
+	r.meRouter.Attach(apiGroup)
+	r.missionRouter.Attach(apiGroup)
+	r.userRouter.Attach(apiGroup)
+	r.verificationRouter.Attach(apiGroup)
 }
 
 func New(
+	adminRouter admin.AdminRouter,
 	assistantRouter assistant.AssistantRouter,
 	assisterRouter assister.AssisterRouter,
 	authRouter auth.AuthRouter,
@@ -65,6 +71,7 @@ func New(
 	verificationRouter verification.VerificationRouter,
 ) Router {
 	return &router{
+		adminRouter:         adminRouter,
 		assistantRouter:     assistantRouter,
 		assisterRouter:      assisterRouter,
 		authRouter:          authRouter,

@@ -10,6 +10,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/labstack/echo/v4"
+	"github.com/purplior/podoroot/application/admin"
 	"github.com/purplior/podoroot/application/config"
 	"github.com/purplior/podoroot/application/middleware"
 	"github.com/purplior/podoroot/application/router"
@@ -66,6 +67,8 @@ func Start() error {
 	contextManager := infra.NewContextManager(client)
 	assisterService := assister.NewAssisterService(podoopenaiClient, walletService, assisterRepository, contextManager)
 	assistantService := assistant.NewAssistantService(podoopenaiClient, assistantRepository, assisterService, walletService, contextManager)
+	adminController := admin.NewAdminController(assistantService, contextManager)
+	adminRouter := admin.NewAdminRouter(adminController)
 	assistantController := app.NewAssistantController(assistantService, contextManager)
 	assistantRouter := app.NewAssistantRouter(assistantController)
 	assisterController := app2.NewAssisterController(assisterService, contextManager)
@@ -107,7 +110,7 @@ func Start() error {
 	emailVerificationController := app11.NewEmailVerificationController(emailVerificationService, contextManager)
 	phoneVerificationController := app11.NewPhoneVerificationController(phoneVerificationService, userService, contextManager)
 	verificationRouter := app11.NewVerificationRouter(emailVerificationController, phoneVerificationController)
-	routerRouter := router.New(assistantRouter, assisterRouter, authRouter, bookmarkRouter, categoryRouter, challengeRouter, customerVoiceRouter, meRouter, missionRouter, userRouter, verificationRouter)
+	routerRouter := router.New(adminRouter, assistantRouter, assisterRouter, authRouter, bookmarkRouter, categoryRouter, challengeRouter, customerVoiceRouter, meRouter, missionRouter, userRouter, verificationRouter)
 	error2 := StartApplication(databaseManager, routerRouter)
 	return error2
 }

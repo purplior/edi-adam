@@ -14,6 +14,7 @@ import (
 
 	"github.com/google/wire"
 	"github.com/labstack/echo/v4"
+	"github.com/purplior/podoroot/application/admin"
 	"github.com/purplior/podoroot/application/config"
 	"github.com/purplior/podoroot/application/middleware"
 	"github.com/purplior/podoroot/application/router"
@@ -75,6 +76,7 @@ func Start() error {
 	panic(
 		wire.Build(
 			StartApplication,
+			admin.New,
 			router.New,
 			domain.New,
 			infra.New,
