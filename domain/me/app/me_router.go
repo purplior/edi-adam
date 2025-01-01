@@ -20,6 +20,9 @@ type (
 func (r *meRouter) Attach(router *echo.Group) {
 	meRouterGroup := router.Group("/me")
 
+	/**
+	 * 사용자 정보 관련
+	 */
 	meRouterGroup.GET(
 		"/identity",
 		api.Handler(
@@ -27,7 +30,6 @@ func (r *meRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{},
 		),
 	)
-
 	meRouterGroup.GET(
 		"/detail",
 		api.Handler(
@@ -35,7 +37,6 @@ func (r *meRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{},
 		),
 	)
-
 	meRouterGroup.GET(
 		"/podo",
 		api.Handler(
@@ -43,7 +44,6 @@ func (r *meRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{},
 		),
 	)
-
 	meRouterGroup.GET(
 		"/temp/at",
 		api.Handler(
@@ -52,6 +52,9 @@ func (r *meRouter) Attach(router *echo.Group) {
 		),
 	)
 
+	/**
+	 * 어시 관련
+	 */
 	meRouterGroup.GET(
 		"/assistant/one",
 		api.Handler(
@@ -59,7 +62,6 @@ func (r *meRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{},
 		),
 	)
-
 	meRouterGroup.GET(
 		"/assistant/detail-one",
 		api.Handler(
@@ -67,7 +69,6 @@ func (r *meRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{},
 		),
 	)
-
 	meRouterGroup.GET(
 		"/assistant/info-plist",
 		api.Handler(
@@ -75,7 +76,6 @@ func (r *meRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{},
 		),
 	)
-
 	meRouterGroup.POST(
 		"/assistant",
 		api.Handler(
@@ -83,15 +83,6 @@ func (r *meRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{},
 		),
 	)
-
-	meRouterGroup.POST(
-		"/bookmark",
-		api.Handler(
-			r.meController.ToggleBookmarkOne(),
-			api.HandlerFuncOption{},
-		),
-	)
-
 	meRouterGroup.PATCH(
 		"/assistant/:id",
 		api.Handler(
@@ -99,7 +90,6 @@ func (r *meRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{},
 		),
 	)
-
 	meRouterGroup.DELETE(
 		"/assistant/:id",
 		api.Handler(
@@ -108,10 +98,27 @@ func (r *meRouter) Attach(router *echo.Group) {
 		),
 	)
 
+	/**
+	 * 북마크 관련
+	 */
 	meRouterGroup.GET(
 		"/bookmark/one",
 		api.Handler(
 			r.meController.GetMyBookmarkOne(),
+			api.HandlerFuncOption{},
+		),
+	)
+	meRouterGroup.GET(
+		"/bookmark/plist",
+		api.Handler(
+			r.meController.GetMyBookmarkPaginatedList(),
+			api.HandlerFuncOption{},
+		),
+	)
+	meRouterGroup.POST(
+		"/bookmark",
+		api.Handler(
+			r.meController.ToggleBookmarkOne(),
 			api.HandlerFuncOption{},
 		),
 	)

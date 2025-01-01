@@ -68,8 +68,11 @@ func (s *bookmarkService) GetPaginatedList_ByUserID(
 	pagination.PaginationMeta,
 	error,
 ) {
-	// TODO:
-	return nil, pagination.PaginationMeta{}, nil
+	return s.bookmarkRepository.FindPaginatedList_ByUserID(
+		ctx,
+		userID,
+		pageRequest,
+	)
 }
 
 func (s *bookmarkService) ToggleOne(

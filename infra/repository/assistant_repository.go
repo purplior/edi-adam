@@ -127,6 +127,7 @@ func (r *assistantRepository) FindPaginatedList_ByAuthorID(
 	db := r.client.DBWithContext(ctx)
 	pageMeta, err := repoutil.FindPaginatedList(
 		db,
+		&entity.Assistant{},
 		&entities,
 		pageRequest,
 		repoutil.FindPaginatedListOption{
@@ -135,9 +136,6 @@ func (r *assistantRepository) FindPaginatedList_ByAuthorID(
 					Preload("Category").
 					Order("created_at DESC").
 					Where("author_id = ?", authorID)
-			},
-			Association: func(db *podosql.DB) *podosql.DB {
-				return db.Preload("Category")
 			},
 		},
 	)

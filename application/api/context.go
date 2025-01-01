@@ -10,6 +10,8 @@ import (
 	"github.com/purplior/podoroot/domain/auth"
 	"github.com/purplior/podoroot/domain/shared/constant"
 	"github.com/purplior/podoroot/domain/shared/exception"
+	"github.com/purplior/podoroot/domain/shared/pagination"
+	"github.com/purplior/podoroot/lib/dt"
 )
 
 type (
@@ -18,6 +20,18 @@ type (
 		Identity *auth.Identity
 	}
 )
+
+func (ctx Context) PaginationRequest() pagination.PaginationRequest {
+	page := dt.Int(ctx.QueryParam("p"))
+	pageSize := dt.Int(ctx.QueryParam("ps"))
+	totalCount := dt.Int(ctx.QueryParam("ptc"))
+
+	return pagination.PaginationRequest{
+		Page:       page,
+		Size:       pageSize,
+		TotalCount: totalCount,
+	}
+}
 
 func (ctx Context) SendJSON(jsonResponse response.JSONResponse) error {
 	if jsonResponse.Status == 0 {

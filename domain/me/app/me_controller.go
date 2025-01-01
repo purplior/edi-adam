@@ -370,19 +370,13 @@ func (c *meController) GetMyBookmarkPaginatedList() api.HandlerFunc {
 			return ctx.SendError(exception.ErrUnauthorized)
 		}
 
-		page := dt.Int(ctx.QueryParam("p"))
-		pageSize := dt.Int(ctx.QueryParam("ps"))
-
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
 		bookmarks, pageMeta, err := c.bookmarkService.GetPaginatedList_ByUserID(
 			innerCtx,
 			ctx.Identity.ID,
-			pagination.PaginationRequest{
-				Page: page,
-				Size: pageSize,
-			},
+			ctx.PaginationRequest(),
 		)
 		if err != nil {
 			return ctx.SendError(err)

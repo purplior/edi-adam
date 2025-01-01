@@ -19,7 +19,8 @@ type (
 
 func (e Bookmark) ToModel() domain.Bookmark {
 	m := domain.Bookmark{
-		CreatedAt: e.CreatedAt,
+		CreatedAt:     e.CreatedAt,
+		AssistantInfo: e.Assistant.ToModel().ToInfo(),
 	}
 
 	if e.ID > 0 {

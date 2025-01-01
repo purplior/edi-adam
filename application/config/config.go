@@ -97,6 +97,10 @@ func AppPort() int {
 	return port
 }
 
+func DebugMode() bool {
+	return os.Getenv("DEBUG_MODE") == "true"
+}
+
 func convertPhaseStringToEnum(phaseString string) constant.Phase {
 	enm, is := phaseStringToEnumMap[phaseString]
 	if !is {

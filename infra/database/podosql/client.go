@@ -2,6 +2,7 @@ package podosql
 
 import (
 	"log"
+	"os"
 	"time"
 
 	"github.com/purplior/podoroot/application/config"
@@ -15,6 +16,8 @@ import (
 
 type (
 	DB = gorm.DB
+
+	Association = gorm.Association
 
 	ConstructorOption struct {
 		Phase constant.Phase
@@ -37,12 +40,33 @@ func (c *Client) DBWithContext(ctx inner.Context) *DB {
 }
 
 func (c *Client) ConnectDB() error {
+	isDebugMode := config.DebugMode()
+
+	var dbLogger logger.Interface
+	if isDebugMode {
+		dbLogger = logger.New(
+			log.New(os.Stdout, "\r\n", log.LstdFlags),
+			logger.Config{
+				SlowThreshold: time.Second,
+				LogLevel:      logger.Info,
+				Colorful:      true,
+			},
+		)
+	} else {
+		dbLogger = logger.Default.LogMode(logger.Silent)
+	}
+
 	db, err := gorm.Open(mysql.Open(c.opt.DSN), &gorm.Config{
-		Logger:      logger.Default.LogMode(logger.Silent),
+		Logger:      dbLogger,
 		PrepareStmt: true,
 	})
 	if err != nil {
 		return err
+	}
+
+	if isDebugMode {
+		log.Println("[podosql] 디버그모드가 활성화 되었어요")
+		db.Debug()
 	}
 
 	c.DB = db

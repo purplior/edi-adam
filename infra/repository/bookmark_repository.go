@@ -7,6 +7,7 @@ import (
 	"github.com/purplior/podoroot/infra/database"
 	"github.com/purplior/podoroot/infra/database/podosql"
 	"github.com/purplior/podoroot/infra/entity"
+	"github.com/purplior/podoroot/infra/repoutil"
 	"github.com/purplior/podoroot/lib/dt"
 )
 
@@ -50,8 +51,35 @@ func (r *bookmarkRepository) FindPaginatedList_ByUserID(
 	pagination.PaginationMeta,
 	error,
 ) {
-	// TODO:
-	return nil, pagination.PaginationMeta{}, nil
+	db := r.client.DBWithContext(ctx)
+	eUserID := dt.UInt(userID)
+
+	var entities []entity.Bookmark
+	pageMeta, err := repoutil.FindPaginatedList(
+		db,
+		&entity.Bookmark{},
+		&entities,
+		pageRequest,
+		repoutil.FindPaginatedListOption{
+			Condition: func(db *podosql.DB) *podosql.DB {
+				return db.Preload("Assistant").
+					Preload("Assistant.Author").
+					Preload("Assistant.Category").
+					Order("created_at DESC").
+					Where("user_id = ?", eUserID)
+			},
+		},
+	)
+	if err != nil {
+		return nil, pagination.PaginationMeta{}, database.ToDomainError(err)
+	}
+
+	bookmarks := make([]domain.Bookmark, len(entities))
+	for i, entity := range entities {
+		bookmarks[i] = entity.ToModel()
+	}
+
+	return bookmarks, pageMeta, nil
 }
 
 func (r *bookmarkRepository) InsertOne(
