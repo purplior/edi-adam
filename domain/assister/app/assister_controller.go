@@ -72,9 +72,8 @@ func (c *assisterController) GetInfoOne() api.HandlerFunc {
 
 func (c *assisterController) Execute() api.HandlerFunc {
 	return func(ctx *api.Context) error {
-		userID := ""
-		if ctx.Identity != nil {
-			userID = ctx.Identity.ID
+		if ctx.Identity == nil {
+			return ctx.SendError(exception.ErrUnauthorized)
 		}
 
 		id := ctx.QueryParam("id")
@@ -94,7 +93,7 @@ func (c *assisterController) Execute() api.HandlerFunc {
 
 		result, err := c.assisterService.Request(
 			innerCtx,
-			userID,
+			ctx.Identity.ID,
 			id,
 			dto.Inputs,
 		)
@@ -114,9 +113,8 @@ func (c *assisterController) Execute() api.HandlerFunc {
 
 func (c *assisterController) ExecuteAsStream() api.HandlerFunc {
 	return func(ctx *api.Context) error {
-		userID := ""
-		if ctx.Identity != nil {
-			userID = ctx.Identity.ID
+		if ctx.Identity == nil {
+			return ctx.SendError(exception.ErrUnauthorized)
 		}
 
 		assisterID := ctx.QueryParam("aid")
@@ -140,7 +138,7 @@ func (c *assisterController) ExecuteAsStream() api.HandlerFunc {
 
 			err := c.assisterService.RequestAsStream(
 				innerCtx,
-				userID,
+				ctx.Identity.ID,
 				assisterID,
 				dto.Inputs,
 				func() error {

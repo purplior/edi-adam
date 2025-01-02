@@ -18,6 +18,23 @@ type (
 	}
 )
 
+func (r *categoryRepository) FindOne_ByAlias(
+	ctx inner.Context,
+	alias string,
+) (
+	domain.Category,
+	error,
+) {
+	db := r.client.DBWithContext(ctx)
+
+	var entity entity.Category
+	if err := db.Where("alias = ?", alias).First(&entity).Error; err != nil {
+		return domain.Category{}, database.ToDomainError(err)
+	}
+
+	return entity.ToModel(), nil
+}
+
 func (r *categoryRepository) FindList_ByIDs(
 	ctx inner.Context,
 	ids []string,

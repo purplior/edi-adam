@@ -1,13 +1,12 @@
 package app
 
 import (
-	"fmt"
-
 	"github.com/purplior/podoroot/application/api"
 	"github.com/purplior/podoroot/application/response"
 	domain "github.com/purplior/podoroot/domain/assistant"
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/domain/shared/pagination"
 )
 
 type (
@@ -20,7 +19,7 @@ type (
 		/**
 		 * 어시 목록 가져오기 (카테고리)
 		 */
-		GetInfoList() api.HandlerFunc
+		GetInfoPaginatedList() api.HandlerFunc
 	}
 )
 
@@ -66,7 +65,7 @@ func (c *assistantController) GetDetailOne() api.HandlerFunc {
 	}
 }
 
-func (c *assistantController) GetInfoList() api.HandlerFunc {
+func (c *assistantController) GetInfoPaginatedList() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
@@ -75,16 +74,11 @@ func (c *assistantController) GetInfoList() api.HandlerFunc {
 		if len(categoryAlias) == 0 {
 			return ctx.SendError(exception.ErrBadRequest)
 		}
-
-		fmt.Println(categoryAlias)
-
-		assistants, err := c.assistantService.GetList_ByCategoryAlias(
+		pageRequest := ctx.PaginationRequest()
+		assistants, pageMeta, err := c.assistantService.GetPaginatedList_ByCategoryAlias(
 			innerCtx,
 			categoryAlias,
-			domain.AssistantJoinOption{
-				WithAuthor:   true,
-				WithCategory: true,
-			},
+			pageRequest,
 		)
 		if err != nil {
 			return ctx.SendError(err)
@@ -97,9 +91,11 @@ func (c *assistantController) GetInfoList() api.HandlerFunc {
 
 		return ctx.SendJSON(response.JSONResponse{
 			Data: struct {
-				AssistantInfos []domain.AssistantInfo `json:"assistantInfos"`
+				AssistantInfos []domain.AssistantInfo    `json:"assistantInfos"`
+				PageMeta       pagination.PaginationMeta `json:"pageMeta"`
 			}{
 				AssistantInfos: assistantInfos,
+				PageMeta:       pageMeta,
 			},
 		})
 	}

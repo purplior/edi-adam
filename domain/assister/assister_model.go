@@ -66,6 +66,7 @@ func (r AssisterRegisterRequest) ToModalForInsert() Assister {
 		Fields:        r.Fields,
 		Tests:         r.Tests,
 		QueryMessages: r.QueryMessages,
+		Cost:          r.Cost,
 	}
 }
 

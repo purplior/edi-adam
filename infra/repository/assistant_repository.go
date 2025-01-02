@@ -74,43 +74,42 @@ func (r *assistantRepository) FindOne_ByViewID(
 	return e.ToModel(), nil
 }
 
-func (r *assistantRepository) FindList_ByCategoryAlias(
+func (r *assistantRepository) FindPaginatedList_ByCategoryID(
 	ctx inner.Context,
-	categoryAlias string,
-	joinOption domain.AssistantJoinOption,
+	categoryID string,
+	pageRequest pagination.PaginationRequest,
 ) (
 	[]domain.Assistant,
+	pagination.PaginationMeta,
 	error,
 ) {
-	db := r.client.DBWithContext(ctx)
-
-	var categoryEntity entity.Category
-	if err := db.
-		Where("alias = ?", categoryAlias).
-		First(&categoryEntity).Error; err != nil {
-		return nil, database.ToDomainError(err)
-	}
-
 	var entities []entity.Assistant
-	query := db
-	if joinOption.WithAuthor {
-		query = query.Preload("Author")
-	}
 
-	if err := query.
-		Where("category_id = ? AND is_public = ?", categoryEntity.ID, true).
-		Order("created_at asc").
-		Find(&entities).Error; err != nil {
-		return nil, database.ToDomainError(err)
+	db := r.client.DBWithContext(ctx)
+	pageMeta, err := repoutil.FindPaginatedList(
+		db,
+		&entity.Assistant{},
+		&entities,
+		pageRequest,
+		repoutil.FindPaginatedListOption{
+			Condition: func(db *podosql.DB) *podosql.DB {
+				return db.
+					Preload("Author").
+					Order("created_at DESC").
+					Where("category_id = ?", categoryID)
+			},
+		},
+	)
+	if err != nil {
+		return nil, pagination.PaginationMeta{}, database.ToDomainError(err)
 	}
 
 	assistants := make([]domain.Assistant, len(entities))
 	for i, entity := range entities {
-		entity.Category = categoryEntity
 		assistants[i] = entity.ToModel()
 	}
 
-	return assistants, nil
+	return assistants, pageMeta, nil
 }
 
 func (r *assistantRepository) FindPaginatedList_ByAuthorID(

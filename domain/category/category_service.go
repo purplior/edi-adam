@@ -4,6 +4,14 @@ import "github.com/purplior/podoroot/domain/shared/inner"
 
 type (
 	CategoryService interface {
+		GetOne_ByAlias(
+			ctx inner.Context,
+			alias string,
+		) (
+			Category,
+			error,
+		)
+
 		GetMainCategoryList(
 			ctx inner.Context,
 		) (
@@ -18,6 +26,16 @@ type (
 		categoryRepository CategoryRepository
 	}
 )
+
+func (s *categoryService) GetOne_ByAlias(
+	ctx inner.Context,
+	alias string,
+) (
+	Category,
+	error,
+) {
+	return s.categoryRepository.FindOne_ByAlias(ctx, alias)
+}
 
 func (s *categoryService) GetMainCategoryList(
 	ctx inner.Context,

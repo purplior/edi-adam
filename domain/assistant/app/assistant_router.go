@@ -29,9 +29,9 @@ func (r *assistantRouter) Attach(router *echo.Group) {
 	)
 
 	assistantRouterGroup.GET(
-		"/info-list",
+		"/info-plist",
 		api.Handler(
-			r.assistantController.GetInfoList(),
+			r.assistantController.GetInfoPaginatedList(),
 			api.HandlerFuncOption{},
 		),
 	)

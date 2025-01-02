@@ -1,9 +1,8 @@
 package assistant
 
 import (
-	"fmt"
-
 	"github.com/purplior/podoroot/domain/assister"
+	"github.com/purplior/podoroot/domain/category"
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
 	"github.com/purplior/podoroot/domain/shared/pagination"
@@ -14,6 +13,44 @@ import (
 
 type (
 	AssistantService interface {
+		GetOne_ByID(
+			ctx inner.Context,
+			id string,
+			joinOption AssistantJoinOption,
+		) (
+			Assistant,
+			error,
+		)
+
+		GetOne_ByViewID(
+			ctx inner.Context,
+			viewID string,
+			joinOption AssistantJoinOption,
+		) (
+			Assistant,
+			error,
+		)
+
+		GetPaginatedList_ByCategoryAlias(
+			ctx inner.Context,
+			categoryAlias string,
+			pageRequest pagination.PaginationRequest,
+		) (
+			[]Assistant,
+			pagination.PaginationMeta,
+			error,
+		)
+
+		GetPaginatedList_ByAuthor(
+			ctx inner.Context,
+			authorID string,
+			pageRequest pagination.PaginationRequest,
+		) (
+			[]Assistant,
+			pagination.PaginationMeta,
+			error,
+		)
+
 		RegisterOne(
 			ctx inner.Context,
 			authorID string,
@@ -35,45 +72,6 @@ type (
 			id string,
 		) error
 
-		GetOne_ByID(
-			ctx inner.Context,
-			id string,
-			joinOption AssistantJoinOption,
-		) (
-			Assistant,
-			error,
-		)
-
-		// @used
-		GetOne_ByViewID(
-			ctx inner.Context,
-			viewID string,
-			joinOption AssistantJoinOption,
-		) (
-			Assistant,
-			error,
-		)
-
-		// @used
-		GetList_ByCategoryAlias(
-			ctx inner.Context,
-			categoryAlias string,
-			joinOption AssistantJoinOption,
-		) (
-			[]Assistant,
-			error,
-		)
-
-		GetPaginatedList_ByAuthor(
-			ctx inner.Context,
-			authorID string,
-			pageRequest pagination.PaginationRequest,
-		) (
-			[]Assistant,
-			pagination.PaginationMeta,
-			error,
-		)
-
 		ApproveOne(
 			ctx inner.Context,
 			id string,
@@ -86,11 +84,108 @@ type (
 	assistantService struct {
 		openaiClient        *podoopenai.Client
 		assistantRepository AssistantRepository
+		categoryService     category.CategoryService
 		assisterService     assister.AssisterService
 		walletService       wallet.WalletService
 		cm                  inner.ContextManager
 	}
 )
+
+func (s *assistantService) GetOne_ByID(
+	ctx inner.Context,
+	id string,
+	joinOption AssistantJoinOption,
+) (
+	Assistant,
+	error,
+) {
+	_assistant, err := s.assistantRepository.FindOne_ByID(ctx, id, joinOption)
+	if err != nil {
+		return Assistant{}, err
+	}
+
+	if joinOption.WithAssister {
+		_assister, err := s.assisterService.GetOne_ByID(
+			ctx,
+			_assistant.AssisterID,
+		)
+		if err != nil {
+			return Assistant{}, err
+		}
+
+		_assistant.Assister = _assister
+	}
+
+	return _assistant, nil
+}
+
+func (s *assistantService) GetOne_ByViewID(
+	ctx inner.Context,
+	viewID string,
+	joinOption AssistantJoinOption,
+) (
+	Assistant,
+	error,
+) {
+	_assistant, err := s.assistantRepository.FindOne_ByViewID(ctx, viewID, joinOption)
+	if err != nil {
+		return Assistant{}, err
+	}
+
+	if joinOption.WithAssister {
+		_assister, err := s.assisterService.GetOne_ByID(
+			ctx,
+			_assistant.AssisterID,
+		)
+		if err != nil {
+			return Assistant{}, err
+		}
+
+		_assistant.Assister = _assister
+	}
+
+	return _assistant, nil
+}
+
+func (s *assistantService) GetPaginatedList_ByCategoryAlias(
+	ctx inner.Context,
+	categoryAlias string,
+	pageRequest pagination.PaginationRequest,
+) (
+	[]Assistant,
+	pagination.PaginationMeta,
+	error,
+) {
+	category, err := s.categoryService.GetOne_ByAlias(
+		ctx,
+		categoryAlias,
+	)
+	if err != nil {
+		return nil, pagination.PaginationMeta{}, err
+	}
+
+	return s.assistantRepository.FindPaginatedList_ByCategoryID(
+		ctx,
+		category.ID,
+		pageRequest,
+	)
+}
+
+func (s *assistantService) GetPaginatedList_ByAuthor(
+	ctx inner.Context,
+	authorID string,
+	pageRequest pagination.PaginationRequest,
+) (
+	[]Assistant,
+	pagination.PaginationMeta,
+	error,
+) {
+	return s.assistantRepository.FindPaginatedList_ByAuthorID(
+		ctx,
+		authorID,
+		pageRequest,
+	)
+}
 
 func (s *assistantService) RegisterOne(
 	ctx inner.Context,
@@ -291,100 +386,6 @@ func (s *assistantService) RemoveOne_ByID(
 	return nil
 }
 
-func (s *assistantService) GetOne_ByID(
-	ctx inner.Context,
-	id string,
-	joinOption AssistantJoinOption,
-) (
-	Assistant,
-	error,
-) {
-	_assistant, err := s.assistantRepository.FindOne_ByID(ctx, id, joinOption)
-	if err != nil {
-		return Assistant{}, err
-	}
-
-	if joinOption.WithAssister {
-		_assister, err := s.assisterService.GetOne_ByID(
-			ctx,
-			_assistant.AssisterID,
-		)
-		if err != nil {
-			return Assistant{}, err
-		}
-
-		_assistant.Assister = _assister
-	}
-
-	return _assistant, nil
-}
-
-func (s *assistantService) GetOne_ByViewID(
-	ctx inner.Context,
-	viewID string,
-	joinOption AssistantJoinOption,
-) (
-	Assistant,
-	error,
-) {
-	_assistant, err := s.assistantRepository.FindOne_ByViewID(ctx, viewID, joinOption)
-	if err != nil {
-		fmt.Println("here..?")
-		return Assistant{}, err
-	}
-
-	if joinOption.WithAssister {
-		_assister, err := s.assisterService.GetOne_ByID(
-			ctx,
-			_assistant.AssisterID,
-		)
-		if err != nil {
-			fmt.Println("here..2?")
-			return Assistant{}, err
-		}
-
-		_assistant.Assister = _assister
-	}
-
-	return _assistant, nil
-}
-
-func (s *assistantService) GetList_ByCategoryAlias(
-	ctx inner.Context,
-	categoryAlias string,
-	joinOption AssistantJoinOption,
-) (
-	[]Assistant,
-	error,
-) {
-	assistants, err := s.assistantRepository.FindList_ByCategoryAlias(
-		ctx,
-		categoryAlias,
-		joinOption,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	return assistants, nil
-}
-
-func (s *assistantService) GetPaginatedList_ByAuthor(
-	ctx inner.Context,
-	authorID string,
-	pageRequest pagination.PaginationRequest,
-) (
-	[]Assistant,
-	pagination.PaginationMeta,
-	error,
-) {
-	return s.assistantRepository.FindPaginatedList_ByAuthorID(
-		ctx,
-		authorID,
-		pageRequest,
-	)
-}
-
 func (s *assistantService) ApproveOne(
 	ctx inner.Context,
 	id string,
@@ -419,6 +420,7 @@ func (s *assistantService) ApproveOne(
 func NewAssistantService(
 	openaiClient *podoopenai.Client,
 	assistantRepository AssistantRepository,
+	categoryService category.CategoryService,
 	assisterService assister.AssisterService,
 	walletService wallet.WalletService,
 	cm inner.ContextManager,
@@ -426,6 +428,7 @@ func NewAssistantService(
 	return &assistantService{
 		openaiClient:        openaiClient,
 		assistantRepository: assistantRepository,
+		categoryService:     categoryService,
 		assisterService:     assisterService,
 		walletService:       walletService,
 		cm:                  cm,

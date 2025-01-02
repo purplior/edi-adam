@@ -25,12 +25,13 @@ type (
 			error,
 		)
 
-		FindList_ByCategoryAlias(
+		FindPaginatedList_ByCategoryID(
 			ctx inner.Context,
-			categoryAlias string,
-			joinOption AssistantJoinOption,
+			categoryID string,
+			pageRequest pagination.PaginationRequest,
 		) (
 			[]Assistant,
+			pagination.PaginationMeta,
 			error,
 		)
 
