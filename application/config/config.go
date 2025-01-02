@@ -47,6 +47,10 @@ func Phase() constant.Phase {
 	return convertPhaseStringToEnum(phase)
 }
 
+func JwtSecretKey() string {
+	return os.Getenv("JWT_SECRET_KEY")
+}
+
 func SqlDbDSN() string {
 	return os.Getenv("SQL_DB_DSN")
 }
@@ -59,18 +63,6 @@ func MongoDbName() string {
 	return os.Getenv("MONGO_DB_NAME")
 }
 
-func CsEmail() string {
-	return os.Getenv("CS_EMAIL")
-}
-
-func CsEmailPassword() string {
-	return os.Getenv("CS_EMAIL_PASSWORD")
-}
-
-func JwtSecretKey() string {
-	return os.Getenv("JWT_SECRET_KEY")
-}
-
 func OpenAiServiceAccountApiKey() string {
 	return os.Getenv("OPENAI_SA_API_KEY")
 }
@@ -81,6 +73,18 @@ func OpenAiOrganizationID() string {
 
 func OpenAiProjectID() string {
 	return os.Getenv("OPENAI_PROJECT_ID")
+}
+
+func CsEmail() string {
+	return os.Getenv("CS_EMAIL")
+}
+
+func CsEmailPassword() string {
+	return os.Getenv("CS_EMAIL_PASSWORD")
+}
+
+func SlackBotToken() string {
+	return os.Getenv("SLACK_BOT_TOKEN")
 }
 
 func NCloudSMSServiceID() string {

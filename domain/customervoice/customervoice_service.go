@@ -2,14 +2,15 @@ package customervoice
 
 import (
 	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/domain/shared/logger"
 	"github.com/purplior/podoroot/domain/user"
+	"github.com/purplior/podoroot/infra/port/podoslack"
 )
 
 type (
 	CustomerVoiceService interface {
 		RegisterOne(
 			ctx inner.Context,
-			userID string,
 			request CustomerVoiceRegisterRequest,
 		) (
 			CustomerVoice,
@@ -20,6 +21,7 @@ type (
 
 type (
 	customerVoiceService struct {
+		slackClient             *podoslack.Client
 		customerVoiceRepository CustomerVoiceRepository
 		userService             user.UserService
 		cm                      inner.ContextManager
@@ -28,22 +30,27 @@ type (
 
 func (s *customerVoiceService) RegisterOne(
 	ctx inner.Context,
-	userID string,
 	request CustomerVoiceRegisterRequest,
 ) (
 	CustomerVoice,
 	error,
 ) {
+	if err := s.slackClient.SendMessage(podoslack.SendMessageRequest{
+		ChannelID: podoslack.ChannelID_CustomerVoice,
+		Text:      request.ToSlackMessageText(),
+	}); err != nil {
+		logger.Error(err, "slack error occurred")
+	}
+
 	if request.Type == CustomerVoiceType_Withdrawal {
 		return s.processWithdrawal(
 			ctx,
-			userID,
 			request,
 		)
 	}
 
 	return s.customerVoiceRepository.InsertOne(ctx, CustomerVoice{
-		UserID:  userID,
+		UserID:  request.UserID,
 		Type:    request.Type,
 		Content: request.Content,
 	})
@@ -51,7 +58,6 @@ func (s *customerVoiceService) RegisterOne(
 
 func (s *customerVoiceService) processWithdrawal(
 	ctx inner.Context,
-	userID string,
 	request CustomerVoiceRegisterRequest,
 ) (
 	CustomerVoice,
@@ -69,14 +75,14 @@ func (s *customerVoiceService) processWithdrawal(
 	}()
 
 	customerVoice, err := s.customerVoiceRepository.InsertOne(ctx, CustomerVoice{
-		UserID:  userID,
+		UserID:  request.UserID,
 		Type:    request.Type,
 		Content: request.Content,
 	})
 	if err != nil {
 		return CustomerVoice{}, err
 	}
-	if err := s.userService.Inactive(ctx, userID); err != nil {
+	if err := s.userService.Inactive(ctx, request.UserID); err != nil {
 		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
 		return CustomerVoice{}, err
 	}
@@ -89,11 +95,13 @@ func (s *customerVoiceService) processWithdrawal(
 }
 
 func NewCustomerVoiceService(
+	slackClient *podoslack.Client,
 	customerVoiceRepository CustomerVoiceRepository,
 	userService user.UserService,
 	cm inner.ContextManager,
 ) CustomerVoiceService {
 	return &customerVoiceService{
+		slackClient:             slackClient,
 		customerVoiceRepository: customerVoiceRepository,
 		userService:             userService,
 		cm:                      cm,

@@ -32,12 +32,13 @@ func (c *customerVoiceController) RegisterOne() api.HandlerFunc {
 			return ctx.SendError(err)
 		}
 
+		request.UserID = ctx.Identity.ID
+
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
 		_, err := c.customerVoiceService.RegisterOne(
 			innerCtx,
-			ctx.Identity.ID,
 			request,
 		)
 		if err != nil {

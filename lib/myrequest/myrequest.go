@@ -7,12 +7,14 @@ import (
 	"io"
 	"net/http"
 	"time"
+
+	"github.com/purplior/podoroot/domain/shared/logger"
 )
 
 type (
 	PostRequestOption struct {
 		Headers map[string]string
-		Body    map[string]interface{}
+		Body    interface{}
 	}
 )
 
@@ -28,6 +30,9 @@ func POST(
 			return statusCode, err
 		}
 	}
+
+	logger.Debug("POST " + url)
+	logger.Debug(string(requestBodyBytes))
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBodyBytes))
 	if err != nil {
@@ -47,6 +52,7 @@ func POST(
 	defer resp.Body.Close()
 
 	statusCode = resp.StatusCode
+	logger.Debug("statusCode: %d", statusCode)
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return resp.StatusCode, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}

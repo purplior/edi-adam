@@ -43,6 +43,7 @@ import (
 	"github.com/purplior/podoroot/infra/database/podomongo"
 	"github.com/purplior/podoroot/infra/database/podosql"
 	"github.com/purplior/podoroot/infra/port/podoopenai"
+	"github.com/purplior/podoroot/infra/port/podoslack"
 	"github.com/purplior/podoroot/infra/repository"
 	"log"
 	"os"
@@ -94,8 +95,9 @@ func Start() error {
 	categoryRouter := app5.NewCategoryRouter(categoryController)
 	challengeController := app6.NewChallengeController(challengeService, contextManager)
 	challengeRouter := app6.NewChallengeRouter(challengeController)
+	podoslackClient := podoslack.NewClient()
 	customerVoiceRepository := repository.NewCustomerVoiceRepository(client)
-	customerVoiceService := customervoice.NewCustomerVoiceService(customerVoiceRepository, userService, contextManager)
+	customerVoiceService := customervoice.NewCustomerVoiceService(podoslackClient, customerVoiceRepository, userService, contextManager)
 	customerVoiceController := app7.NewCustomerVoiceController(customerVoiceService, contextManager)
 	customerVoiceRouter := app7.NewCustomerVoiceRouter(customerVoiceController)
 	meService := me.NewMeService()
