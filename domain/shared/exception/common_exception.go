@@ -3,6 +3,7 @@ package exception
 import "errors"
 
 var (
+	ErrInternalServer  = errors.New("일시적인 서버오류가 발생했어요")
 	ErrTest            = errors.New("테스트용 에러에요")
 	ErrBadRequest      = errors.New("잘못된 요청이에요")
 	ErrUnauthorized    = errors.New("인증에 실패 했어요")

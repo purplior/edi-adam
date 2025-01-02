@@ -2,6 +2,7 @@ package verification
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/purplior/podoroot/domain/shared/exception"
@@ -80,6 +81,7 @@ func (s *phoneVerificationService) RequestCode(
 		return PhoneVerification{}, err
 	}
 
+	phoneNumber = strings.ReplaceAll(phoneNumber, "-", "")
 	count, err := s.phoneVerificationRepository.FindCount_ByPhoneNumber(
 		ctx,
 		phoneNumber,
@@ -107,7 +109,7 @@ func (s *phoneVerificationService) RequestCode(
 
 	if !isTestMode {
 		msg := "[포도쌤] 인증번호 [" + code + "] *타인에게 절대 알리지 마세요."
-		// TODO: send email
+		// TODO: send sms
 		fmt.Println(msg)
 	}
 

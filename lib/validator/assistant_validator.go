@@ -101,7 +101,7 @@ func checkValidAssistantTags(
 	tags []string,
 ) bool {
 	tagLen := len(tags)
-	if tagLen <= 0 && tagLen > 4 {
+	if tagLen <= 0 && tagLen > 2 {
 		return false
 	}
 

@@ -83,6 +83,22 @@ func OpenAiProjectID() string {
 	return os.Getenv("OPENAI_PROJECT_ID")
 }
 
+func NCloudSMSServiceID() string {
+	return os.Getenv("NCLOUD_SMS_SERVICE_ID")
+}
+
+func NCloudSMSFrom() string {
+	return os.Getenv("NCLOUD_SMS_FROM")
+}
+
+func NCloudAccessKey() string {
+	return os.Getenv("NCLOUD_ACCESS_KEY")
+}
+
+func NCloudSecretKey() string {
+	return os.Getenv("NCLOUD_SECRET_KEY")
+}
+
 func IsEnvLoaded() bool {
 	return isEnvLoaded
 }
