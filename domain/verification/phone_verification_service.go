@@ -124,6 +124,7 @@ func (s *phoneVerificationService) VerifyCode(
 	PhoneVerification,
 	error,
 ) {
+	phoneNumber = strings.ReplaceAll(phoneNumber, "-", "")
 	verification, err := s.phoneVerificationRepository.FindRecentOne_ByPhoneNumber(ctx, phoneNumber)
 	if err != nil {
 		return PhoneVerification{}, err

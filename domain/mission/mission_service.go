@@ -1,12 +1,15 @@
 package mission
 
 import (
+	"strings"
+
 	"github.com/purplior/podoroot/domain/challenge"
 	"github.com/purplior/podoroot/domain/ledger"
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
 	"github.com/purplior/podoroot/domain/shared/pagination"
 	"github.com/purplior/podoroot/domain/wallet"
+	"github.com/purplior/podoroot/lib/dt"
 )
 
 type (
@@ -133,32 +136,20 @@ func (s *missionService) ReceiveOne(
 		return err
 	}
 
-	switch mission.Reward {
-	case MissionReward_Podo3000:
-		{
-			if err := s.walletService.Charge(
-				ctx,
-				userID,
-				3000,
-				ledger.LedgerAction_ReceiveByMission,
-				mission.ID,
-			); err != nil {
-				s.cm.RollbackTX(ctx, inner.TX_PodoSql)
-				return err
-			}
-		}
-	case MissionReward_Podo5000:
-		{
-			if err := s.walletService.Charge(
-				ctx,
-				userID,
-				5000,
-				ledger.LedgerAction_ReceiveByMission,
-				mission.ID,
-			); err != nil {
-				s.cm.RollbackTX(ctx, inner.TX_PodoSql)
-				return err
-			}
+	reward := string(mission.Reward)
+
+	if strings.HasPrefix(reward, "podo_") {
+		podoAmount := dt.Int(strings.ReplaceAll(reward, "podo_", ""))
+
+		if err := s.walletService.Charge(
+			ctx,
+			userID,
+			podoAmount,
+			ledger.LedgerAction_ReceiveByMission,
+			mission.ID,
+		); err != nil {
+			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			return err
 		}
 	}
 

@@ -76,9 +76,7 @@ func (ctx Context) SendError(err error) error {
 
 	if status != response.Status_InternalServerError {
 		message = err.Error()
-	}
-
-	if config.Phase() != constant.Phase_Production {
+	} else if config.Phase() != constant.Phase_Production {
 		log.Println(err.Error())
 		log.Printf("Error: %v\nStack Trace:\n%s", err, debug.Stack())
 	}
