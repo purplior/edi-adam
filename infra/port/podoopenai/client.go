@@ -28,8 +28,10 @@ type (
 
 type (
 	ChatCompletionRequest struct {
-		Model    string
-		Messages []map[string]string
+		Model       string
+		Messages    []map[string]string
+		Temperature float64
+		TopP        float64
 	}
 
 	chatCompletionResponseChunk struct {
@@ -51,8 +53,10 @@ func (c *Client) RequestChatCompletions(
 	onInit func() error,
 ) (string, error) {
 	requestBody, err := json.Marshal(map[string]interface{}{
-		"model":    request.Model,
-		"messages": request.Messages,
+		"model":       request.Model,
+		"messages":    request.Messages,
+		"temperature": request.Temperature,
+		"top_p":       request.TopP,
 	})
 	if err != nil {
 		return "", err
@@ -122,9 +126,11 @@ func (c *Client) RequestChatCompletionsStream(
 	onReceiveMessage func(msg string) error,
 ) error {
 	requestBody, err := json.Marshal(map[string]interface{}{
-		"model":    request.Model,
-		"messages": request.Messages,
-		"stream":   true,
+		"model":       request.Model,
+		"messages":    request.Messages,
+		"temperature": request.Temperature,
+		"top_p":       request.TopP,
+		"stream":      true,
 	})
 	if err != nil {
 		return err

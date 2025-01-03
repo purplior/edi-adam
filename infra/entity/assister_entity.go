@@ -18,16 +18,20 @@ type (
 		Tests         []AssisterInput        `bson:"tests"`
 		QueryMessages []AssisterQueryMessage `bson:"queryMessages"`
 		Cost          uint                   `bson:"cost"`
+		Temperature   float64                `bson:"temperature"`
+		TopP          float64                `bson:"topP"`
 		CreatedAt     time.Time              `bson:"created_at"`
 	}
 )
 
 func (e Assister) ToModel() domain.Assister {
 	model := domain.Assister{
-		Origin:    domain.AssisterOrigin(e.Origin),
-		Model:     domain.AssisterModel(e.Model),
-		Cost:      e.Cost,
-		CreatedAt: e.CreatedAt,
+		Origin:      domain.AssisterOrigin(e.Origin),
+		Model:       domain.AssisterModel(e.Model),
+		Cost:        e.Cost,
+		Temperature: e.Temperature,
+		TopP:        e.TopP,
+		CreatedAt:   e.CreatedAt,
 	}
 
 	if !e.ID.IsZero() {
@@ -54,10 +58,12 @@ func (e Assister) ToModel() domain.Assister {
 
 func MakeAssister(m domain.Assister) Assister {
 	entity := Assister{
-		Origin:    string(m.Origin),
-		Model:     string(m.Model),
-		Cost:      m.Cost,
-		CreatedAt: m.CreatedAt,
+		Origin:      string(m.Origin),
+		Model:       string(m.Model),
+		Cost:        m.Cost,
+		Temperature: m.Temperature,
+		TopP:        m.TopP,
+		CreatedAt:   m.CreatedAt,
 	}
 
 	if len(m.ID) > 0 {

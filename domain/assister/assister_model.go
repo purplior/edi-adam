@@ -66,6 +66,8 @@ func (r AssisterRegisterRequest) ToModalForInsert() Assister {
 		Fields:        r.Fields,
 		Tests:         r.Tests,
 		QueryMessages: r.QueryMessages,
+		Temperature:   0.7,
+		TopP:          0.8,
 		Cost:          r.Cost,
 	}
 }
@@ -102,6 +104,8 @@ type (
 		Fields        []AssisterField        `json:"fields"`
 		Tests         []AssisterInput        `json:"tests"`
 		QueryMessages []AssisterQueryMessage `json:"queryMessages"`
+		Temperature   float64                `json:"temperature"`
+		TopP          float64                `json:"topP"`
 		Cost          uint                   `json:"cost"`
 		CreatedAt     time.Time              `json:"createdAt"`
 	}
