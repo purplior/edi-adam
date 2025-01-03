@@ -1,13 +1,10 @@
 package podosms
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/purplior/podoroot/application/config"
-	"github.com/purplior/podoroot/lib/dt"
-	"github.com/purplior/podoroot/lib/mycrypto"
-	"github.com/purplior/podoroot/lib/mydate"
+	"github.com/purplior/podoroot/lib/myncloud"
 	"github.com/purplior/podoroot/lib/myrequest"
 )
 
@@ -40,11 +37,12 @@ type (
 
 func (c *Client) SendSMS(request SendSMSRequest) (SendSMSResponse, error) {
 	contentLen := len(request.Content)
-	if contentLen < 4 || contentLen > 40 {
+	if contentLen < 4 || contentLen > 90 {
 		return SendSMSResponse{}, ErrInvalidContentSize
 	}
 
-	url := fmt.Sprintf("https://sens.apigw.ntruss.com/sms/v2/services/%s/messages", c.opt.ServiceID)
+	origin := "https://sens.apigw.ntruss.com"
+	uri := "/sms/v2/services/" + c.opt.ServiceID + "/messages"
 
 	messages := make([]map[string]interface{}, len(request.ToList))
 	for i, to := range request.ToList {
@@ -53,10 +51,12 @@ func (c *Client) SendSMS(request SendSMSRequest) (SendSMSResponse, error) {
 		}
 	}
 	requestBody := map[string]interface{}{
-		"type":     "SMS",
-		"from":     c.opt.From,
-		"content":  request.Content,
-		"messages": messages,
+		"type":        "SMS",
+		"contentType": "COMM",
+		"countryCode": "82",
+		"from":        c.opt.From,
+		"content":     request.Content,
+		"messages":    messages,
 	}
 	if len(request.Subject) > 0 {
 		requestBody["subject"] = request.Subject
@@ -65,23 +65,29 @@ func (c *Client) SendSMS(request SendSMSRequest) (SendSMSResponse, error) {
 		requestBody["reserveTime"] = request.ReserveTime.Format("2006-01-02 15:04")
 	}
 
-	sign, err := mycrypto.SignMapDataWithHMACSHA256(requestBody, c.opt.SecretKey)
+	sign, timestamp, err := myncloud.MakeSignature(myncloud.MakeSignaturePayload{
+		HTTPMethod: "POST",
+		URI:        uri,
+		AccessKey:  c.opt.AccessKey,
+		SecretKey:  c.opt.SecretKey,
+	})
 	if err != nil {
 		return SendSMSResponse{}, ErrSendSMS
 	}
 
 	headers := map[string]string{
-		"Content-Type":             "application/json",
-		"x-ncp-apigw-timestamp":    dt.Str(mydate.NowUnixMilli()),
+		"Content-Type":             "application/json; charset=utf-8",
+		"x-ncp-apigw-timestamp":    timestamp,
 		"x-ncp-iam-access-key":     c.opt.AccessKey,
 		"x-ncp-apigw-signature-v2": sign,
 	}
 
 	var responseBody SendSMSResponse
 	_, err = myrequest.POST(
-		url,
+		origin+uri,
 		myrequest.PostRequestOption{
 			Headers: headers,
+			Body:    requestBody,
 		},
 		&responseBody,
 	)

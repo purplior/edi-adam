@@ -44,6 +44,7 @@ import (
 	"github.com/purplior/podoroot/infra/database/podosql"
 	"github.com/purplior/podoroot/infra/port/podoopenai"
 	"github.com/purplior/podoroot/infra/port/podoslack"
+	"github.com/purplior/podoroot/infra/port/podosms"
 	"github.com/purplior/podoroot/infra/repository"
 	"log"
 	"os"
@@ -78,8 +79,9 @@ func Start() error {
 	assisterRouter := app2.NewAssisterRouter(assisterController)
 	emailVerificationRepository := repository.NewEmailVerificationRepository(client)
 	emailVerificationService := verification.NewEmailVerificationService(emailVerificationRepository)
+	podosmsClient := podosms.NewClient()
 	phoneVerificationRepository := repository.NewPhoneVerificationRepository(client)
-	phoneVerificationService := verification.NewPhoneVerificationService(phoneVerificationRepository)
+	phoneVerificationService := verification.NewPhoneVerificationService(podosmsClient, phoneVerificationRepository)
 	userRepository := repository.NewUserRepository(client)
 	userService := user.NewUserService(userRepository)
 	challengeRepository := repository.NewChallengeRepository(client)

@@ -4,11 +4,6 @@ import (
 	"log"
 
 	"github.com/purplior/podoroot/application/config"
-	"github.com/purplior/podoroot/domain/shared/constant"
-)
-
-var (
-	isDebugLogEnable = config.Phase() != constant.Phase_Production
 )
 
 func Info(format string, v ...interface{}) {
@@ -17,13 +12,13 @@ func Info(format string, v ...interface{}) {
 
 func Error(err error, format string, v ...interface{}) {
 	log.Printf(format+"\n", v...)
-	if isDebugLogEnable {
+	if config.DebugMode() {
 		log.Println(err.Error())
 	}
 }
 
 func Debug(format string, v ...interface{}) {
-	if isDebugLogEnable {
+	if config.DebugMode() {
 		log.Printf(format+"\n", v...)
 	}
 }

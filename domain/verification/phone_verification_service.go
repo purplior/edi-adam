@@ -1,12 +1,13 @@
 package verification
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/infra/port/podosms"
+	"github.com/purplior/podoroot/lib/dt"
 	"github.com/purplior/podoroot/lib/mydate"
 	"github.com/purplior/podoroot/lib/strgen"
 	"github.com/purplior/podoroot/lib/validator"
@@ -42,6 +43,7 @@ type (
 	}
 
 	phoneVerificationService struct {
+		smsClient                   *podosms.Client
 		phoneVerificationRepository PhoneVerificationRepository
 		maxCount                    int
 	}
@@ -94,9 +96,30 @@ func (s *phoneVerificationService) RequestCode(
 	}
 
 	code := strgen.RandomNumber(6)
+	var requestId string = ""
+	if !isTestMode {
+		messageContent := "[포도쌤] 인증번호 [" + code + "] *타인에게 절대 알리지 마세요."
+		response, err := s.smsClient.SendSMS(podosms.SendSMSRequest{
+			Content: messageContent,
+			ToList: []string{
+				phoneNumber,
+			},
+		})
+		if err != nil {
+			return PhoneVerification{}, err
+		}
+		statusCode := dt.Int(response.StatusCode)
+		if statusCode < 200 || statusCode >= 300 {
+			return PhoneVerification{}, exception.ErrSMSFailed
+		}
+
+		requestId = response.RequestID
+	}
+
 	verification := PhoneVerification{
 		PhoneNumber: phoneNumber,
 		Code:        code,
+		ReferenceID: requestId,
 		IsVerified:  false,
 		IsConsumed:  false,
 		ExpiredAt:   mydate.After(time.Duration(5 * time.Minute)),
@@ -105,12 +128,6 @@ func (s *phoneVerificationService) RequestCode(
 	ver, err := s.phoneVerificationRepository.InsertOne(ctx, verification)
 	if err != nil {
 		return PhoneVerification{}, err
-	}
-
-	if !isTestMode {
-		msg := "[포도쌤] 인증번호 [" + code + "] *타인에게 절대 알리지 마세요."
-		// TODO: send sms
-		fmt.Println(msg)
 	}
 
 	return ver, nil
@@ -152,9 +169,11 @@ func (s *phoneVerificationService) VerifyCode(
 }
 
 func NewPhoneVerificationService(
+	smsClient *podosms.Client,
 	phoneVerificationRepository PhoneVerificationRepository,
 ) PhoneVerificationService {
 	return &phoneVerificationService{
+		smsClient:                   smsClient,
 		phoneVerificationRepository: phoneVerificationRepository,
 		maxCount:                    5,
 	}

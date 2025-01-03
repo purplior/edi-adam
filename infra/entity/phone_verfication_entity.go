@@ -12,6 +12,7 @@ type (
 		ID          uint      `gorm:"primaryKey;autoIncrement"`
 		PhoneNumber string    `gorm:"size:20;not null"`
 		Code        string    `gorm:"size:10;not null"`
+		ReferenceID string    `gorm:"size:80"`
 		IsVerified  bool      `gorm:"not null"`
 		IsConsumed  bool      `gorm:"not null"`
 		ExpiredAt   time.Time `gorm:"not null"`
@@ -23,6 +24,7 @@ func (e PhoneVerification) ToModel() verification.PhoneVerification {
 	model := verification.PhoneVerification{
 		PhoneNumber: e.PhoneNumber,
 		Code:        e.Code,
+		ReferenceID: e.ReferenceID,
 		IsVerified:  e.IsVerified,
 		IsConsumed:  e.IsConsumed,
 		ExpiredAt:   e.ExpiredAt,
@@ -40,6 +42,7 @@ func MakePhoneVerification(m verification.PhoneVerification) PhoneVerification {
 	entity := PhoneVerification{
 		PhoneNumber: m.PhoneNumber,
 		Code:        m.Code,
+		ReferenceID: m.ReferenceID,
 		IsVerified:  m.IsVerified,
 		IsConsumed:  m.IsConsumed,
 		ExpiredAt:   m.ExpiredAt,

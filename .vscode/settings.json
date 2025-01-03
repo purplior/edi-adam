@@ -18,6 +18,7 @@
     "mydate",
     "myjwt",
     "mymail",
+    "myncloud",
     "myredis",
     "myrequest",
     "ncloud",
@@ -29,6 +30,8 @@
   "go.formatTool": "goimports",
   "editor.defaultFormatter": "golang.go",
   "editor.formatOnSave": true,
+  "editor.inlineSuggest.enabled": false,
+  "editor.useGlobalIME": true,
   "[go]": {
     "editor.insertSpaces": false,
     "editor.tabSize": 2,

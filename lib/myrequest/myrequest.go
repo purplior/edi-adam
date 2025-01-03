@@ -31,16 +31,20 @@ func POST(
 		}
 	}
 
-	logger.Debug("POST " + url)
-	logger.Debug(string(requestBodyBytes))
-
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBodyBytes))
 	if err != nil {
 		return statusCode, err
 	}
+
+	headersStr := ""
 	for key, value := range opt.Headers {
+		headersStr += "\n" + key + ": " + value
 		req.Header.Set(key, value)
 	}
+
+	logger.Debug("POST " + url)
+	logger.Debug("- Headers:%s", headersStr)
+	logger.Debug("- Body:\n%s", string(requestBodyBytes))
 
 	client := &http.Client{
 		Timeout: 10 * time.Second,
@@ -52,7 +56,7 @@ func POST(
 	defer resp.Body.Close()
 
 	statusCode = resp.StatusCode
-	logger.Debug("statusCode: %d", statusCode)
+	logger.Debug("- StatusCode: %d", statusCode)
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return resp.StatusCode, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
