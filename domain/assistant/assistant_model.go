@@ -6,6 +6,7 @@ import (
 	"github.com/purplior/podoroot/domain/assister"
 	"github.com/purplior/podoroot/domain/category"
 	"github.com/purplior/podoroot/domain/user"
+	"github.com/purplior/podoroot/lib/strgen"
 )
 
 const (
@@ -30,12 +31,14 @@ type (
 		AssistantType AssistantType     `json:"assistantType"`
 		Title         string            `json:"title"`
 		Description   string            `json:"description"`
+		Notice        string            `json:"notice"`
 		Tags          []string          `json:"tags"`
 		MetaTags      []string          `json:"metaTags"`
 		IsPublic      bool              `json:"isPublic"`
 		Status        AssistantStatus   `json:"status"`
 		CreatedAt     time.Time         `json:"createdAt"`
 		UpdatedAt     time.Time         `json:"updatedAt"`
+		PublishedAt   *time.Time        `json:"publishedAt"`
 		Author        user.User         `json:"author"`
 		Assister      assister.Assister `json:"assister"`
 		Category      category.Category `json:"category"`
@@ -67,12 +70,14 @@ type (
 		AuthorInfo    user.UserInfo         `json:"authorInfo"`
 		Title         string                `json:"title"`
 		Description   string                `json:"description"`
+		Notice        string                `json:"notice"`
 		Tags          []string              `json:"tags"`
 		MetaTags      []string              `json:"metaTags"`
 		IsPublic      bool                  `json:"isPublic"`
 		Status        AssistantStatus       `json:"status"`
 		AssisterInfo  assister.AssisterInfo `json:"assisterInfo"`
 		CreatedAt     time.Time             `json:"createdAt"`
+		PublishedAt   *time.Time            `json:"publishedAt"`
 	}
 )
 
@@ -115,12 +120,14 @@ func (m Assistant) ToDetail() AssistantDetail {
 		AssistantType: m.AssistantType,
 		Title:         m.Title,
 		Description:   m.Description,
+		Notice:        m.Notice,
 		Tags:          m.Tags,
 		MetaTags:      m.MetaTags,
 		IsPublic:      m.IsPublic,
 		Status:        m.Status,
 		AssisterInfo:  assisterInfo,
 		CreatedAt:     m.CreatedAt,
+		PublishedAt:   m.PublishedAt,
 	}
 }
 
@@ -128,18 +135,7 @@ type (
 	RegisterOneRequest struct {
 		Title         string                          `json:"title"`
 		Description   string                          `json:"description"`
-		CategoryID    string                          `json:"categoryId"`
-		Tags          []string                        `json:"tags"`
-		Fields        []assister.AssisterField        `json:"fields"`
-		QueryMessages []assister.AssisterQueryMessage `json:"queryMessages"`
-		Tests         []assister.AssisterInput        `json:"tests"`
-		IsPublic      bool                            `json:"isPublic"`
-	}
-
-	UpdateOneRequest struct {
-		ID            string                          `json:"id"`
-		Title         string                          `json:"title"`
-		Description   string                          `json:"description"`
+		Notice        string                          `json:"notice"`
 		CategoryID    string                          `json:"categoryId"`
 		Tags          []string                        `json:"tags"`
 		Fields        []assister.AssisterField        `json:"fields"`
@@ -148,3 +144,64 @@ type (
 		IsPublic      bool                            `json:"isPublic"`
 	}
 )
+
+func (r RegisterOneRequest) ToModelForInsert(
+	authorID string,
+	assisterID string,
+) Assistant {
+	status := AssistantStatus_Registered
+	if r.IsPublic {
+		status = AssistantStatus_UnderReview
+	}
+
+	return Assistant{
+		ViewID:        strgen.ShortUniqueID(),
+		AuthorID:      authorID,
+		CategoryID:    r.CategoryID,
+		AssisterID:    assisterID,
+		AssistantType: AssistantType_Formal,
+		Title:         r.Title,
+		Description:   r.Description,
+		Notice:        r.Notice,
+		Tags:          r.Tags,
+		MetaTags:      []string{},
+		// 공개는 심사를 통해서만 수정됨.
+		IsPublic: false,
+		Status:   status,
+	}
+}
+
+type (
+	UpdateOneRequest struct {
+		ID            string                          `json:"id"`
+		Title         string                          `json:"title"`
+		Description   string                          `json:"description"`
+		Notice        string                          `json:"notice"`
+		CategoryID    string                          `json:"categoryId"`
+		Tags          []string                        `json:"tags"`
+		Fields        []assister.AssisterField        `json:"fields"`
+		QueryMessages []assister.AssisterQueryMessage `json:"queryMessages"`
+		Tests         []assister.AssisterInput        `json:"tests"`
+		IsPublic      bool                            `json:"isPublic"`
+	}
+)
+
+func (r UpdateOneRequest) ToModelForUpdate(
+	existedAssistant Assistant,
+) Assistant {
+	status := AssistantStatus_Registered
+	if r.IsPublic {
+		status = AssistantStatus_UnderReview
+	}
+
+	existedAssistant.CategoryID = r.CategoryID
+	existedAssistant.Title = r.Title
+	existedAssistant.Description = r.Description
+	existedAssistant.Notice = r.Notice
+	existedAssistant.Tags = r.Tags
+	// 공개는 심사를 통해서만 수정됨.
+	existedAssistant.IsPublic = false
+	existedAssistant.Status = status
+
+	return existedAssistant
+}

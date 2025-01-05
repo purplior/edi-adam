@@ -30,7 +30,7 @@ func checkValidAssistantTitle(
 
 	// 2. 허용된 문자만 사용되었는지 확인
 	//    허용: 한국어(가-힣,ㄱ-ㅎ,ㅏ-ㅣ), 영어 대소문자(a-zA-Z), 숫자(0-9), 공백(\s)
-	allowedChars := regexp.MustCompile(`^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9\s]+$`)
+	allowedChars := regexp.MustCompile(`^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9\-·\s]+$`)
 	if !allowedChars.MatchString(title) {
 		return false
 	}
@@ -174,14 +174,20 @@ func checkValidAssistantQueryMessages(
 		names[i] = field.Name
 	}
 
+	totalQueryLen := 0
 	for _, queryMessage := range queryMessages {
-		if len(queryMessage.Content) < 1 {
+		queryLen := len(queryMessage.Content)
+		totalQueryLen += queryLen
+		if queryLen < 1 || queryLen > 10000 {
 			return false
 		}
 
 		if len(strings.Split(queryMessage.Content, "\n")) > 200 {
 			return false
 		}
+	}
+	if totalQueryLen > 20000 {
+		return false
 	}
 
 	for _, name := range names {

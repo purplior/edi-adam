@@ -8,7 +8,8 @@ import (
 	"github.com/purplior/podoroot/domain/shared/pagination"
 	"github.com/purplior/podoroot/domain/wallet"
 	"github.com/purplior/podoroot/infra/port/podoopenai"
-	"github.com/purplior/podoroot/lib/strgen"
+	"github.com/purplior/podoroot/lib/dt"
+	"github.com/purplior/podoroot/lib/mydate"
 )
 
 type (
@@ -34,6 +35,7 @@ type (
 		GetPaginatedList_ByCategoryAlias(
 			ctx inner.Context,
 			categoryAlias string,
+			isPublicOnly bool,
 			pageRequest pagination.PaginationRequest,
 		) (
 			[]Assistant,
@@ -75,6 +77,7 @@ type (
 		ApproveOne(
 			ctx inner.Context,
 			id string,
+			cost int,
 			metaTags []string,
 		) error
 	}
@@ -150,6 +153,7 @@ func (s *assistantService) GetOne_ByViewID(
 func (s *assistantService) GetPaginatedList_ByCategoryAlias(
 	ctx inner.Context,
 	categoryAlias string,
+	isPublicOnly bool,
 	pageRequest pagination.PaginationRequest,
 ) (
 	[]Assistant,
@@ -167,6 +171,7 @@ func (s *assistantService) GetPaginatedList_ByCategoryAlias(
 	return s.assistantRepository.FindPaginatedList_ByCategoryID(
 		ctx,
 		category.ID,
+		isPublicOnly,
 		pageRequest,
 	)
 }
@@ -206,20 +211,15 @@ func (s *assistantService) RegisterOne(
 		}
 	}()
 
-	status := AssistantStatus_Registered
-	if request.IsPublic {
-		status = AssistantStatus_UnderReview
-	}
-
 	_assister, err := s.assisterService.RegisterOne(
 		ctx,
 		assister.AssisterRegisterRequest{
-			Origin:        assister.AssisterOrigin_OpenAI,
-			Model:         assister.AssisterModel_OpenAI_ChatGPT4o,
+			Origin:        assister.Origin_OpenAI,
+			Model:         podoopenai.Model_GPT4oMini,
 			Tests:         request.Tests,
 			Fields:        request.Fields,
 			QueryMessages: request.QueryMessages,
-			Cost:          2,
+			Cost:          3,
 		},
 	)
 	if err != nil {
@@ -229,18 +229,10 @@ func (s *assistantService) RegisterOne(
 
 	_assistant, err := s.assistantRepository.InsertOne(
 		ctx,
-		Assistant{
-			ViewID:        strgen.ShortUniqueID(),
-			AuthorID:      authorID,
-			CategoryID:    request.CategoryID,
-			AssisterID:    _assister.ID,
-			AssistantType: AssistantType_Formal,
-			Title:         request.Title,
-			Description:   request.Description,
-			Tags:          request.Tags,
-			IsPublic:      false,
-			Status:        status,
-		},
+		request.ToModelForInsert(
+			authorID,
+			_assister.ID,
+		),
 	)
 	if err != nil {
 		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
@@ -276,23 +268,13 @@ func (s *assistantService) UpdateOne(
 		return exception.ErrUnauthorized
 	}
 
-	_assister, err := s.assisterService.GetOne_ByID(ctx, _assistant.AssisterID)
+	_assister, err := s.assisterService.GetOne_ByID(
+		ctx,
+		_assistant.AssisterID,
+	)
 	if err != nil {
 		return err
 	}
-
-	status := AssistantStatus_Registered
-	if request.IsPublic {
-		status = AssistantStatus_UnderReview
-	}
-
-	newAssistant := _assistant.Copy()
-	newAssistant.CategoryID = request.CategoryID
-	newAssistant.Title = request.Title
-	newAssistant.Description = request.Description
-	newAssistant.Tags = request.Tags
-	newAssistant.IsPublic = false
-	newAssistant.Status = status
 
 	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
 		return err
@@ -305,6 +287,7 @@ func (s *assistantService) UpdateOne(
 		}
 	}()
 
+	newAssistant := request.ToModelForUpdate(_assistant)
 	err = s.assistantRepository.UpdateOne(
 		ctx,
 		newAssistant,
@@ -389,9 +372,10 @@ func (s *assistantService) RemoveOne_ByID(
 func (s *assistantService) ApproveOne(
 	ctx inner.Context,
 	id string,
+	cost int,
 	metaTags []string,
 ) error {
-	assistant, err := s.assistantRepository.FindOne_ByID(
+	_assistant, err := s.assistantRepository.FindOne_ByID(
 		ctx,
 		id,
 		AssistantJoinOption{},
@@ -399,16 +383,30 @@ func (s *assistantService) ApproveOne(
 	if err != nil {
 		return err
 	}
-	if assistant.Status != AssistantStatus_UnderReview {
+	if _assistant.Status != AssistantStatus_UnderReview {
 		return exception.ErrBadRequest
 	}
 
-	assistant.Status = AssistantStatus_Approved
-	assistant.MetaTags = metaTags
-	assistant.IsPublic = true
+	if cost > 0 {
+		_assister, err := s.assisterService.GetOne_ByID(ctx, _assistant.AssisterID)
+		if err != nil {
+			return err
+		}
+		_assister.Cost = dt.UInt(cost)
+		s.assisterService.UpdateOne(
+			ctx,
+			_assister,
+		)
+	}
+
+	now := mydate.Now()
+	_assistant.Status = AssistantStatus_Approved
+	_assistant.MetaTags = metaTags
+	_assistant.IsPublic = true
+	_assistant.PublishedAt = &now
 	err = s.assistantRepository.UpdateOne(
 		ctx,
-		assistant,
+		_assistant,
 	)
 	if err != nil {
 		return err

@@ -77,6 +77,7 @@ func (r *assistantRepository) FindOne_ByViewID(
 func (r *assistantRepository) FindPaginatedList_ByCategoryID(
 	ctx inner.Context,
 	categoryID string,
+	isPublicOnly bool,
 	pageRequest pagination.PaginationRequest,
 ) (
 	[]domain.Assistant,
@@ -93,10 +94,18 @@ func (r *assistantRepository) FindPaginatedList_ByCategoryID(
 		pageRequest,
 		repoutil.FindPaginatedListOption{
 			Condition: func(db *podosql.DB) *podosql.DB {
-				return db.
+				query := db.
 					Preload("Author").
 					Order("created_at DESC").
 					Where("category_id = ?", categoryID)
+
+				if isPublicOnly {
+					query = query.Where("category_id = ? AND is_public = ?", categoryID, true)
+				} else {
+					query = query.Where("category_id = ?", categoryID)
+				}
+
+				return query
 			},
 		},
 	)

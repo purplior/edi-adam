@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"strings"
 	"time"
 
 	domain "github.com/purplior/podoroot/domain/assister"
@@ -116,21 +115,21 @@ func MakeAssisterField(m domain.AssisterField) AssisterField {
 type (
 	AssisterQueryMessage struct {
 		Role    domain.AssisterQueryMessageRole `bson:"role"`
-		Content []string                        `bson:"content"`
+		Content string                          `bson:"content"`
 	}
 )
 
 func (e AssisterQueryMessage) ToModel() domain.AssisterQueryMessage {
 	return domain.AssisterQueryMessage{
 		Role:    e.Role,
-		Content: strings.Join(e.Content, "\n"),
+		Content: e.Content,
 	}
 }
 
 func MakeAssisterQueryMessage(m domain.AssisterQueryMessage) AssisterQueryMessage {
 	return AssisterQueryMessage{
 		Role:    m.Role,
-		Content: strings.Split(m.Content, "\n"),
+		Content: m.Content,
 	}
 }
 

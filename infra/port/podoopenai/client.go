@@ -7,11 +7,25 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/purplior/podoroot/application/config"
+	"github.com/purplior/podoroot/domain/shared/constant"
+	"github.com/purplior/podoroot/domain/shared/logger"
+)
+
+const (
+	Model_GPT4o     = "chatgpt-4o-latest"
+	Model_GPT4oMini = "gpt-4o-mini"
+
+	Token_1M                              = 1000 * 1000
+	GPT4o_Input_CostPerToken      float64 = (2.5 * constant.ExchangeWonOfDollar) / Token_1M
+	GPT4o_Output_CostPerToken     float64 = (10 * constant.ExchangeWonOfDollar) / Token_1M
+	GPT4oMini_Input_CostPerToken  float64 = (1.0 * constant.ExchangeWonOfDollar) / Token_1M
+	GPT4oMini_Output_CostPerToken float64 = (0.6 * constant.ExchangeWonOfDollar) / Token_1M
 )
 
 type (
@@ -106,6 +120,14 @@ func (c *Client) RequestChatCompletions(
 				Content string `json:"content"`
 			} `json:"message"`
 		} `json:"choices"`
+		Usage struct {
+			PromptTokens       int `json:"prompt_tokens"`
+			CompletionTokens   int `json:"completion_tokens"`
+			TotalTokens        int `json:"total_tokens"`
+			PromptTokensDetail struct {
+				CachedTokens int `json:"cached_tokens"`
+			} `json:"prompt_tokens_details"`
+		} `json:"usage"`
 	}
 
 	if err := json.Unmarshal(responseBody, &completionResponse); err != nil {
@@ -116,7 +138,38 @@ func (c *Client) RequestChatCompletions(
 		return "", fmt.Errorf("no completion choices found")
 	}
 
-	return completionResponse.Choices[0].Message.Content, nil
+	content := completionResponse.Choices[0].Message.Content
+
+	if config.DebugMode() {
+		promptTokens := completionResponse.Usage.PromptTokens
+		promptCachedTokens := completionResponse.Usage.PromptTokensDetail.CachedTokens
+		completionTokens := completionResponse.Usage.CompletionTokens
+		totalTokens := completionResponse.Usage.TotalTokens
+
+		logger.Debug("prompt_token: %d", promptTokens)
+		logger.Debug("cached_tokens: %d", promptCachedTokens)
+		logger.Debug("completion_tokens: %d", completionTokens)
+		logger.Debug("total_tokens: %d", totalTokens)
+
+		inputCostPerToken := 1.0
+		outputCostPerToken := 1.0
+		switch request.Model {
+		case Model_GPT4o:
+			inputCostPerToken = GPT4o_Input_CostPerToken
+			outputCostPerToken = GPT4o_Output_CostPerToken
+		case Model_GPT4oMini:
+			inputCostPerToken = GPT4oMini_Input_CostPerToken
+			outputCostPerToken = GPT4oMini_Output_CostPerToken
+		}
+		prompt_won := inputCostPerToken * float64(promptTokens)
+		completion_won := outputCostPerToken * float64(completionTokens)
+		cost := (prompt_won + completion_won) * 1.1
+
+		logger.Debug("cost: %f 원", cost)
+		logger.Debug("podo: %d 알", int(math.Ceil(cost)))
+	}
+
+	return content, nil
 }
 
 func (c *Client) RequestChatCompletionsStream(

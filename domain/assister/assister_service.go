@@ -92,7 +92,7 @@ func (s *assisterService) RegisterOne(
 ) {
 	return s.assisterRepository.InsertOne(
 		ctx,
-		request.ToModalForInsert(),
+		request.ToModelForInsert(),
 	)
 }
 

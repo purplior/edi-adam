@@ -17,12 +17,14 @@ type (
 		AssistantType uint      `gorm:"default:0"`
 		Title         string    `gorm:"size:80;not null"`  // 20자 이내
 		Description   string    `gorm:"size:255;not null"` // 80자 이내
+		Notice        string    `gorm:"size:255"`
 		Tags          []string  `gorm:"serializer:json"`
 		MetaTags      []string  `gorm:"serializer:json"`
 		IsPublic      bool      `gorm:"default:false;not null"`
 		Status        string    `gorm:"size:80"`
 		CreatedAt     time.Time `gorm:"autoCreateTime"`
 		UpdatedAt     time.Time `gorm:"autoUpdateTime"`
+		PublishedAt   *time.Time
 		Author        User
 		Category      Category
 		Bookmarks     []Bookmark `gorm:"foreignKey:AssistantID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
@@ -36,12 +38,14 @@ func (e Assistant) ToModel() domain.Assistant {
 		AssistantType: domain.AssistantType(e.AssistantType),
 		Title:         e.Title,
 		Description:   e.Description,
+		Notice:        e.Notice,
 		Tags:          e.Tags,
 		MetaTags:      e.MetaTags,
 		IsPublic:      e.IsPublic,
 		Status:        domain.AssistantStatus(e.Status),
 		CreatedAt:     e.CreatedAt,
 		UpdatedAt:     e.UpdatedAt,
+		PublishedAt:   e.PublishedAt,
 	}
 
 	if e.ID > 0 {
@@ -66,12 +70,14 @@ func MakeAssistant(m domain.Assistant) Assistant {
 		AssistantType: uint(m.AssistantType),
 		Title:         m.Title,
 		Description:   m.Description,
+		Notice:        m.Notice,
 		Tags:          m.Tags,
 		MetaTags:      m.MetaTags,
 		IsPublic:      m.IsPublic,
 		Status:        string(m.Status),
 		CreatedAt:     m.CreatedAt,
 		UpdatedAt:     m.UpdatedAt,
+		PublishedAt:   m.PublishedAt,
 	}
 
 	if len(m.ID) > 0 {

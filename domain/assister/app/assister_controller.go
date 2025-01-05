@@ -117,8 +117,8 @@ func (c *assisterController) ExecuteAsStream() api.HandlerFunc {
 			return ctx.SendError(exception.ErrUnauthorized)
 		}
 
-		assisterID := ctx.QueryParam("aid")
-		if len(assisterID) == 0 {
+		id := ctx.QueryParam("id")
+		if len(id) == 0 {
 			return ctx.String(http.StatusBadRequest, exception.ErrBadRequest.Error())
 		}
 
@@ -139,7 +139,7 @@ func (c *assisterController) ExecuteAsStream() api.HandlerFunc {
 			err := c.assisterService.RequestAsStream(
 				innerCtx,
 				ctx.Identity.ID,
-				assisterID,
+				id,
 				dto.Inputs,
 				func() error {
 					ctx.Response().Header().Set(echo.HeaderContentType, echo.MIMETextPlain)

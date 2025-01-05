@@ -27,6 +27,7 @@ func (c *adminController) ApproveAssistantOne() api.HandlerFunc {
 
 		var dto struct {
 			ID       string   `json:"id"`
+			Cost     int      `json:"cost"`
 			MetaTags []string `json:"metaTags"`
 		}
 		if err := ctx.Bind(&dto); err != nil {
@@ -36,6 +37,7 @@ func (c *adminController) ApproveAssistantOne() api.HandlerFunc {
 		if err := c.assistantService.ApproveOne(
 			innerCtx,
 			dto.ID,
+			dto.Cost,
 			dto.MetaTags,
 		); err != nil {
 			return ctx.SendError(err)

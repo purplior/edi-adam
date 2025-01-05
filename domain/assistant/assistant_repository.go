@@ -28,6 +28,7 @@ type (
 		FindPaginatedList_ByCategoryID(
 			ctx inner.Context,
 			categoryID string,
+			isPublicOnly bool,
 			pageRequest pagination.PaginationRequest,
 		) (
 			[]Assistant,

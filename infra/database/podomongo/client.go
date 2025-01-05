@@ -81,8 +81,6 @@ func (c *Client) MyCollection(
 ) *MyMongoCollection {
 	db := c.databaseMap[c.opt.DefaultDbName]
 
-	print(db)
-
 	return db.MyCollection(name, opts...)
 }
 

@@ -94,7 +94,6 @@ func (c *authController) RefreshIdentityToken() api.HandlerFunc {
 	return func(ctx *api.Context) error {
 		var dto domain.IdentityToken
 		if err := ctx.Bind(&dto); err != nil {
-			print(err)
 			return ctx.SendError(err)
 		}
 

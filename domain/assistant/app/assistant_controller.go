@@ -78,6 +78,7 @@ func (c *assistantController) GetInfoPaginatedList() api.HandlerFunc {
 		assistants, pageMeta, err := c.assistantService.GetPaginatedList_ByCategoryAlias(
 			innerCtx,
 			categoryAlias,
+			true,
 			pageRequest,
 		)
 		if err != nil {

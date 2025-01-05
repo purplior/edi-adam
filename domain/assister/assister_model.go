@@ -14,10 +14,7 @@ const (
 	QueryMessageRole_User      AssisterQueryMessageRole = "user"
 	QueryMessageRole_Assistant AssisterQueryMessageRole = "assistant"
 
-	AssisterOrigin_OpenAI               AssisterOrigin = "openai"
-	AssisterModel_OpenAI_ChatGPT35Turbo AssisterModel  = "gpt-3.5-turbo"
-	AssisterModel_OpenAI_ChatGPT4o      AssisterModel  = "gpt-4o"
-	AssisterModel_OpenAI_O1Mini         AssisterModel  = "o1-mini"
+	Origin_OpenAI = "openai"
 )
 
 var (
@@ -59,7 +56,7 @@ type (
 	}
 )
 
-func (r AssisterRegisterRequest) ToModalForInsert() Assister {
+func (r AssisterRegisterRequest) ToModelForInsert() Assister {
 	return Assister{
 		Origin:        r.Origin,
 		Model:         r.Model,
@@ -114,7 +111,6 @@ type (
 		ID        string          `json:"id"`
 		Fields    []AssisterField `json:"fields"`
 		Tests     []AssisterInput `json:"tests"`
-		NoStream  bool            `json:"noStream"`
 		IsFree    bool            `json:"isFree"`
 		Cost      uint            `json:"cost"`
 		CreatedAt time.Time       `json:"createdAt"`
@@ -136,17 +132,10 @@ func (m Assister) FindField(name string) (AssisterField, bool) {
 }
 
 func (m Assister) ToInfo() AssisterInfo {
-	noStream := false
-
-	if m.Model == AssisterModel_OpenAI_O1Mini {
-		noStream = true
-	}
-
 	return AssisterInfo{
 		ID:        m.ID,
 		Fields:    m.Fields,
 		Tests:     m.Tests,
-		NoStream:  noStream,
 		IsFree:    m.Cost == 0,
 		Cost:      m.Cost,
 		CreatedAt: m.CreatedAt,
