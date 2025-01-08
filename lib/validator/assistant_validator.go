@@ -24,7 +24,7 @@ func checkValidAssistantTitle(
 ) bool {
 	// 1. 길이 검사 (3 ~ 20 글자)
 	length := utf8.RuneCountInString(title)
-	if length < 3 || length > 20 {
+	if length < 3 || length > 25 {
 		return false
 	}
 

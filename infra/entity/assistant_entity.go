@@ -15,6 +15,7 @@ type (
 		CategoryID    uint
 		AssisterID    string    `gorm:"size:80"`
 		AssistantType uint      `gorm:"default:0"`
+		Icon          string    `gorm:"size:80"`
 		Title         string    `gorm:"size:80;not null"`  // 20자 이내
 		Description   string    `gorm:"size:255;not null"` // 80자 이내
 		Notice        string    `gorm:"size:255"`
@@ -36,6 +37,7 @@ func (e Assistant) ToModel() domain.Assistant {
 		ViewID:        e.ViewID,
 		AssisterID:    e.AssisterID,
 		AssistantType: domain.AssistantType(e.AssistantType),
+		Icon:          e.Icon,
 		Title:         e.Title,
 		Description:   e.Description,
 		Notice:        e.Notice,
@@ -68,6 +70,7 @@ func MakeAssistant(m domain.Assistant) Assistant {
 		ViewID:        m.ViewID,
 		AssisterID:    m.AssisterID,
 		AssistantType: uint(m.AssistantType),
+		Icon:          m.Icon,
 		Title:         m.Title,
 		Description:   m.Description,
 		Notice:        m.Notice,

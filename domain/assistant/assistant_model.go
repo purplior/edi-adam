@@ -29,6 +29,7 @@ type (
 		CategoryID    string            `json:"categoryId"`
 		AssisterID    string            `json:"assisterId"`
 		AssistantType AssistantType     `json:"assistantType"`
+		Icon          string            `json:"icon"`
 		Title         string            `json:"title"`
 		Description   string            `json:"description"`
 		Notice        string            `json:"notice"`
@@ -53,6 +54,7 @@ type (
 	AssistantInfo struct {
 		ID            string                `json:"id"`
 		ViewID        string                `json:"viewId"`
+		Icon          string                `json:"icon"`
 		Title         string                `json:"title"`
 		AssistantType AssistantType         `json:"assistantType"`
 		Description   string                `json:"description"`
@@ -68,6 +70,7 @@ type (
 		ViewID        string                `json:"viewId"`
 		AssistantType AssistantType         `json:"assistantType"`
 		AuthorInfo    user.UserInfo         `json:"authorInfo"`
+		Icon          string                `json:"icon"`
 		Title         string                `json:"title"`
 		Description   string                `json:"description"`
 		Notice        string                `json:"notice"`
@@ -95,6 +98,7 @@ func (m Assistant) ToInfo() AssistantInfo {
 	return AssistantInfo{
 		ID:            m.ID,
 		ViewID:        m.ViewID,
+		Icon:          m.Icon,
 		Title:         m.Title,
 		AssistantType: m.AssistantType,
 		Description:   m.Description,
@@ -118,6 +122,7 @@ func (m Assistant) ToDetail() AssistantDetail {
 		ViewID:        m.ViewID,
 		AuthorInfo:    authorInfo,
 		AssistantType: m.AssistantType,
+		Icon:          m.Icon,
 		Title:         m.Title,
 		Description:   m.Description,
 		Notice:        m.Notice,
@@ -133,6 +138,7 @@ func (m Assistant) ToDetail() AssistantDetail {
 
 type (
 	RegisterOneRequest struct {
+		Icon          string                          `json:"icon"`
 		Title         string                          `json:"title"`
 		Description   string                          `json:"description"`
 		Notice        string                          `json:"notice"`
@@ -160,6 +166,7 @@ func (r RegisterOneRequest) ToModelForInsert(
 		CategoryID:    r.CategoryID,
 		AssisterID:    assisterID,
 		AssistantType: AssistantType_Formal,
+		Icon:          r.Icon,
 		Title:         r.Title,
 		Description:   r.Description,
 		Notice:        r.Notice,
@@ -174,6 +181,7 @@ func (r RegisterOneRequest) ToModelForInsert(
 type (
 	UpdateOneRequest struct {
 		ID            string                          `json:"id"`
+		Icon          string                          `json:"icon"`
 		Title         string                          `json:"title"`
 		Description   string                          `json:"description"`
 		Notice        string                          `json:"notice"`
@@ -194,6 +202,7 @@ func (r UpdateOneRequest) ToModelForUpdate(
 		status = AssistantStatus_UnderReview
 	}
 
+	existedAssistant.Icon = r.Icon
 	existedAssistant.CategoryID = r.CategoryID
 	existedAssistant.Title = r.Title
 	existedAssistant.Description = r.Description
