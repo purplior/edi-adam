@@ -30,7 +30,7 @@ func checkValidAssistantTitle(
 
 	// 2. 허용된 문자만 사용되었는지 확인
 	//    허용: 한국어(가-힣,ㄱ-ㅎ,ㅏ-ㅣ), 영어 대소문자(a-zA-Z), 숫자(0-9), 공백(\s)
-	allowedChars := regexp.MustCompile(`^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9\-·\s]+$`)
+	allowedChars := regexp.MustCompile(`^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9\-·)(\s]+$`)
 	if !allowedChars.MatchString(title) {
 		return false
 	}
@@ -58,7 +58,7 @@ func checkValidAssistantDescription(
 	// 2. 허용된 문자만 사용되었는지 확인
 	//    허용 문자: 한국어(가-힣,ㄱ-ㅎ,ㅏ-ㅣ), 영어 대소문자(a-zA-Z), 숫자(0-9),
 	//              마침표(.), 콤마(,) 및 공백(\s)
-	allowedChars := regexp.MustCompile(`^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9.,!?_~\s]+$`)
+	allowedChars := regexp.MustCompile(`^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9.,!?_~)(\s]+$`)
 	if !allowedChars.MatchString(description) {
 		return false
 	}

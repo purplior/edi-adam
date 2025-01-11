@@ -38,6 +38,10 @@ type (
 )
 
 func (r *router) Attach(app *echo.Echo) {
+	app.GET("/healthx", func(c echo.Context) error {
+		return c.String(200, "Hello, i'm podoroot")
+	})
+
 	adminGroup := app.Group("/_admin")
 	r.adminRouter.Attach(adminGroup)
 

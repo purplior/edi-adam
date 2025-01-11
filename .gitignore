@@ -3,3 +3,4 @@ build/
 .env.local
 .env.alpha
 .env.prod
+podossaem-admin-sa.json
