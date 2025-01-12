@@ -16,7 +16,7 @@ else
   exit 1
 fi
 
-docker buildx use podo-builder
+docker buildx use desktop-linux
 
 docker buildx build \
   --platform linux/amd64 \
@@ -24,6 +24,7 @@ docker buildx build \
   --build-arg GTK=${GITHUB_TOKEN} \
   -t "${IMAGE_TAG}" \
   --push \
+  --target runner \
   .
 
 gcloud run deploy ${CLOUD_RUN_SERVICE_NAME} \

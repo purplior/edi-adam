@@ -35,7 +35,7 @@ RUN update-ca-certificates
 RUN apk add tzdata
 
 ### 메인 ###
-FROM scratch
+FROM scratch AS runner
 
 ARG PHASE
 
