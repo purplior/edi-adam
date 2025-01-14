@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"strings"
 	"time"
 
 	"github.com/purplior/podoroot/application/config"
@@ -80,10 +81,11 @@ func (s *authService) SignIn_ByPhoneNumberVerification(
 	Identity,
 	error,
 ) {
+	phoneNumber := strings.ReplaceAll(request.AccountID, "-", "")
 	existedUser, err := s.userService.GetOne_ByAccount(
 		ctx,
 		user.JoinMethod_PhoneNumber,
-		request.AccountID,
+		phoneNumber,
 	)
 	if err != nil {
 		return IdentityToken{}, Identity{}, exception.ErrUnauthorized
