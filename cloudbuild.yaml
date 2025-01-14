@@ -1,0 +1,39 @@
+substitutions:
+  _REGION: 'asia-northeast3'
+  _AR_HOSTNAME: 'asia-northeast3-docker.pkg.dev'
+  _AR_REPO: 'podossaem/podoroot'
+  _SERVICE_NAME: 'podoroot'
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - 'docker pull $_AR_HOSTNAME/$PROJECT_ID/$_AR_REPO:latest || exit 0'
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+  - build
+  - '-t'
+  - '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPO:$COMMIT_SHA'
+  - '-t'
+  - '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPO:latest'
+  - '.'
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+  - push
+  - '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPO'
+  - '-a'
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  args:
+  - run
+  - deploy
+  - $_SERVICE_NAME
+  - '--image'
+  - '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPO:$COMMIT_SHA'
+  - '--region'
+  - $_REGION
+images:
+- '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPO:$COMMIT_SHA'
