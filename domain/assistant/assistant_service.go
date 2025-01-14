@@ -261,9 +261,6 @@ func (s *assistantService) UpdateOne(
 	if err != nil {
 		return err
 	}
-	if _assistant.IsPublic {
-		return exception.ErrBadRequest
-	}
 	if _assistant.AuthorID != authorID {
 		return exception.ErrUnauthorized
 	}
