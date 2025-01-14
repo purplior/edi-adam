@@ -135,6 +135,7 @@ func MakeAssisterQueryMessage(m domain.AssisterQueryMessage) AssisterQueryMessag
 
 type (
 	AssisterInput struct {
+		Type   string        `bson:"type"`
 		Name   string        `bson:"name"`
 		Values []interface{} `bson:"values"`
 	}
@@ -163,6 +164,7 @@ func (e AssisterInput) ToModel() domain.AssisterInput {
 	}
 
 	return domain.AssisterInput{
+		Type:   domain.AssisterFieldType(e.Type),
 		Name:   e.Name,
 		Values: values,
 	}
@@ -170,6 +172,7 @@ func (e AssisterInput) ToModel() domain.AssisterInput {
 
 func MakeAssisterInput(m domain.AssisterInput) AssisterInput {
 	return AssisterInput{
+		Type:   string(m.Type),
 		Name:   m.Name,
 		Values: m.Values,
 	}

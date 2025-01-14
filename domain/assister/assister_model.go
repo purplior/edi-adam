@@ -44,7 +44,8 @@ type (
 	}
 
 	AssisterInput struct {
-		Name string `json:"name"`
+		Type AssisterFieldType `json:"type"`
+		Name string            `json:"name"`
 		/**
 		 * Keyword, Paragraph: []string
 		 * ParagraphGroup: [][]{
