@@ -8,25 +8,15 @@ options:
   logging: CLOUD_LOGGING_ONLY
 steps:
 - name: 'gcr.io/cloud-builders/docker'
-  entrypoint: 'bash'
-  args:
-  - '-c'
-  - 'docker pull $_AR_HOSTNAME/$PROJECT_ID/$_AR_REPO:latest || exit 0'
-- name: 'gcr.io/cloud-builders/docker'
   args:
   - build
   - '-t'
   - '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPO:$COMMIT_SHA'
-  - '-t'
-  - '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPO:latest'
-  - '--cache-from'
-  - '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPO:latest'
   - '.'
 - name: 'gcr.io/cloud-builders/docker'
   args:
   - push
-  - '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPO'
-  - '-a'
+  - '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPO:$COMMIT_SHA'
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
   args:
