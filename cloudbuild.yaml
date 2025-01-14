@@ -19,6 +19,8 @@ steps:
   - '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPO:$COMMIT_SHA'
   - '-t'
   - '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPO:latest'
+  - '--cache-from'
+  - '$_AR_HOSTNAME/$PROJECT_ID/$_AR_REPO:latest'
   - '.'
 - name: 'gcr.io/cloud-builders/docker'
   args:
