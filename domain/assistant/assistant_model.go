@@ -197,11 +197,6 @@ type (
 func (r UpdateOneRequest) ToModelForUpdate(
 	existedAssistant Assistant,
 ) Assistant {
-	status := AssistantStatus_Registered
-	if r.IsPublic {
-		status = AssistantStatus_UnderReview
-	}
-
 	existedAssistant.Icon = r.Icon
 	existedAssistant.CategoryID = r.CategoryID
 	existedAssistant.Title = r.Title
@@ -210,7 +205,6 @@ func (r UpdateOneRequest) ToModelForUpdate(
 	existedAssistant.Tags = r.Tags
 	// 공개는 심사를 통해서만 수정됨.
 	existedAssistant.IsPublic = false
-	existedAssistant.Status = status
 
 	return existedAssistant
 }
