@@ -33,10 +33,12 @@ import (
 	app8 "github.com/purplior/podoroot/domain/me/app"
 	"github.com/purplior/podoroot/domain/mission"
 	app9 "github.com/purplior/podoroot/domain/mission/app"
+	"github.com/purplior/podoroot/domain/review"
+	app10 "github.com/purplior/podoroot/domain/review/app"
 	"github.com/purplior/podoroot/domain/user"
-	app10 "github.com/purplior/podoroot/domain/user/app"
+	app11 "github.com/purplior/podoroot/domain/user/app"
 	"github.com/purplior/podoroot/domain/verification"
-	app11 "github.com/purplior/podoroot/domain/verification/app"
+	app12 "github.com/purplior/podoroot/domain/verification/app"
 	"github.com/purplior/podoroot/domain/wallet"
 	"github.com/purplior/podoroot/infra"
 	"github.com/purplior/podoroot/infra/database"
@@ -109,12 +111,16 @@ func Start() error {
 	missionService := mission.NewMissionService(missionRepository, challengeService, walletService, contextManager)
 	missionController := app9.NewMissionController(missionService, contextManager)
 	missionRouter := app9.NewMissionRouter(missionController)
-	userController := app10.NewUserController(userService, contextManager)
-	userRouter := app10.NewUserRouter(userController)
-	emailVerificationController := app11.NewEmailVerificationController(emailVerificationService, contextManager)
-	phoneVerificationController := app11.NewPhoneVerificationController(phoneVerificationService, userService, contextManager)
-	verificationRouter := app11.NewVerificationRouter(emailVerificationController, phoneVerificationController)
-	routerRouter := router.New(adminRouter, assistantRouter, assisterRouter, authRouter, bookmarkRouter, categoryRouter, challengeRouter, customerVoiceRouter, meRouter, missionRouter, userRouter, verificationRouter)
+	reviewRepository := repository.NewReviewRepository(client)
+	reviewService := review.NewReviewService(reviewRepository)
+	reviewController := app10.NewReviewController(reviewService, contextManager)
+	reviewRouter := app10.NewReviewRouter(reviewController)
+	userController := app11.NewUserController(userService, contextManager)
+	userRouter := app11.NewUserRouter(userController)
+	emailVerificationController := app12.NewEmailVerificationController(emailVerificationService, contextManager)
+	phoneVerificationController := app12.NewPhoneVerificationController(phoneVerificationService, userService, contextManager)
+	verificationRouter := app12.NewVerificationRouter(emailVerificationController, phoneVerificationController)
+	routerRouter := router.New(adminRouter, assistantRouter, assisterRouter, authRouter, bookmarkRouter, categoryRouter, challengeRouter, customerVoiceRouter, meRouter, missionRouter, reviewRouter, userRouter, verificationRouter)
 	error2 := StartApplication(databaseManager, routerRouter)
 	return error2
 }
@@ -130,17 +136,17 @@ func StartApplication(
 		log.Println("[#] 데이터베이스를 초기화 하는데 실패 했어요")
 		return err
 	}
-	app12 := echo.New()
-	app12.
+	app13 := echo.New()
+	app13.
 		Use(middleware.New()...)
 	router2.
-		Attach(app12)
+		Attach(app13)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		if err := app12.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
+		if err := app13.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
 			log.Println("[#] 서버를 시작 하는데 실패 했어요")
 			panic(err)
 		}
@@ -156,7 +162,7 @@ func StartApplication(
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := app12.Shutdown(ctx); err != nil {
+	if err := app13.Shutdown(ctx); err != nil {
 		log.Println("[#] 서버를 종료 하는데 실패 했어요")
 		return err
 	}

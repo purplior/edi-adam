@@ -12,6 +12,7 @@ import (
 	ledger "github.com/purplior/podoroot/domain/ledger/app"
 	me "github.com/purplior/podoroot/domain/me/app"
 	mission "github.com/purplior/podoroot/domain/mission/app"
+	review "github.com/purplior/podoroot/domain/review/app"
 	user "github.com/purplior/podoroot/domain/user/app"
 	verification "github.com/purplior/podoroot/domain/verification/app"
 	wallet "github.com/purplior/podoroot/domain/wallet/app"
@@ -28,6 +29,7 @@ var New = wire.NewSet(
 	ledger.New,
 	me.New,
 	mission.New,
+	review.New,
 	user.New,
 	verification.New,
 	wallet.New,

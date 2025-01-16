@@ -1,6 +1,7 @@
 package mydate
 
 import (
+	"math"
 	"time"
 )
 
@@ -38,4 +39,21 @@ func Between(
 	}
 
 	return dates
+}
+
+func DaysDifference(a, b time.Time) int {
+	if a.After(b) {
+		a, b = b, a
+	}
+
+	a = a.UTC()
+	b = b.UTC()
+
+	a = time.Date(a.Year(), a.Month(), a.Day(), 0, 0, 0, 0, time.UTC)
+	b = time.Date(b.Year(), b.Month(), b.Day(), 0, 0, 0, 0, time.UTC)
+
+	diff := b.Sub(a)
+	days := int(math.Round(diff.Hours() / 24))
+
+	return days
 }

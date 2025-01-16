@@ -203,8 +203,6 @@ func (r UpdateOneRequest) ToModelForUpdate(
 	existedAssistant.Description = r.Description
 	existedAssistant.Notice = r.Notice
 	existedAssistant.Tags = r.Tags
-	// 공개는 심사를 통해서만 수정됨.
-	existedAssistant.IsPublic = false
 
 	return existedAssistant
 }

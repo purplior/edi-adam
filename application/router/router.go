@@ -12,6 +12,7 @@ import (
 	customervoice "github.com/purplior/podoroot/domain/customervoice/app"
 	me "github.com/purplior/podoroot/domain/me/app"
 	mission "github.com/purplior/podoroot/domain/mission/app"
+	review "github.com/purplior/podoroot/domain/review/app"
 	user "github.com/purplior/podoroot/domain/user/app"
 	verification "github.com/purplior/podoroot/domain/verification/app"
 )
@@ -32,6 +33,7 @@ type (
 		customerVoiceRouter customervoice.CustomerVoiceRouter
 		meRouter            me.MeRouter
 		missionRouter       mission.MissionRouter
+		reviewRouter        review.ReviewRouter
 		userRouter          user.UserRouter
 		verificationRouter  verification.VerificationRouter
 	}
@@ -56,6 +58,7 @@ func (r *router) Attach(app *echo.Echo) {
 	r.customerVoiceRouter.Attach(apiGroup)
 	r.meRouter.Attach(apiGroup)
 	r.missionRouter.Attach(apiGroup)
+	r.reviewRouter.Attach(apiGroup)
 	r.userRouter.Attach(apiGroup)
 	r.verificationRouter.Attach(apiGroup)
 }
@@ -71,6 +74,7 @@ func New(
 	customerVoiceRouter customervoice.CustomerVoiceRouter,
 	meRouter me.MeRouter,
 	missionRouter mission.MissionRouter,
+	reviewRouter review.ReviewRouter,
 	userRouter user.UserRouter,
 	verificationRouter verification.VerificationRouter,
 ) Router {
@@ -85,6 +89,7 @@ func New(
 		customerVoiceRouter: customerVoiceRouter,
 		meRouter:            meRouter,
 		missionRouter:       missionRouter,
+		reviewRouter:        reviewRouter,
 		userRouter:          userRouter,
 		verificationRouter:  verificationRouter,
 	}

@@ -102,6 +102,7 @@ func (c *Client) MigrateDB() error {
 		entity.EmailVerification{},
 		entity.PhoneVerification{},
 		entity.Bookmark{},
+		entity.Review{},
 	)
 }
 

@@ -13,6 +13,7 @@ var New = wire.NewSet(
 	NewLedgerRepository,
 	NewMissionRepository,
 	NewPhoneVerificationRepository,
+	NewReviewRepository,
 	NewUserRepository,
 	NewWalletRepository,
 )
