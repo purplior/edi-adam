@@ -93,3 +93,10 @@ func (ctx Context) SendError(err error) error {
 		Message: message,
 	})
 }
+
+func (ctx Context) SendCustomError(status int, errMessage string) error {
+	return ctx.JSON(status, response.ErrorResponse{
+		Status:  status,
+		Message: errMessage,
+	})
+}

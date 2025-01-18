@@ -170,7 +170,6 @@ func (s *assistantService) GetDetailOne_ByViewID(
 	_assistant, err := s.assistantRepository.FindOne_ByViewID(ctx, viewID, AssistantJoinOption{
 		WithAuthor:   true,
 		WithAssister: true,
-		WithReviews:  true,
 	})
 	if err != nil {
 		return AssistantDetail{}, err
@@ -183,8 +182,22 @@ func (s *assistantService) GetDetailOne_ByViewID(
 	if err != nil {
 		return AssistantDetail{}, err
 	}
-
 	_assistant.Assister = _assister
+
+	reviews, reviewPageMeta, err := s.reviewService.GetPaginatedList_ByAssistantID(
+		ctx,
+		_assistant.ID,
+		pagination.PaginationRequest{
+			Page: 1,
+			Size: 10,
+		},
+	)
+	if err != nil && err != exception.ErrNoRecord {
+		return AssistantDetail{}, err
+	}
+	_assistant.Reviews = reviews
+	_assistant.ReviewPageMeta = reviewPageMeta
+
 	assistantDetail := _assistant.ToDetail()
 
 	return assistantDetail, nil

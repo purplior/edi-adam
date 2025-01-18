@@ -133,6 +133,13 @@ func (r *meRouter) Attach(router *echo.Group) {
 			api.HandlerFuncOption{},
 		),
 	)
+	rg.PATCH(
+		"/review",
+		api.Handler(
+			r.meController.UpdateRecentReviewOne(),
+			api.HandlerFuncOption{},
+		),
+	)
 }
 
 func NewMeRouter(

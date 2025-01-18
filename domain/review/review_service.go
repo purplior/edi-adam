@@ -27,9 +27,9 @@ type (
 			error,
 		)
 
-		UpdateOne(
+		UpdateRecentOne(
 			ctx inner.Context,
-			request UpdateOneRequest,
+			request AddOneRequest,
 		) (
 			Review,
 			error,
@@ -91,17 +91,27 @@ func (s *reviewService) AddOne(
 	return s.addOne(ctx, request)
 }
 
-func (s *reviewService) UpdateOne(
+func (s *reviewService) UpdateRecentOne(
 	ctx inner.Context,
-	request UpdateOneRequest,
+	request AddOneRequest,
 ) (
 	Review,
 	error,
 ) {
-	err := s.reviewRepository.UpdateOne_ByID(
+	_review, err := s.reviewRepository.FindOne_ByAuthorAndAssistantID(
 		ctx,
-		request.ID,
-		request.ToModelForUpdate(),
+		request.AuthorID,
+		request.AssistantID,
+		ReviewQueryOption{},
+	)
+	if err != nil {
+		return Review{}, err
+	}
+
+	err = s.reviewRepository.UpdateOne_ByID(
+		ctx,
+		_review.ID,
+		request.ToModelForInsert(),
 	)
 	if err != nil {
 		return Review{}, err
@@ -109,7 +119,7 @@ func (s *reviewService) UpdateOne(
 
 	return s.reviewRepository.FindOne_ByID(
 		ctx,
-		request.ID,
+		_review.ID,
 		ReviewQueryOption{WithAuthor: true},
 	)
 }

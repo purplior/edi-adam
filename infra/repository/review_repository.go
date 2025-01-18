@@ -9,6 +9,7 @@ import (
 	"github.com/purplior/podoroot/infra/entity"
 	"github.com/purplior/podoroot/infra/repoutil"
 	"github.com/purplior/podoroot/lib/dt"
+	"gorm.io/gorm"
 )
 
 type (
@@ -38,7 +39,7 @@ func (r *reviewRepository) FindPaginatedList_ByAssistantID(
 			Condition: func(db *podosql.DB) *podosql.DB {
 				query := db.
 					Preload("Author").
-					Order("created_at DESC").
+					Order(gorm.Expr("COALESCE(updated_at, created_at) DESC")).
 					Where("assistant_id = ?", assistantID)
 
 				return query

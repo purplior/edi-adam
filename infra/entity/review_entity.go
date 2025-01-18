@@ -16,6 +16,7 @@ type (
 		Content     string `gorm:"size:1500"`
 		Score       float64
 		CreatedAt   time.Time `gorm:"autoCreateTime"`
+		UpdatedAt   time.Time `gorm:"autoUpdateTime"`
 	}
 )
 
@@ -24,6 +25,7 @@ func (e Review) ToModel() domain.Review {
 		Content:   e.Content,
 		Score:     e.Score,
 		CreatedAt: e.CreatedAt,
+		UpdatedAt: e.UpdatedAt,
 	}
 	if e.ID > 0 {
 		m.ID = dt.Str(e.ID)
@@ -44,6 +46,7 @@ func MakeReview(m domain.Review) Review {
 		Content:   m.Content,
 		Score:     m.Score,
 		CreatedAt: m.CreatedAt,
+		UpdatedAt: m.UpdatedAt,
 	}
 	if len(m.ID) > 0 {
 		e.ID = dt.UInt(m.ID)

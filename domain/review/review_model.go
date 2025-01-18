@@ -14,6 +14,7 @@ type (
 		Content     string    `json:"content"`
 		Score       float64   `json:"score"`
 		CreatedAt   time.Time `json:"createdAt"`
+		UpdatedAt   time.Time `json:"updatedAt"`
 		Author      user.User `json:"author"`
 	}
 
@@ -55,25 +56,6 @@ func (r AddOneRequest) ToModelForInsert() Review {
 		AssistantID: r.AssistantID,
 		Content:     r.Content,
 		Score:       r.Score,
-	}
-
-	return m
-}
-
-type (
-	UpdateOneRequest struct {
-		ID       string  `json:"id"`
-		AuthorID string  `json:"authorId"`
-		Content  string  `json:"content"`
-		Score    float64 `json:"score"`
-	}
-)
-
-func (r UpdateOneRequest) ToModelForUpdate() Review {
-	m := Review{
-		ID:      r.ID,
-		Content: r.Content,
-		Score:   r.Score,
 	}
 
 	return m

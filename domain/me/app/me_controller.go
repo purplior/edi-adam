@@ -1,6 +1,8 @@
 package app
 
 import (
+	"unicode/utf8"
+
 	"github.com/purplior/podoroot/application/api"
 	"github.com/purplior/podoroot/application/response"
 	"github.com/purplior/podoroot/domain/assistant"
@@ -89,6 +91,11 @@ type (
 		 * 리뷰 쓰기
 		 */
 		WriteReviewOne() api.HandlerFunc
+
+		/**
+		 * 최근 리뷰 수정
+		 */
+		UpdateRecentReviewOne() api.HandlerFunc
 	}
 )
 
@@ -542,9 +549,18 @@ func (c *meController) WriteReviewOne() api.HandlerFunc {
 		if err := ctx.Bind(&request); err != nil {
 			return ctx.SendError(err)
 		}
-
 		if request.Score <= 0 || request.Score > 5 {
-			return ctx.SendError(exception.ErrBadRequest)
+			return ctx.SendCustomError(
+				response.Status_BadRequest,
+				"별점을 다시 확인해주세요.",
+			)
+		}
+		requestLen := utf8.RuneCountInString(request.Content)
+		if requestLen < 20 || requestLen > 500 {
+			return ctx.SendCustomError(
+				response.Status_BadRequest,
+				"길이는 20자 이상 500자 이하로 작성해주세요.",
+			)
 		}
 
 		innerCtx, cancel := c.cm.NewContext()
@@ -556,6 +572,63 @@ func (c *meController) WriteReviewOne() api.HandlerFunc {
 			request,
 		)
 		if err != nil {
+			if err == exception.ErrBadRequest {
+				return ctx.SendCustomError(
+					response.Status_Unprocessable,
+					"동일한 어시에는 한달에 한번만 리뷰를 남길 수 있어요.",
+				)
+			}
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				ReviewInfo review.ReviewInfo `json:"reviewInfo"`
+			}{
+				ReviewInfo: _review.ToInfo(),
+			},
+		})
+	}
+}
+
+func (c *meController) UpdateRecentReviewOne() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		if ctx.Identity == nil {
+			return ctx.SendError(exception.ErrUnauthorized)
+		}
+		var request review.AddOneRequest
+		if err := ctx.Bind(&request); err != nil {
+			return ctx.SendError(err)
+		}
+		if request.Score <= 0 || request.Score > 5 {
+			return ctx.SendCustomError(
+				response.Status_BadRequest,
+				"별점을 다시 확인해주세요.",
+			)
+		}
+		requestLen := utf8.RuneCountInString(request.Content)
+		if requestLen < 20 || requestLen > 500 {
+			return ctx.SendCustomError(
+				response.Status_BadRequest,
+				"길이는 20자 이상 500자 이하로 작성해주세요.",
+			)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		request.AuthorID = ctx.Identity.ID
+		_review, err := c.reviewService.UpdateRecentOne(
+			innerCtx,
+			request,
+		)
+		if err != nil {
+			if err == exception.ErrBadRequest {
+				return ctx.SendCustomError(
+					response.Status_Unprocessable,
+					"동일한 어시에는 한달에 한번만 리뷰를 남길 수 있어요.",
+				)
+			}
 			return ctx.SendError(err)
 		}
 

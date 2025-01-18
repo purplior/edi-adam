@@ -6,6 +6,7 @@ import (
 	"github.com/purplior/podoroot/domain/assister"
 	"github.com/purplior/podoroot/domain/category"
 	"github.com/purplior/podoroot/domain/review"
+	"github.com/purplior/podoroot/domain/shared/pagination"
 	"github.com/purplior/podoroot/domain/user"
 	"github.com/purplior/podoroot/lib/strgen"
 )
@@ -24,27 +25,28 @@ type (
 	AssistantStatus string
 
 	Assistant struct {
-		ID            string            `json:"id"`
-		ViewID        string            `json:"viewId"`
-		AuthorID      string            `json:"authorId"`
-		CategoryID    string            `json:"categoryId"`
-		AssisterID    string            `json:"assisterId"`
-		AssistantType AssistantType     `json:"assistantType"`
-		Icon          string            `json:"icon"`
-		Title         string            `json:"title"`
-		Description   string            `json:"description"`
-		Notice        string            `json:"notice"`
-		Tags          []string          `json:"tags"`
-		MetaTags      []string          `json:"metaTags"`
-		IsPublic      bool              `json:"isPublic"`
-		Status        AssistantStatus   `json:"status"`
-		CreatedAt     time.Time         `json:"createdAt"`
-		UpdatedAt     time.Time         `json:"updatedAt"`
-		PublishedAt   *time.Time        `json:"publishedAt"`
-		Author        user.User         `json:"author"`
-		Assister      assister.Assister `json:"assister"`
-		Category      category.Category `json:"category"`
-		Reviews       []review.Review   `json:"reviews"`
+		ID             string                    `json:"id"`
+		ViewID         string                    `json:"viewId"`
+		AuthorID       string                    `json:"authorId"`
+		CategoryID     string                    `json:"categoryId"`
+		AssisterID     string                    `json:"assisterId"`
+		AssistantType  AssistantType             `json:"assistantType"`
+		Icon           string                    `json:"icon"`
+		Title          string                    `json:"title"`
+		Description    string                    `json:"description"`
+		Notice         string                    `json:"notice"`
+		Tags           []string                  `json:"tags"`
+		MetaTags       []string                  `json:"metaTags"`
+		IsPublic       bool                      `json:"isPublic"`
+		Status         AssistantStatus           `json:"status"`
+		CreatedAt      time.Time                 `json:"createdAt"`
+		UpdatedAt      time.Time                 `json:"updatedAt"`
+		PublishedAt    *time.Time                `json:"publishedAt"`
+		Author         user.User                 `json:"author"`
+		Assister       assister.Assister         `json:"assister"`
+		Category       category.Category         `json:"category"`
+		Reviews        []review.Review           `json:"reviews"`
+		ReviewPageMeta pagination.PaginationMeta `json:"reviewPageMeta"`
 	}
 
 	AssistantJoinOption struct {
@@ -69,23 +71,24 @@ type (
 	}
 
 	AssistantDetail struct {
-		ID               string                `json:"id"`
-		ViewID           string                `json:"viewId"`
-		AssistantType    AssistantType         `json:"assistantType"`
-		AuthorInfo       user.UserInfo         `json:"authorInfo"`
-		Icon             string                `json:"icon"`
-		Title            string                `json:"title"`
-		Description      string                `json:"description"`
-		Notice           string                `json:"notice"`
-		Tags             []string              `json:"tags"`
-		MetaTags         []string              `json:"metaTags"`
-		IsPublic         bool                  `json:"isPublic"`
-		IsMyRecentReview bool                  `json:"isMyRecentReview"`
-		Status           AssistantStatus       `json:"status"`
-		AssisterInfo     assister.AssisterInfo `json:"assisterInfo"`
-		ReviewInfos      []review.ReviewInfo   `json:"reviewInfos"`
-		CreatedAt        time.Time             `json:"createdAt"`
-		PublishedAt      *time.Time            `json:"publishedAt"`
+		ID               string                    `json:"id"`
+		ViewID           string                    `json:"viewId"`
+		AssistantType    AssistantType             `json:"assistantType"`
+		AuthorInfo       user.UserInfo             `json:"authorInfo"`
+		Icon             string                    `json:"icon"`
+		Title            string                    `json:"title"`
+		Description      string                    `json:"description"`
+		Notice           string                    `json:"notice"`
+		Tags             []string                  `json:"tags"`
+		MetaTags         []string                  `json:"metaTags"`
+		IsPublic         bool                      `json:"isPublic"`
+		IsMyRecentReview bool                      `json:"isMyRecentReview"`
+		Status           AssistantStatus           `json:"status"`
+		AssisterInfo     assister.AssisterInfo     `json:"assisterInfo"`
+		ReviewInfos      []review.ReviewInfo       `json:"reviewInfos"`
+		ReviewPageMeta   pagination.PaginationMeta `json:"reviewPageMeta"`
+		CreatedAt        time.Time                 `json:"createdAt"`
+		PublishedAt      *time.Time                `json:"publishedAt"`
 	}
 )
 
@@ -125,21 +128,22 @@ func (m Assistant) ToDetail() AssistantDetail {
 	assisterInfo.ID = m.AssisterID
 
 	detail := AssistantDetail{
-		ID:            m.ID,
-		ViewID:        m.ViewID,
-		AuthorInfo:    authorInfo,
-		AssistantType: m.AssistantType,
-		Icon:          m.Icon,
-		Title:         m.Title,
-		Description:   m.Description,
-		Notice:        m.Notice,
-		Tags:          m.Tags,
-		MetaTags:      m.MetaTags,
-		IsPublic:      m.IsPublic,
-		Status:        m.Status,
-		AssisterInfo:  assisterInfo,
-		CreatedAt:     m.CreatedAt,
-		PublishedAt:   m.PublishedAt,
+		ID:             m.ID,
+		ViewID:         m.ViewID,
+		AuthorInfo:     authorInfo,
+		AssistantType:  m.AssistantType,
+		Icon:           m.Icon,
+		Title:          m.Title,
+		Description:    m.Description,
+		Notice:         m.Notice,
+		Tags:           m.Tags,
+		MetaTags:       m.MetaTags,
+		IsPublic:       m.IsPublic,
+		Status:         m.Status,
+		AssisterInfo:   assisterInfo,
+		ReviewPageMeta: m.ReviewPageMeta,
+		CreatedAt:      m.CreatedAt,
+		PublishedAt:    m.PublishedAt,
 	}
 
 	detail.ReviewInfos = make([]review.ReviewInfo, len(m.Reviews))
