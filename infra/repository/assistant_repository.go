@@ -9,6 +9,7 @@ import (
 	"github.com/purplior/podoroot/infra/entity"
 	"github.com/purplior/podoroot/infra/repoutil"
 	"github.com/purplior/podoroot/lib/dt"
+	"gorm.io/gorm"
 )
 
 type (
@@ -63,6 +64,11 @@ func (r *assistantRepository) FindOne_ByViewID(
 	}
 	if joinOption.WithCategory {
 		query = query.Preload("Category")
+	}
+	if joinOption.WithReviews {
+		query = query.Preload("Reviews", func(db *gorm.DB) *gorm.DB {
+			return db.Order("created_at DESC").Limit(10)
+		})
 	}
 
 	if err := query.

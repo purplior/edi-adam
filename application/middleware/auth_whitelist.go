@@ -65,6 +65,15 @@ var (
 				},
 			},
 		},
+		"reviews": {
+			Children: map[string]AuthWhiteListItem{
+				"info-plist": {
+					Type:   Type_Exact,
+					Method: Method_Post,
+					Action: Action_SkipButParse,
+				},
+			},
+		},
 		"user": {
 			Children: map[string]AuthWhiteListItem{
 				"nickname-check": {

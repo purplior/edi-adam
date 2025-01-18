@@ -31,6 +31,12 @@ type (
 		Nickname    string `json:"nickname"`
 	}
 
+	OtherUserInfo struct {
+		AvatarTheme int    `json:"avatarTheme"`
+		AvatarText  string `json:"avatarText"`
+		Nickname    string `json:"nickname"`
+	}
+
 	UserDetail struct {
 		ID          string    `json:"id"`
 		JoinMethod  string    `json:"joinMethod"`
@@ -46,6 +52,14 @@ type (
 func (m User) ToInfo() UserInfo {
 	return UserInfo{
 		ID:          m.ID,
+		AvatarTheme: m.AvatarTheme,
+		AvatarText:  m.AvatarText,
+		Nickname:    m.Nickname,
+	}
+}
+
+func (m User) ToOtherUserInfo() OtherUserInfo {
+	return OtherUserInfo{
 		AvatarTheme: m.AvatarTheme,
 		AvatarText:  m.AvatarText,
 		Nickname:    m.Nickname,

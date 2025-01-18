@@ -5,6 +5,7 @@ import (
 
 	"github.com/purplior/podoroot/domain/assister"
 	"github.com/purplior/podoroot/domain/category"
+	"github.com/purplior/podoroot/domain/review"
 	"github.com/purplior/podoroot/domain/user"
 	"github.com/purplior/podoroot/lib/strgen"
 )
@@ -43,12 +44,14 @@ type (
 		Author        user.User         `json:"author"`
 		Assister      assister.Assister `json:"assister"`
 		Category      category.Category `json:"category"`
+		Reviews       []review.Review   `json:"reviews"`
 	}
 
 	AssistantJoinOption struct {
 		WithAuthor   bool
 		WithCategory bool
 		WithAssister bool
+		WithReviews  bool
 	}
 
 	AssistantInfo struct {
@@ -66,21 +69,23 @@ type (
 	}
 
 	AssistantDetail struct {
-		ID            string                `json:"id"`
-		ViewID        string                `json:"viewId"`
-		AssistantType AssistantType         `json:"assistantType"`
-		AuthorInfo    user.UserInfo         `json:"authorInfo"`
-		Icon          string                `json:"icon"`
-		Title         string                `json:"title"`
-		Description   string                `json:"description"`
-		Notice        string                `json:"notice"`
-		Tags          []string              `json:"tags"`
-		MetaTags      []string              `json:"metaTags"`
-		IsPublic      bool                  `json:"isPublic"`
-		Status        AssistantStatus       `json:"status"`
-		AssisterInfo  assister.AssisterInfo `json:"assisterInfo"`
-		CreatedAt     time.Time             `json:"createdAt"`
-		PublishedAt   *time.Time            `json:"publishedAt"`
+		ID               string                `json:"id"`
+		ViewID           string                `json:"viewId"`
+		AssistantType    AssistantType         `json:"assistantType"`
+		AuthorInfo       user.UserInfo         `json:"authorInfo"`
+		Icon             string                `json:"icon"`
+		Title            string                `json:"title"`
+		Description      string                `json:"description"`
+		Notice           string                `json:"notice"`
+		Tags             []string              `json:"tags"`
+		MetaTags         []string              `json:"metaTags"`
+		IsPublic         bool                  `json:"isPublic"`
+		IsMyRecentReview bool                  `json:"isMyRecentReview"`
+		Status           AssistantStatus       `json:"status"`
+		AssisterInfo     assister.AssisterInfo `json:"assisterInfo"`
+		ReviewInfos      []review.ReviewInfo   `json:"reviewInfos"`
+		CreatedAt        time.Time             `json:"createdAt"`
+		PublishedAt      *time.Time            `json:"publishedAt"`
 	}
 )
 
@@ -95,7 +100,7 @@ func (m Assistant) ToInfo() AssistantInfo {
 	categoryInfo := m.Category.ToInfo()
 	categoryInfo.ID = m.CategoryID
 
-	return AssistantInfo{
+	info := AssistantInfo{
 		ID:            m.ID,
 		ViewID:        m.ViewID,
 		Icon:          m.Icon,
@@ -108,6 +113,8 @@ func (m Assistant) ToInfo() AssistantInfo {
 		CategoryInfo:  categoryInfo,
 		CreatedAt:     m.CreatedAt,
 	}
+
+	return info
 }
 
 func (m Assistant) ToDetail() AssistantDetail {
@@ -117,7 +124,7 @@ func (m Assistant) ToDetail() AssistantDetail {
 	assisterInfo := m.Assister.ToInfo()
 	assisterInfo.ID = m.AssisterID
 
-	return AssistantDetail{
+	detail := AssistantDetail{
 		ID:            m.ID,
 		ViewID:        m.ViewID,
 		AuthorInfo:    authorInfo,
@@ -134,6 +141,13 @@ func (m Assistant) ToDetail() AssistantDetail {
 		CreatedAt:     m.CreatedAt,
 		PublishedAt:   m.PublishedAt,
 	}
+
+	detail.ReviewInfos = make([]review.ReviewInfo, len(m.Reviews))
+	for i, review := range m.Reviews {
+		detail.ReviewInfos[i] = review.ToInfo()
+	}
+
+	return detail
 }
 
 type (

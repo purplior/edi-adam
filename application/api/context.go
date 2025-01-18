@@ -21,16 +21,23 @@ type (
 	}
 )
 
-func (ctx Context) PaginationRequest() pagination.PaginationRequest {
+func (ctx Context) PaginationRequest() (
+	pagination.PaginationRequest,
+	error,
+) {
 	page := dt.Int(ctx.QueryParam("p"))
 	pageSize := dt.Int(ctx.QueryParam("ps"))
 	totalCount := dt.Int(ctx.QueryParam("ptc"))
+
+	if pageSize == 0 || pageSize > 50 {
+		return pagination.PaginationRequest{}, exception.ErrBadRequest
+	}
 
 	return pagination.PaginationRequest{
 		Page:       page,
 		Size:       pageSize,
 		TotalCount: totalCount,
-	}
+	}, nil
 }
 
 func (ctx Context) SendJSON(jsonResponse response.JSONResponse) error {

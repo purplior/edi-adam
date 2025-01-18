@@ -20,8 +20,8 @@ type (
 func (r *reviewRouter) Attach(router *echo.Group) {
 	rg := router.Group("/reviews")
 
-	rg.POST("/", api.Handler(
-		r.reviewController.WriteOne(),
+	rg.GET("/info-plist", api.Handler(
+		r.reviewController.GetInfoPaginatedList(),
 		api.HandlerFuncOption{},
 	))
 }

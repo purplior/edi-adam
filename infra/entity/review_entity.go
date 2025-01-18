@@ -11,6 +11,7 @@ type (
 	Review struct {
 		ID          uint `gorm:"primaryKey;autoIncrement"`
 		AuthorID    uint
+		Author      User
 		AssistantID uint
 		Content     string `gorm:"size:1500"`
 		Score       float64
@@ -29,6 +30,7 @@ func (e Review) ToModel() domain.Review {
 	}
 	if e.AuthorID > 0 {
 		m.AuthorID = dt.Str(e.AuthorID)
+		m.Author = e.Author.ToModel()
 	}
 	if e.AssistantID > 0 {
 		m.AssistantID = dt.Str(e.AssistantID)

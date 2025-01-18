@@ -18,33 +18,33 @@ type (
 )
 
 func (r *meRouter) Attach(router *echo.Group) {
-	meRouterGroup := router.Group("/me")
+	rg := router.Group("/me")
 
 	/**
 	 * 사용자 정보 관련
 	 */
-	meRouterGroup.GET(
+	rg.GET(
 		"/identity",
 		api.Handler(
 			r.meController.GetMyIdentity(),
 			api.HandlerFuncOption{},
 		),
 	)
-	meRouterGroup.GET(
+	rg.GET(
 		"/detail",
 		api.Handler(
 			r.meController.GetMyDetail(),
 			api.HandlerFuncOption{},
 		),
 	)
-	meRouterGroup.GET(
+	rg.GET(
 		"/podo",
 		api.Handler(
 			r.meController.GetMyPodo(),
 			api.HandlerFuncOption{},
 		),
 	)
-	meRouterGroup.GET(
+	rg.GET(
 		"/temp/at",
 		api.Handler(
 			r.meController.GetTempAccessToken(),
@@ -55,42 +55,42 @@ func (r *meRouter) Attach(router *echo.Group) {
 	/**
 	 * 어시 관련
 	 */
-	meRouterGroup.GET(
+	rg.GET(
 		"/assistant/one",
 		api.Handler(
 			r.meController.GetMyAssistantOne(),
 			api.HandlerFuncOption{},
 		),
 	)
-	meRouterGroup.GET(
+	rg.GET(
 		"/assistant/detail-one",
 		api.Handler(
 			r.meController.GetMyAssistantDetailOne(),
 			api.HandlerFuncOption{},
 		),
 	)
-	meRouterGroup.GET(
+	rg.GET(
 		"/assistant/info-plist",
 		api.Handler(
 			r.meController.GetMyAssistantInfoPaginatedList(),
 			api.HandlerFuncOption{},
 		),
 	)
-	meRouterGroup.POST(
+	rg.POST(
 		"/assistant",
 		api.Handler(
 			r.meController.RegisterMyAssistantOne(),
 			api.HandlerFuncOption{},
 		),
 	)
-	meRouterGroup.PATCH(
+	rg.PATCH(
 		"/assistant/:id",
 		api.Handler(
 			r.meController.UpdateMyAssistantOne(),
 			api.HandlerFuncOption{},
 		),
 	)
-	meRouterGroup.DELETE(
+	rg.DELETE(
 		"/assistant/:id",
 		api.Handler(
 			r.meController.RemoveMyAssistantOne(),
@@ -101,24 +101,35 @@ func (r *meRouter) Attach(router *echo.Group) {
 	/**
 	 * 북마크 관련
 	 */
-	meRouterGroup.GET(
+	rg.GET(
 		"/bookmark/one",
 		api.Handler(
 			r.meController.GetMyBookmarkOne(),
 			api.HandlerFuncOption{},
 		),
 	)
-	meRouterGroup.GET(
+	rg.GET(
 		"/bookmark/plist",
 		api.Handler(
 			r.meController.GetMyBookmarkPaginatedList(),
 			api.HandlerFuncOption{},
 		),
 	)
-	meRouterGroup.POST(
+	rg.POST(
 		"/bookmark",
 		api.Handler(
 			r.meController.ToggleBookmarkOne(),
+			api.HandlerFuncOption{},
+		),
+	)
+
+	/**
+	 * 리뷰 관련
+	 */
+	rg.POST(
+		"/review",
+		api.Handler(
+			r.meController.WriteReviewOne(),
 			api.HandlerFuncOption{},
 		),
 	)

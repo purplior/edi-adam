@@ -3,6 +3,7 @@ package assistant
 import (
 	"github.com/purplior/podoroot/domain/assister"
 	"github.com/purplior/podoroot/domain/category"
+	"github.com/purplior/podoroot/domain/review"
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
 	"github.com/purplior/podoroot/domain/shared/pagination"
@@ -29,6 +30,14 @@ type (
 			joinOption AssistantJoinOption,
 		) (
 			Assistant,
+			error,
+		)
+
+		GetDetailOne_ByViewID(
+			ctx inner.Context,
+			viewID string,
+		) (
+			AssistantDetail,
 			error,
 		)
 
@@ -90,6 +99,7 @@ type (
 		categoryService     category.CategoryService
 		assisterService     assister.AssisterService
 		walletService       wallet.WalletService
+		reviewService       review.ReviewService
 		cm                  inner.ContextManager
 	}
 )
@@ -148,6 +158,36 @@ func (s *assistantService) GetOne_ByViewID(
 	}
 
 	return _assistant, nil
+}
+
+func (s *assistantService) GetDetailOne_ByViewID(
+	ctx inner.Context,
+	viewID string,
+) (
+	AssistantDetail,
+	error,
+) {
+	_assistant, err := s.assistantRepository.FindOne_ByViewID(ctx, viewID, AssistantJoinOption{
+		WithAuthor:   true,
+		WithAssister: true,
+		WithReviews:  true,
+	})
+	if err != nil {
+		return AssistantDetail{}, err
+	}
+
+	_assister, err := s.assisterService.GetOne_ByID(
+		ctx,
+		_assistant.AssisterID,
+	)
+	if err != nil {
+		return AssistantDetail{}, err
+	}
+
+	_assistant.Assister = _assister
+	assistantDetail := _assistant.ToDetail()
+
+	return assistantDetail, nil
 }
 
 func (s *assistantService) GetPaginatedList_ByCategoryAlias(
@@ -418,6 +458,7 @@ func NewAssistantService(
 	categoryService category.CategoryService,
 	assisterService assister.AssisterService,
 	walletService wallet.WalletService,
+	reviewService review.ReviewService,
 	cm inner.ContextManager,
 ) AssistantService {
 	return &assistantService{
@@ -426,6 +467,7 @@ func NewAssistantService(
 		categoryService:     categoryService,
 		assisterService:     assisterService,
 		walletService:       walletService,
+		reviewService:       reviewService,
 		cm:                  cm,
 	}
 }

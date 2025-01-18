@@ -40,18 +40,14 @@ func (c *assistantController) GetDetailOne() api.HandlerFunc {
 			return ctx.SendError(exception.ErrBadRequest)
 		}
 
-		_assistant, err := c.assistantService.GetOne_ByViewID(
+		assistantDetail, err := c.assistantService.GetDetailOne_ByViewID(
 			innerCtx,
 			viewID,
-			domain.AssistantJoinOption{
-				WithAuthor:   true,
-				WithAssister: true,
-			},
 		)
 		if err != nil {
 			return ctx.SendError(err)
 		}
-		if !_assistant.IsPublic {
+		if !assistantDetail.IsPublic {
 			return ctx.SendError(exception.ErrUnauthorized)
 		}
 
@@ -59,7 +55,7 @@ func (c *assistantController) GetDetailOne() api.HandlerFunc {
 			Data: struct {
 				AssistantDetail domain.AssistantDetail `json:"assistantDetail"`
 			}{
-				AssistantDetail: _assistant.ToDetail(),
+				AssistantDetail: assistantDetail,
 			},
 		})
 	}
@@ -74,14 +70,17 @@ func (c *assistantController) GetInfoPaginatedList() api.HandlerFunc {
 		if len(categoryAlias) == 0 {
 			return ctx.SendError(exception.ErrBadRequest)
 		}
-		pageRequest := ctx.PaginationRequest()
+		pageRequest, err := ctx.PaginationRequest()
+		if err != nil {
+			return ctx.SendError(err)
+		}
 		assistants, pageMeta, err := c.assistantService.GetPaginatedList_ByCategoryAlias(
 			innerCtx,
 			categoryAlias,
 			true,
 			pageRequest,
 		)
-		if err != nil {
+		if err != nil && err != exception.ErrNoRecord {
 			return ctx.SendError(err)
 		}
 

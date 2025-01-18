@@ -4,6 +4,7 @@ import (
 	"time"
 
 	domain "github.com/purplior/podoroot/domain/assistant"
+	"github.com/purplior/podoroot/domain/review"
 	"github.com/purplior/podoroot/lib/dt"
 )
 
@@ -63,6 +64,11 @@ func (e Assistant) ToModel() domain.Assistant {
 		model.Category = e.Category.ToModel()
 	}
 
+	model.Reviews = make([]review.Review, len(e.Reviews))
+	for i, eReview := range e.Reviews {
+		model.Reviews[i] = eReview.ToModel()
+	}
+
 	return model
 }
 
@@ -92,6 +98,11 @@ func MakeAssistant(m domain.Assistant) Assistant {
 	}
 	if len(m.CategoryID) > 0 {
 		entity.CategoryID = dt.UInt(m.CategoryID)
+	}
+
+	entity.Reviews = make([]Review, len(m.Reviews))
+	for i, review := range m.Reviews {
+		entity.Reviews[i] = MakeReview(review)
 	}
 
 	return entity

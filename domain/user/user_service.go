@@ -10,6 +10,14 @@ import (
 
 type (
 	UserService interface {
+		GetOne_ByID(
+			ctx inner.Context,
+			id string,
+		) (
+			User,
+			error,
+		)
+
 		GetOne_ByAccount(
 			ctx inner.Context,
 			joinMethod string,
@@ -60,6 +68,16 @@ type (
 		userRepository UserRepository
 	}
 )
+
+func (s *userService) GetOne_ByID(
+	ctx inner.Context,
+	id string,
+) (
+	User,
+	error,
+) {
+	return s.userRepository.FindOne_ByID(ctx, id)
+}
 
 func (s *userService) GetOne_ByAccount(
 	ctx inner.Context,

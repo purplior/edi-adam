@@ -6,11 +6,12 @@ import (
 	domain "github.com/purplior/podoroot/domain/review"
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/podoroot/domain/shared/pagination"
 )
 
 type (
 	ReviewController interface {
-		WriteOne() api.HandlerFunc
+		GetInfoPaginatedList() api.HandlerFunc
 	}
 )
 
@@ -21,37 +22,42 @@ type (
 	}
 )
 
-func (c *reviewController) WriteOne() api.HandlerFunc {
+func (c *reviewController) GetInfoPaginatedList() api.HandlerFunc {
 	return func(ctx *api.Context) error {
-		if ctx.Identity == nil {
-			return ctx.SendError(exception.ErrUnauthorized)
-		}
-		var request domain.WriteOneRequest
-		if err := ctx.Bind(&request); err != nil {
-			return ctx.SendError(err)
-		}
-
-		if request.Score <= 0 || request.Score > 5 {
-			return ctx.SendError(exception.ErrBadRequest)
-		}
-
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
-		request.AuthorID = ctx.Identity.ID
-		review, err := c.reviewService.WriteOne(
-			innerCtx,
-			request,
-		)
+		assistantID := ctx.QueryParam("assistant_id")
+		if len(assistantID) < 1 {
+			return ctx.SendError(exception.ErrBadRequest)
+		}
+
+		pageRequest, err := ctx.PaginationRequest()
 		if err != nil {
 			return ctx.SendError(err)
 		}
 
+		reviews, pageMeta, err := c.reviewService.GetPaginatedList_ByAssistantID(
+			innerCtx,
+			assistantID,
+			pageRequest,
+		)
+		if err != nil && err != exception.ErrNoRecord {
+			return ctx.SendError(err)
+		}
+
+		reviewInfos := make([]domain.ReviewInfo, len(reviews))
+		for i, review := range reviews {
+			reviewInfos[i] = review.ToInfo()
+		}
+
 		return ctx.SendJSON(response.JSONResponse{
 			Data: struct {
-				Review domain.Review `json:"review"`
+				ReviewInfos []domain.ReviewInfo       `json:"reviewInfos"`
+				PageMeta    pagination.PaginationMeta `json:"pageMeta"`
 			}{
-				Review: review,
+				ReviewInfos: reviewInfos,
+				PageMeta:    pageMeta,
 			},
 		})
 	}

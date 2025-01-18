@@ -8,6 +8,7 @@ import (
 	"github.com/purplior/podoroot/domain/auth"
 	"github.com/purplior/podoroot/domain/bookmark"
 	domain "github.com/purplior/podoroot/domain/me"
+	"github.com/purplior/podoroot/domain/review"
 	"github.com/purplior/podoroot/domain/shared/exception"
 	"github.com/purplior/podoroot/domain/shared/inner"
 	"github.com/purplior/podoroot/domain/shared/pagination"
@@ -83,6 +84,11 @@ type (
 		 * 북마크 토글하기
 		 */
 		ToggleBookmarkOne() api.HandlerFunc
+
+		/**
+		 * 리뷰 쓰기
+		 */
+		WriteReviewOne() api.HandlerFunc
 	}
 )
 
@@ -92,6 +98,7 @@ type (
 		assistantService assistant.AssistantService
 		assisterService  assister.AssisterService
 		authService      auth.AuthService
+		reviewService    review.ReviewService
 		userService      user.UserService
 		walletService    wallet.WalletService
 		bookmarkService  bookmark.BookmarkService
@@ -370,13 +377,18 @@ func (c *meController) GetMyBookmarkPaginatedList() api.HandlerFunc {
 			return ctx.SendError(exception.ErrUnauthorized)
 		}
 
+		pageRequest, err := ctx.PaginationRequest()
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
 		innerCtx, cancel := c.cm.NewContext()
 		defer cancel()
 
 		bookmarks, pageMeta, err := c.bookmarkService.GetPaginatedList_ByUserID(
 			innerCtx,
 			ctx.Identity.ID,
-			ctx.PaginationRequest(),
+			pageRequest,
 		)
 		if err != nil {
 			return ctx.SendError(err)
@@ -521,11 +533,48 @@ func (c *meController) ToggleBookmarkOne() api.HandlerFunc {
 	}
 }
 
+func (c *meController) WriteReviewOne() api.HandlerFunc {
+	return func(ctx *api.Context) error {
+		if ctx.Identity == nil {
+			return ctx.SendError(exception.ErrUnauthorized)
+		}
+		var request review.AddOneRequest
+		if err := ctx.Bind(&request); err != nil {
+			return ctx.SendError(err)
+		}
+
+		if request.Score <= 0 || request.Score > 5 {
+			return ctx.SendError(exception.ErrBadRequest)
+		}
+
+		innerCtx, cancel := c.cm.NewContext()
+		defer cancel()
+
+		request.AuthorID = ctx.Identity.ID
+		_review, err := c.reviewService.AddOne(
+			innerCtx,
+			request,
+		)
+		if err != nil {
+			return ctx.SendError(err)
+		}
+
+		return ctx.SendJSON(response.JSONResponse{
+			Data: struct {
+				ReviewInfo review.ReviewInfo `json:"reviewInfo"`
+			}{
+				ReviewInfo: _review.ToInfo(),
+			},
+		})
+	}
+}
+
 func NewMeController(
 	meService domain.MeService,
 	assistantService assistant.AssistantService,
 	assisterService assister.AssisterService,
 	authService auth.AuthService,
+	reviewService review.ReviewService,
 	userService user.UserService,
 	walletService wallet.WalletService,
 	bookmarkService bookmark.BookmarkService,
@@ -536,6 +585,7 @@ func NewMeController(
 		assistantService: assistantService,
 		assisterService:  assisterService,
 		authService:      authService,
+		reviewService:    reviewService,
 		userService:      userService,
 		walletService:    walletService,
 		bookmarkService:  bookmarkService,
