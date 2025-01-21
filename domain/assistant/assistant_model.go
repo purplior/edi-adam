@@ -221,6 +221,9 @@ func (r UpdateOneRequest) ToModelForUpdate(
 	existedAssistant.Description = r.Description
 	existedAssistant.Notice = r.Notice
 	existedAssistant.Tags = r.Tags
+	if !existedAssistant.IsPublic && r.IsPublic {
+		existedAssistant.Status = AssistantStatus_UnderReview
+	}
 
 	return existedAssistant
 }

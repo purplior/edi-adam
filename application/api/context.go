@@ -79,6 +79,8 @@ func (ctx Context) SendError(err error) error {
 		status = response.Status_Unprocessable
 	case exception.ErrNotAllowedNickname:
 		status = response.Status_BadRequest
+	case exception.ErrNoPodo:
+		status = response.Status_Forbidden
 	}
 
 	if status != response.Status_InternalServerError {
