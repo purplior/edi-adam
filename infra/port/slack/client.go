@@ -1,8 +1,8 @@
-package podoslack
+package slack
 
 import (
-	"github.com/purplior/podoroot/application/config"
-	"github.com/purplior/podoroot/lib/myrequest"
+	"github.com/purplior/sbec/application/config"
+	"github.com/purplior/sbec/lib/myrequest"
 )
 
 var (

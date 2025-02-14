@@ -1,4 +1,4 @@
-package podosms
+package sms
 
 import "errors"
 

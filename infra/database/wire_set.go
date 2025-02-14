@@ -2,14 +2,14 @@ package database
 
 import (
 	"github.com/google/wire"
-	"github.com/purplior/podoroot/infra/database/myredis"
-	"github.com/purplior/podoroot/infra/database/podomongo"
-	"github.com/purplior/podoroot/infra/database/podosql"
+	"github.com/purplior/sbec/infra/database/mongodb"
+	"github.com/purplior/sbec/infra/database/redisdb"
+	"github.com/purplior/sbec/infra/database/sqldb"
 )
 
 var New = wire.NewSet(
 	NewDatabaseManager,
-	podomongo.NewClient,
-	myredis.NewClient,
-	podosql.NewClient,
+	mongodb.NewClient,
+	redisdb.NewClient,
+	sqldb.NewClient,
 )

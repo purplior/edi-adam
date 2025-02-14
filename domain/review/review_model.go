@@ -3,7 +3,7 @@ package review
 import (
 	"time"
 
-	"github.com/purplior/podoroot/domain/user"
+	"github.com/purplior/sbec/domain/user"
 )
 
 type (

@@ -3,16 +3,16 @@ package repository
 import (
 	"time"
 
-	"github.com/purplior/podoroot/domain/shared/inner"
-	domain "github.com/purplior/podoroot/domain/user"
-	"github.com/purplior/podoroot/infra/database"
-	"github.com/purplior/podoroot/infra/database/podosql"
-	"github.com/purplior/podoroot/infra/entity"
+	"github.com/purplior/sbec/domain/shared/inner"
+	domain "github.com/purplior/sbec/domain/user"
+	"github.com/purplior/sbec/infra/database"
+	"github.com/purplior/sbec/infra/database/sqldb"
+	"github.com/purplior/sbec/infra/entity"
 )
 
 type (
 	userRepository struct {
-		client *podosql.Client
+		client *sqldb.Client
 	}
 )
 
@@ -138,7 +138,7 @@ func (r *userRepository) UpdateOne_Password_ByAccount(
 }
 
 func NewUserRepository(
-	client *podosql.Client,
+	client *sqldb.Client,
 ) domain.UserRepository {
 	return &userRepository{
 		client: client,

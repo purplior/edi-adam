@@ -1,10 +1,10 @@
 package app
 
 import (
-	"github.com/purplior/podoroot/application/api"
-	"github.com/purplior/podoroot/application/response"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/domain/user"
+	"github.com/purplior/sbec/application/api"
+	"github.com/purplior/sbec/application/response"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/domain/user"
 )
 
 type (

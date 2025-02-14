@@ -1,4 +1,4 @@
-package podoopenai
+package openai
 
 import (
 	"bufio"
@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/purplior/podoroot/application/config"
-	"github.com/purplior/podoroot/domain/shared/constant"
-	"github.com/purplior/podoroot/domain/shared/logger"
+	"github.com/purplior/sbec/application/config"
+	"github.com/purplior/sbec/domain/shared/constant"
+	"github.com/purplior/sbec/domain/shared/logger"
 )
 
 const (

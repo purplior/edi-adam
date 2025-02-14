@@ -3,9 +3,9 @@ package entity
 import (
 	"time"
 
-	"github.com/purplior/podoroot/domain/challenge"
-	domain "github.com/purplior/podoroot/domain/mission"
-	"github.com/purplior/podoroot/lib/dt"
+	"github.com/purplior/sbec/domain/challenge"
+	domain "github.com/purplior/sbec/domain/mission"
+	"github.com/purplior/sbec/lib/dt"
 )
 
 type (

@@ -1,11 +1,11 @@
-package podosms
+package sms
 
 import (
 	"time"
 
-	"github.com/purplior/podoroot/application/config"
-	"github.com/purplior/podoroot/lib/myncloud"
-	"github.com/purplior/podoroot/lib/myrequest"
+	"github.com/purplior/sbec/application/config"
+	"github.com/purplior/sbec/lib/myncloud"
+	"github.com/purplior/sbec/lib/myrequest"
 )
 
 type (

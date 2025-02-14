@@ -1,4 +1,4 @@
-package podomongo
+package mongodb
 
 const (
 	Collection_Assister = "assisters"

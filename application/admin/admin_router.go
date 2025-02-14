@@ -2,7 +2,7 @@ package admin
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/purplior/podoroot/application/api"
+	"github.com/purplior/sbec/application/api"
 )
 
 type (

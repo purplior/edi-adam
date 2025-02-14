@@ -1,14 +1,14 @@
-package podosql
+package sqldb
 
 import (
 	"log"
 	"os"
 	"time"
 
-	"github.com/purplior/podoroot/application/config"
-	"github.com/purplior/podoroot/domain/shared/constant"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/infra/entity"
+	"github.com/purplior/sbec/application/config"
+	"github.com/purplior/sbec/domain/shared/constant"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/infra/entity"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -31,7 +31,7 @@ type (
 )
 
 func (c *Client) DBWithContext(ctx inner.Context) *DB {
-	tx := ctx.TX(inner.TX_PodoSql)
+	tx := ctx.TX(inner.TX_sqldb)
 	if tx != nil {
 		return tx
 	}
@@ -65,7 +65,7 @@ func (c *Client) ConnectDB() error {
 	}
 
 	if isDebugMode {
-		log.Println("[podosql] 디버그모드가 활성화 되었어요")
+		log.Println("[sqldb] 디버그모드가 활성화 되었어요")
 		db.Debug()
 	}
 
@@ -83,7 +83,7 @@ func (c *Client) ConnectDB() error {
 		return err
 	}
 
-	log.Println("[podosql] 데이터베이스 연결에 성공 했어요")
+	log.Println("[sqldb] 데이터베이스 연결에 성공 했어요")
 
 	return nil
 }
@@ -123,24 +123,24 @@ func (c *Client) ReconnectDB(
 	for {
 		err := c.PingDB()
 		if err == nil {
-			log.Println("[podosql] 데이터베이스 재연결에 성공 했어요")
+			log.Println("[sqldb] 데이터베이스 재연결에 성공 했어요")
 			return
 		}
 
 		attempts++
 		if attempts > maxAttempts {
 
-			log.Fatalf("[podosql] 데이터베이스 재시도 연결 횟수가 최대를 초과 했어요: %v", err)
+			log.Fatalf("[sqldb] 데이터베이스 재시도 연결 횟수가 최대를 초과 했어요: %v", err)
 			return
 		}
 
 		// 2의 지수 증가
 		delay := baseDelay * time.Duration(1<<attempts)
-		log.Printf("[podosql] 데이터베이스 연결에 실패 했어요, 재시도 중 %v... (attempt %d/%d)", delay, attempts, maxAttempts)
+		log.Printf("[sqldb] 데이터베이스 연결에 실패 했어요, 재시도 중 %v... (attempt %d/%d)", delay, attempts, maxAttempts)
 		time.Sleep(delay)
 
 		if err := c.ConnectDB(); err != nil {
-			log.Println("[podosql] 데이터베이스 연결에 실패 했어요:", err)
+			log.Println("[sqldb] 데이터베이스 연결에 실패 했어요:", err)
 			return
 		}
 	}

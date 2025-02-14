@@ -3,7 +3,7 @@ package user
 import (
 	"time"
 
-	"github.com/purplior/podoroot/domain/shared/exception"
+	"github.com/purplior/sbec/domain/shared/exception"
 	"golang.org/x/crypto/bcrypt"
 )
 

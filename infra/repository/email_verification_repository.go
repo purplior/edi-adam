@@ -1,17 +1,17 @@
 package repository
 
 import (
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/domain/verification"
-	"github.com/purplior/podoroot/infra/database"
-	"github.com/purplior/podoroot/infra/database/podosql"
-	"github.com/purplior/podoroot/infra/entity"
-	"github.com/purplior/podoroot/lib/dt"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/domain/verification"
+	"github.com/purplior/sbec/infra/database"
+	"github.com/purplior/sbec/infra/database/sqldb"
+	"github.com/purplior/sbec/infra/entity"
+	"github.com/purplior/sbec/lib/dt"
 )
 
 type (
 	emailVerificationRepository struct {
-		client *podosql.Client
+		client *sqldb.Client
 	}
 )
 
@@ -113,7 +113,7 @@ func (r *emailVerificationRepository) UpdateOne_isConsumed(
 }
 
 func NewEmailVerificationRepository(
-	client *podosql.Client,
+	client *sqldb.Client,
 ) verification.EmailVerificationRepository {
 	return &emailVerificationRepository{
 		client: client,

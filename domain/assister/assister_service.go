@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/purplior/podoroot/domain/ledger"
-	"github.com/purplior/podoroot/domain/shared/exception"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/domain/wallet"
-	"github.com/purplior/podoroot/infra/port/podoopenai"
-	"github.com/purplior/podoroot/lib/dt"
+	"github.com/purplior/sbec/domain/ledger"
+	"github.com/purplior/sbec/domain/shared/exception"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/domain/wallet"
+	"github.com/purplior/sbec/infra/port/openai"
+	"github.com/purplior/sbec/lib/dt"
 )
 
 type (
@@ -63,7 +63,7 @@ type (
 
 type (
 	assisterService struct {
-		openaiClient       *podoopenai.Client
+		openaiClient       *openai.Client
 		walletService      wallet.WalletService
 		assisterRepository AssisterRepository
 		cm                 inner.ContextManager
@@ -142,7 +142,7 @@ func (s *assisterService) Request(
 	}
 
 	if !isFree {
-		if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
+		if err := s.cm.BeginTX(ctx, inner.TX_sqldb); err != nil {
 			return "", err
 		}
 
@@ -153,20 +153,20 @@ func (s *assisterService) Request(
 			ledger.LedgerAction_ConsumeByAssister,
 			assister.ID,
 		); err != nil {
-			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			s.cm.RollbackTX(ctx, inner.TX_sqldb)
 			return "", err
 		}
 	}
 
 	return s.openaiClient.RequestChatCompletions(
 		ctx.Value(),
-		podoopenai.ChatCompletionRequest{
+		openai.ChatCompletionRequest{
 			Model:    string(assister.Model),
 			Messages: messages,
 		},
 		func() error {
 			if !isFree {
-				if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
+				if err := s.cm.CommitTX(ctx, inner.TX_sqldb); err != nil {
 					return err
 				}
 			}
@@ -204,7 +204,7 @@ func (s *assisterService) RequestAsStream(
 	}
 
 	if !isFree {
-		if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
+		if err := s.cm.BeginTX(ctx, inner.TX_sqldb); err != nil {
 			return err
 		}
 
@@ -215,14 +215,14 @@ func (s *assisterService) RequestAsStream(
 			ledger.LedgerAction_ConsumeByAssister,
 			assister.ID,
 		); err != nil {
-			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			s.cm.RollbackTX(ctx, inner.TX_sqldb)
 			return err
 		}
 	}
 
 	err = s.openaiClient.RequestChatCompletionsStream(
 		ctx.Value(),
-		podoopenai.ChatCompletionRequest{
+		openai.ChatCompletionRequest{
 			Model:    string(assister.Model),
 			Messages: messages,
 		},
@@ -231,7 +231,7 @@ func (s *assisterService) RequestAsStream(
 				return err
 			}
 			if !isFree {
-				if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
+				if err := s.cm.CommitTX(ctx, inner.TX_sqldb); err != nil {
 					return err
 				}
 			}
@@ -242,7 +242,7 @@ func (s *assisterService) RequestAsStream(
 	)
 	if err != nil {
 		if !isFree {
-			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			s.cm.RollbackTX(ctx, inner.TX_sqldb)
 		}
 	}
 
@@ -329,7 +329,7 @@ func (s *assisterService) createMessagesOfGPT(
 }
 
 func NewAssisterService(
-	openaiClient *podoopenai.Client,
+	openaiClient *openai.Client,
 	walletService wallet.WalletService,
 	assisterRepository AssisterRepository,
 	cm inner.ContextManager,

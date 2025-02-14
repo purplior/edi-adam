@@ -1,8 +1,8 @@
 package app
 
 import (
-	domain "github.com/purplior/podoroot/domain/challenge"
-	"github.com/purplior/podoroot/domain/shared/inner"
+	domain "github.com/purplior/sbec/domain/challenge"
+	"github.com/purplior/sbec/domain/shared/inner"
 )
 
 type (

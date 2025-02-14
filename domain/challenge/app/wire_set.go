@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/google/wire"
-	domain "github.com/purplior/podoroot/domain/challenge"
+	domain "github.com/purplior/sbec/domain/challenge"
 )
 
 var New = wire.NewSet(

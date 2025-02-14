@@ -1,19 +1,19 @@
 package repository
 
 import (
-	domain "github.com/purplior/podoroot/domain/bookmark"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/domain/shared/pagination"
-	"github.com/purplior/podoroot/infra/database"
-	"github.com/purplior/podoroot/infra/database/podosql"
-	"github.com/purplior/podoroot/infra/entity"
-	"github.com/purplior/podoroot/infra/repoutil"
-	"github.com/purplior/podoroot/lib/dt"
+	domain "github.com/purplior/sbec/domain/bookmark"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/domain/shared/pagination"
+	"github.com/purplior/sbec/infra/database"
+	"github.com/purplior/sbec/infra/database/sqldb"
+	"github.com/purplior/sbec/infra/entity"
+	"github.com/purplior/sbec/infra/repoutil"
+	"github.com/purplior/sbec/lib/dt"
 )
 
 type (
 	bookmarkRepository struct {
-		client *podosql.Client
+		client *sqldb.Client
 	}
 )
 
@@ -61,7 +61,7 @@ func (r *bookmarkRepository) FindPaginatedList_ByUserID(
 		&entities,
 		pageRequest,
 		repoutil.FindPaginatedListOption{
-			Condition: func(db *podosql.DB) *podosql.DB {
+			Condition: func(db *sqldb.DB) *sqldb.DB {
 				return db.Preload("Assistant").
 					Preload("Assistant.Author").
 					Preload("Assistant.Category").
@@ -119,7 +119,7 @@ func (r *bookmarkRepository) DeleteOne_ByUserIDAndAssistantID(
 }
 
 func NewBookmarkRepository(
-	client *podosql.Client,
+	client *sqldb.Client,
 ) domain.BookmarkRepository {
 	return &bookmarkRepository{
 		client: client,

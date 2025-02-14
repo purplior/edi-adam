@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"strings"
 
-	domain "github.com/purplior/podoroot/domain/category"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/infra/database"
-	"github.com/purplior/podoroot/infra/database/podosql"
-	"github.com/purplior/podoroot/infra/entity"
-	"github.com/purplior/podoroot/lib/dt"
+	domain "github.com/purplior/sbec/domain/category"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/infra/database"
+	"github.com/purplior/sbec/infra/database/sqldb"
+	"github.com/purplior/sbec/infra/entity"
+	"github.com/purplior/sbec/lib/dt"
 )
 
 type (
 	categoryRepository struct {
-		client *podosql.Client
+		client *sqldb.Client
 	}
 )
 
@@ -65,7 +65,7 @@ func (r *categoryRepository) FindList_ByIDs(
 }
 
 func NewCategoryRepository(
-	client *podosql.Client,
+	client *sqldb.Client,
 ) domain.CategoryRepository {
 	return &categoryRepository{
 		client: client,

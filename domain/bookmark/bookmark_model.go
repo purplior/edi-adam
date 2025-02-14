@@ -3,7 +3,7 @@ package bookmark
 import (
 	"time"
 
-	"github.com/purplior/podoroot/domain/assistant"
+	"github.com/purplior/sbec/domain/assistant"
 )
 
 type (

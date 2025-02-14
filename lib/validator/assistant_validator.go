@@ -6,8 +6,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/purplior/podoroot/domain/assistant"
-	"github.com/purplior/podoroot/domain/assister"
+	"github.com/purplior/sbec/domain/assistant"
+	"github.com/purplior/sbec/domain/assister"
 )
 
 var (

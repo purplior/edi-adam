@@ -3,12 +3,12 @@ package assistant
 import (
 	"time"
 
-	"github.com/purplior/podoroot/domain/assister"
-	"github.com/purplior/podoroot/domain/category"
-	"github.com/purplior/podoroot/domain/review"
-	"github.com/purplior/podoroot/domain/shared/pagination"
-	"github.com/purplior/podoroot/domain/user"
-	"github.com/purplior/podoroot/lib/strgen"
+	"github.com/purplior/sbec/domain/assister"
+	"github.com/purplior/sbec/domain/category"
+	"github.com/purplior/sbec/domain/review"
+	"github.com/purplior/sbec/domain/shared/pagination"
+	"github.com/purplior/sbec/domain/user"
+	"github.com/purplior/sbec/lib/strgen"
 )
 
 const (

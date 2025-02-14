@@ -3,7 +3,7 @@ package logger
 import (
 	"log"
 
-	"github.com/purplior/podoroot/application/config"
+	"github.com/purplior/sbec/application/config"
 )
 
 func Info(format string, v ...interface{}) {

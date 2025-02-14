@@ -1,4 +1,4 @@
-package myredis
+package redisdb
 
 import (
 	"context"

@@ -1,8 +1,8 @@
 package bookmark
 
 import (
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/domain/shared/pagination"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/domain/shared/pagination"
 )
 
 type (

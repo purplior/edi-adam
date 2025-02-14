@@ -1,12 +1,12 @@
-package podomongo
+package mongodb
 
 import (
 	"context"
 	"log"
 	"time"
 
-	"github.com/purplior/podoroot/application/config"
-	"github.com/purplior/podoroot/domain/shared/constant"
+	"github.com/purplior/sbec/application/config"
+	"github.com/purplior/sbec/domain/shared/constant"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"

@@ -1,20 +1,20 @@
 package repository
 
 import (
-	domain "github.com/purplior/podoroot/domain/review"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/domain/shared/pagination"
-	"github.com/purplior/podoroot/infra/database"
-	"github.com/purplior/podoroot/infra/database/podosql"
-	"github.com/purplior/podoroot/infra/entity"
-	"github.com/purplior/podoroot/infra/repoutil"
-	"github.com/purplior/podoroot/lib/dt"
+	domain "github.com/purplior/sbec/domain/review"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/domain/shared/pagination"
+	"github.com/purplior/sbec/infra/database"
+	"github.com/purplior/sbec/infra/database/sqldb"
+	"github.com/purplior/sbec/infra/entity"
+	"github.com/purplior/sbec/infra/repoutil"
+	"github.com/purplior/sbec/lib/dt"
 	"gorm.io/gorm"
 )
 
 type (
 	reviewRepository struct {
-		client *podosql.Client
+		client *sqldb.Client
 	}
 )
 
@@ -36,7 +36,7 @@ func (r *reviewRepository) FindPaginatedList_ByAssistantID(
 		&entities,
 		pageRequest,
 		repoutil.FindPaginatedListOption{
-			Condition: func(db *podosql.DB) *podosql.DB {
+			Condition: func(db *sqldb.DB) *sqldb.DB {
 				query := db.
 					Preload("Author").
 					Order(gorm.Expr("COALESCE(updated_at, created_at) DESC")).
@@ -138,7 +138,7 @@ func (r *reviewRepository) UpdateOne_ByID(
 }
 
 func NewReviewRepository(
-	client *podosql.Client,
+	client *sqldb.Client,
 ) domain.ReviewRepository {
 	return &reviewRepository{
 		client: client,

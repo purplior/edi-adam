@@ -4,17 +4,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/purplior/podoroot/application/config"
-	"github.com/purplior/podoroot/domain/challenge"
-	"github.com/purplior/podoroot/domain/shared/constant"
-	"github.com/purplior/podoroot/domain/shared/exception"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/domain/user"
-	"github.com/purplior/podoroot/domain/verification"
-	"github.com/purplior/podoroot/domain/wallet"
-	"github.com/purplior/podoroot/lib/myjwt"
-	"github.com/purplior/podoroot/lib/strgen"
-	"github.com/purplior/podoroot/lib/validator"
+	"github.com/purplior/sbec/application/config"
+	"github.com/purplior/sbec/domain/challenge"
+	"github.com/purplior/sbec/domain/shared/constant"
+	"github.com/purplior/sbec/domain/shared/exception"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/domain/user"
+	"github.com/purplior/sbec/domain/verification"
+	"github.com/purplior/sbec/domain/wallet"
+	"github.com/purplior/sbec/lib/myjwt"
+	"github.com/purplior/sbec/lib/strgen"
+	"github.com/purplior/sbec/lib/validator"
 )
 
 var (
@@ -118,13 +118,13 @@ func (s *authService) SignUp_ByPhoneNumberVerification(
 		return err
 	}
 
-	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
+	if err := s.cm.BeginTX(ctx, inner.TX_sqldb); err != nil {
 		return err
 	}
 
 	defer func() {
 		if r := recover(); r != nil {
-			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			s.cm.RollbackTX(ctx, inner.TX_sqldb)
 			panic(r)
 		}
 	}()
@@ -135,7 +135,7 @@ func (s *authService) SignUp_ByPhoneNumberVerification(
 		request.VerificationID,
 	)
 	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.RollbackTX(ctx, inner.TX_sqldb)
 		return err
 	}
 
@@ -155,7 +155,7 @@ func (s *authService) SignUp_ByPhoneNumberVerification(
 		},
 	)
 	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.RollbackTX(ctx, inner.TX_sqldb)
 		return err
 	}
 
@@ -168,7 +168,7 @@ func (s *authService) SignUp_ByPhoneNumberVerification(
 		},
 	)
 	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.RollbackTX(ctx, inner.TX_sqldb)
 		return err
 	}
 
@@ -178,7 +178,7 @@ func (s *authService) SignUp_ByPhoneNumberVerification(
 		me.ID,
 		constant.MissionID_SignUp,
 	); err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.RollbackTX(ctx, inner.TX_sqldb)
 		return err
 	}
 	if err := s.challengeService.AchieveOne_ByUserAndMission(
@@ -186,11 +186,11 @@ func (s *authService) SignUp_ByPhoneNumberVerification(
 		me.ID,
 		constant.MissionID_SignUpOpenEvent,
 	); err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.RollbackTX(ctx, inner.TX_sqldb)
 		return err
 	}
 
-	if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
+	if err := s.cm.CommitTX(ctx, inner.TX_sqldb); err != nil {
 		return err
 	}
 
@@ -249,13 +249,13 @@ func (s *authService) ResetPassword_ByPhoneNumberVerification(
 		return err
 	}
 
-	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
+	if err := s.cm.BeginTX(ctx, inner.TX_sqldb); err != nil {
 		return err
 	}
 
 	defer func() {
 		if r := recover(); r != nil {
-			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			s.cm.RollbackTX(ctx, inner.TX_sqldb)
 			panic(r)
 		}
 	}()
@@ -265,7 +265,7 @@ func (s *authService) ResetPassword_ByPhoneNumberVerification(
 		request.VerificationID,
 	)
 	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.RollbackTX(ctx, inner.TX_sqldb)
 		return err
 	}
 
@@ -282,11 +282,11 @@ func (s *authService) ResetPassword_ByPhoneNumberVerification(
 		verification.PhoneNumber,
 		_user.AccountPassword,
 	); err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.RollbackTX(ctx, inner.TX_sqldb)
 		return err
 	}
 
-	if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
+	if err := s.cm.CommitTX(ctx, inner.TX_sqldb); err != nil {
 		return err
 	}
 

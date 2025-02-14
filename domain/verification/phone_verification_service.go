@@ -4,13 +4,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/purplior/podoroot/domain/shared/exception"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/infra/port/podosms"
-	"github.com/purplior/podoroot/lib/dt"
-	"github.com/purplior/podoroot/lib/mydate"
-	"github.com/purplior/podoroot/lib/strgen"
-	"github.com/purplior/podoroot/lib/validator"
+	"github.com/purplior/sbec/domain/shared/exception"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/infra/port/sms"
+	"github.com/purplior/sbec/lib/dt"
+	"github.com/purplior/sbec/lib/mydate"
+	"github.com/purplior/sbec/lib/strgen"
+	"github.com/purplior/sbec/lib/validator"
 )
 
 type (
@@ -43,7 +43,7 @@ type (
 	}
 
 	phoneVerificationService struct {
-		smsClient                   *podosms.Client
+		smsClient                   *sms.Client
 		phoneVerificationRepository PhoneVerificationRepository
 		maxCount                    int
 	}
@@ -99,7 +99,7 @@ func (s *phoneVerificationService) RequestCode(
 	var requestId string = ""
 	if !isTestMode {
 		messageContent := "[포도쌤] 인증번호 [" + code + "] *타인에게 절대 알리지 마세요."
-		response, err := s.smsClient.SendSMS(podosms.SendSMSRequest{
+		response, err := s.smsClient.SendSMS(sms.SendSMSRequest{
 			Content: messageContent,
 			ToList: []string{
 				phoneNumber,
@@ -169,7 +169,7 @@ func (s *phoneVerificationService) VerifyCode(
 }
 
 func NewPhoneVerificationService(
-	smsClient *podosms.Client,
+	smsClient *sms.Client,
 	phoneVerificationRepository PhoneVerificationRepository,
 ) PhoneVerificationService {
 	return &phoneVerificationService{

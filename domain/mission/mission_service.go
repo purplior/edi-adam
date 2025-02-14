@@ -3,13 +3,13 @@ package mission
 import (
 	"strings"
 
-	"github.com/purplior/podoroot/domain/challenge"
-	"github.com/purplior/podoroot/domain/ledger"
-	"github.com/purplior/podoroot/domain/shared/exception"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/domain/shared/pagination"
-	"github.com/purplior/podoroot/domain/wallet"
-	"github.com/purplior/podoroot/lib/dt"
+	"github.com/purplior/sbec/domain/challenge"
+	"github.com/purplior/sbec/domain/ledger"
+	"github.com/purplior/sbec/domain/shared/exception"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/domain/shared/pagination"
+	"github.com/purplior/sbec/domain/wallet"
+	"github.com/purplior/sbec/lib/dt"
 )
 
 type (
@@ -124,7 +124,7 @@ func (s *missionService) ReceiveOne(
 		return exception.ErrAlreadyReceived
 	}
 
-	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
+	if err := s.cm.BeginTX(ctx, inner.TX_sqldb); err != nil {
 		return err
 	}
 
@@ -132,7 +132,7 @@ func (s *missionService) ReceiveOne(
 		ctx,
 		mission.Challenges[0].ID,
 	); err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.RollbackTX(ctx, inner.TX_sqldb)
 		return err
 	}
 
@@ -148,12 +148,12 @@ func (s *missionService) ReceiveOne(
 			ledger.LedgerAction_ReceiveByMission,
 			mission.ID,
 		); err != nil {
-			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			s.cm.RollbackTX(ctx, inner.TX_sqldb)
 			return err
 		}
 	}
 
-	return s.cm.CommitTX(ctx, inner.TX_PodoSql)
+	return s.cm.CommitTX(ctx, inner.TX_sqldb)
 }
 
 func NewMissionService(

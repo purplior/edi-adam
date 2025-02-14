@@ -1,7 +1,7 @@
 package wallet
 
 import (
-	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/sbec/domain/shared/inner"
 )
 
 type (

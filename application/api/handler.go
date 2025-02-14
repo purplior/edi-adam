@@ -2,8 +2,8 @@ package api
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/purplior/podoroot/domain/shared/exception"
-	"github.com/purplior/podoroot/domain/user"
+	"github.com/purplior/sbec/domain/shared/exception"
+	"github.com/purplior/sbec/domain/user"
 )
 
 type (

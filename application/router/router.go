@@ -2,19 +2,19 @@ package router
 
 import (
 	"github.com/labstack/echo/v4"
-	admin "github.com/purplior/podoroot/application/admin"
-	assistant "github.com/purplior/podoroot/domain/assistant/app"
-	assister "github.com/purplior/podoroot/domain/assister/app"
-	auth "github.com/purplior/podoroot/domain/auth/app"
-	bookmark "github.com/purplior/podoroot/domain/bookmark/app"
-	category "github.com/purplior/podoroot/domain/category/app"
-	challenge "github.com/purplior/podoroot/domain/challenge/app"
-	customervoice "github.com/purplior/podoroot/domain/customervoice/app"
-	me "github.com/purplior/podoroot/domain/me/app"
-	mission "github.com/purplior/podoroot/domain/mission/app"
-	review "github.com/purplior/podoroot/domain/review/app"
-	user "github.com/purplior/podoroot/domain/user/app"
-	verification "github.com/purplior/podoroot/domain/verification/app"
+	admin "github.com/purplior/sbec/application/admin"
+	assistant "github.com/purplior/sbec/domain/assistant/app"
+	assister "github.com/purplior/sbec/domain/assister/app"
+	auth "github.com/purplior/sbec/domain/auth/app"
+	bookmark "github.com/purplior/sbec/domain/bookmark/app"
+	category "github.com/purplior/sbec/domain/category/app"
+	challenge "github.com/purplior/sbec/domain/challenge/app"
+	customervoice "github.com/purplior/sbec/domain/customervoice/app"
+	me "github.com/purplior/sbec/domain/me/app"
+	mission "github.com/purplior/sbec/domain/mission/app"
+	review "github.com/purplior/sbec/domain/review/app"
+	user "github.com/purplior/sbec/domain/user/app"
+	verification "github.com/purplior/sbec/domain/verification/app"
 )
 
 type (

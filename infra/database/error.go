@@ -3,8 +3,8 @@ package database
 import (
 	"log"
 
-	"github.com/purplior/podoroot/application/config"
-	"github.com/purplior/podoroot/domain/shared/exception"
+	"github.com/purplior/sbec/application/config"
+	"github.com/purplior/sbec/domain/shared/exception"
 	"go.mongodb.org/mongo-driver/mongo"
 	"gorm.io/gorm"
 )

@@ -1,16 +1,16 @@
 package assistant
 
 import (
-	"github.com/purplior/podoroot/domain/assister"
-	"github.com/purplior/podoroot/domain/category"
-	"github.com/purplior/podoroot/domain/review"
-	"github.com/purplior/podoroot/domain/shared/exception"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/domain/shared/pagination"
-	"github.com/purplior/podoroot/domain/wallet"
-	"github.com/purplior/podoroot/infra/port/podoopenai"
-	"github.com/purplior/podoroot/lib/dt"
-	"github.com/purplior/podoroot/lib/mydate"
+	"github.com/purplior/sbec/domain/assister"
+	"github.com/purplior/sbec/domain/category"
+	"github.com/purplior/sbec/domain/review"
+	"github.com/purplior/sbec/domain/shared/exception"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/domain/shared/pagination"
+	"github.com/purplior/sbec/domain/wallet"
+	"github.com/purplior/sbec/infra/port/openai"
+	"github.com/purplior/sbec/lib/dt"
+	"github.com/purplior/sbec/lib/mydate"
 )
 
 type (
@@ -94,7 +94,7 @@ type (
 
 type (
 	assistantService struct {
-		openaiClient        *podoopenai.Client
+		openaiClient        *openai.Client
 		assistantRepository AssistantRepository
 		categoryService     category.CategoryService
 		assisterService     assister.AssisterService
@@ -253,13 +253,13 @@ func (s *assistantService) RegisterOne(
 	Assistant,
 	error,
 ) {
-	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
+	if err := s.cm.BeginTX(ctx, inner.TX_sqldb); err != nil {
 		return Assistant{}, err
 	}
 
 	defer func() {
 		if r := recover(); r != nil {
-			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			s.cm.RollbackTX(ctx, inner.TX_sqldb)
 			panic(r)
 		}
 	}()
@@ -268,7 +268,7 @@ func (s *assistantService) RegisterOne(
 		ctx,
 		assister.AssisterRegisterRequest{
 			Origin:        assister.Origin_OpenAI,
-			Model:         podoopenai.Model_GPT4oMini,
+			Model:         openai.Model_GPT4oMini,
 			Tests:         request.Tests,
 			Fields:        request.Fields,
 			QueryMessages: request.QueryMessages,
@@ -276,7 +276,7 @@ func (s *assistantService) RegisterOne(
 		},
 	)
 	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.RollbackTX(ctx, inner.TX_sqldb)
 		return Assistant{}, err
 	}
 
@@ -288,11 +288,11 @@ func (s *assistantService) RegisterOne(
 		),
 	)
 	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.RollbackTX(ctx, inner.TX_sqldb)
 		return Assistant{}, err
 	}
 
-	if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
+	if err := s.cm.CommitTX(ctx, inner.TX_sqldb); err != nil {
 		return Assistant{}, err
 	}
 
@@ -326,13 +326,13 @@ func (s *assistantService) UpdateOne(
 		return err
 	}
 
-	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
+	if err := s.cm.BeginTX(ctx, inner.TX_sqldb); err != nil {
 		return err
 	}
 
 	defer func() {
 		if r := recover(); r != nil {
-			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			s.cm.RollbackTX(ctx, inner.TX_sqldb)
 			panic(r)
 		}
 	}()
@@ -343,7 +343,7 @@ func (s *assistantService) UpdateOne(
 		newAssistant,
 	)
 	if err != nil {
-		s.cm.ClearTX(ctx, inner.TX_PodoSql)
+		s.cm.ClearTX(ctx, inner.TX_sqldb)
 		return err
 	}
 
@@ -357,11 +357,11 @@ func (s *assistantService) UpdateOne(
 		newAssister,
 	)
 	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+		s.cm.RollbackTX(ctx, inner.TX_sqldb)
 		return err
 	}
 
-	if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
+	if err := s.cm.CommitTX(ctx, inner.TX_sqldb); err != nil {
 		return err
 	}
 
@@ -385,13 +385,13 @@ func (s *assistantService) RemoveOne_ByID(
 		return exception.ErrBadRequest
 	}
 
-	if err := s.cm.BeginTX(ctx, inner.TX_PodoSql); err != nil {
+	if err := s.cm.BeginTX(ctx, inner.TX_sqldb); err != nil {
 		return err
 	}
 
 	defer func() {
 		if r := recover(); r != nil {
-			s.cm.RollbackTX(ctx, inner.TX_PodoSql)
+			s.cm.RollbackTX(ctx, inner.TX_sqldb)
 			panic(r)
 		}
 	}()
@@ -400,7 +400,7 @@ func (s *assistantService) RemoveOne_ByID(
 		ctx,
 		_assistant.AssisterID,
 	); err != nil {
-		s.cm.ClearTX(ctx, inner.TX_PodoSql)
+		s.cm.ClearTX(ctx, inner.TX_sqldb)
 		return err
 	}
 
@@ -408,11 +408,11 @@ func (s *assistantService) RemoveOne_ByID(
 		ctx,
 		id,
 	); err != nil {
-		s.cm.ClearTX(ctx, inner.TX_PodoSql)
+		s.cm.ClearTX(ctx, inner.TX_sqldb)
 		return err
 	}
 
-	if err := s.cm.CommitTX(ctx, inner.TX_PodoSql); err != nil {
+	if err := s.cm.CommitTX(ctx, inner.TX_sqldb); err != nil {
 		return err
 	}
 
@@ -466,7 +466,7 @@ func (s *assistantService) ApproveOne(
 }
 
 func NewAssistantService(
-	openaiClient *podoopenai.Client,
+	openaiClient *openai.Client,
 	assistantRepository AssistantRepository,
 	categoryService category.CategoryService,
 	assisterService assister.AssisterService,

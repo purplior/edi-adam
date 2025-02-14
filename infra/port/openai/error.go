@@ -1,4 +1,4 @@
-package podoopenai
+package openai
 
 import "errors"
 

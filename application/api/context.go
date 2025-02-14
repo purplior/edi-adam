@@ -5,13 +5,13 @@ import (
 	"runtime/debug"
 
 	"github.com/labstack/echo/v4"
-	"github.com/purplior/podoroot/application/config"
-	"github.com/purplior/podoroot/application/response"
-	"github.com/purplior/podoroot/domain/auth"
-	"github.com/purplior/podoroot/domain/shared/constant"
-	"github.com/purplior/podoroot/domain/shared/exception"
-	"github.com/purplior/podoroot/domain/shared/pagination"
-	"github.com/purplior/podoroot/lib/dt"
+	"github.com/purplior/sbec/application/config"
+	"github.com/purplior/sbec/application/response"
+	"github.com/purplior/sbec/domain/auth"
+	"github.com/purplior/sbec/domain/shared/constant"
+	"github.com/purplior/sbec/domain/shared/exception"
+	"github.com/purplior/sbec/domain/shared/pagination"
+	"github.com/purplior/sbec/lib/dt"
 )
 
 type (

@@ -1,18 +1,18 @@
 package repoutil
 
 import (
-	"github.com/purplior/podoroot/domain/shared/pagination"
-	"github.com/purplior/podoroot/infra/database/podosql"
+	"github.com/purplior/sbec/domain/shared/pagination"
+	"github.com/purplior/sbec/infra/database/sqldb"
 )
 
 type (
 	FindPaginatedListOption struct {
-		Condition func(db *podosql.DB) *podosql.DB
+		Condition func(db *sqldb.DB) *sqldb.DB
 	}
 )
 
 func FindPaginatedList(
-	db *podosql.DB,
+	db *sqldb.DB,
 	entity interface{},
 	entities interface{},
 	pageRequest pagination.PaginationRequest,

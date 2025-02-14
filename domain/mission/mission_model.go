@@ -3,7 +3,7 @@ package mission
 import (
 	"time"
 
-	"github.com/purplior/podoroot/domain/challenge"
+	"github.com/purplior/sbec/domain/challenge"
 )
 
 const (

@@ -1,19 +1,19 @@
 package repository
 
 import (
-	domain "github.com/purplior/podoroot/domain/assister"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/infra/database"
-	"github.com/purplior/podoroot/infra/database/podomongo"
-	"github.com/purplior/podoroot/infra/entity"
-	"github.com/purplior/podoroot/lib/mydate"
+	domain "github.com/purplior/sbec/domain/assister"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/infra/database"
+	"github.com/purplior/sbec/infra/database/mongodb"
+	"github.com/purplior/sbec/infra/entity"
+	"github.com/purplior/sbec/lib/mydate"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type (
 	assisterRepository struct {
-		client *podomongo.Client
+		client *mongodb.Client
 	}
 )
 
@@ -28,7 +28,7 @@ func (r *assisterRepository) FindOne_ByID(
 
 	var e entity.Assister
 	if err := r.client.
-		MyCollection(podomongo.Collection_Assister).
+		MyCollection(mongodb.Collection_Assister).
 		FindOne(
 			ctx.Value(),
 			bson.M{
@@ -52,7 +52,7 @@ func (r *assisterRepository) InsertOne(
 	e.CreatedAt = mydate.Now()
 
 	result, err := r.client.
-		MyCollection(podomongo.Collection_Assister).
+		MyCollection(mongodb.Collection_Assister).
 		InsertOne(ctx.Value(), e)
 	if err != nil {
 		return domain.Assister{}, database.ToDomainError(err)
@@ -70,7 +70,7 @@ func (r *assisterRepository) UpdateOne(
 	e := entity.MakeAssister(assister)
 
 	_, err := r.client.
-		MyCollection(podomongo.Collection_Assister).
+		MyCollection(mongodb.Collection_Assister).
 		UpdateOne(
 			ctx.Value(),
 			bson.M{
@@ -97,7 +97,7 @@ func (r *assisterRepository) DeleteOne_ByID(
 	}
 
 	_, err = r.client.
-		MyCollection(podomongo.Collection_Assister).
+		MyCollection(mongodb.Collection_Assister).
 		DeleteOne(
 			ctx.Value(),
 			bson.M{
@@ -112,7 +112,7 @@ func (r *assisterRepository) DeleteOne_ByID(
 }
 
 func NewAssisterRepository(
-	client *podomongo.Client,
+	client *mongodb.Client,
 ) domain.AssisterRepository {
 	return &assisterRepository{
 		client: client,

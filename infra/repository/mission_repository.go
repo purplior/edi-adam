@@ -1,18 +1,18 @@
 package repository
 
 import (
-	domain "github.com/purplior/podoroot/domain/mission"
-	"github.com/purplior/podoroot/domain/shared/exception"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/domain/shared/pagination"
-	"github.com/purplior/podoroot/infra/database"
-	"github.com/purplior/podoroot/infra/database/podosql"
-	"github.com/purplior/podoroot/infra/entity"
+	domain "github.com/purplior/sbec/domain/mission"
+	"github.com/purplior/sbec/domain/shared/exception"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/domain/shared/pagination"
+	"github.com/purplior/sbec/infra/database"
+	"github.com/purplior/sbec/infra/database/sqldb"
+	"github.com/purplior/sbec/infra/entity"
 )
 
 type (
 	missionRepository struct {
-		client *podosql.Client
+		client *sqldb.Client
 	}
 )
 
@@ -88,7 +88,7 @@ func (r *missionRepository) FindPaginatedList_OnlyPublic_ByUserID(
 }
 
 func NewMissionRepository(
-	client *podosql.Client,
+	client *sqldb.Client,
 ) domain.MissionRepository {
 	return &missionRepository{
 		client: client,

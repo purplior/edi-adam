@@ -1,11 +1,11 @@
 package app
 
 import (
-	"github.com/purplior/podoroot/application/api"
-	"github.com/purplior/podoroot/application/response"
-	domain "github.com/purplior/podoroot/domain/customervoice"
-	"github.com/purplior/podoroot/domain/shared/exception"
-	"github.com/purplior/podoroot/domain/shared/inner"
+	"github.com/purplior/sbec/application/api"
+	"github.com/purplior/sbec/application/response"
+	domain "github.com/purplior/sbec/domain/customervoice"
+	"github.com/purplior/sbec/domain/shared/exception"
+	"github.com/purplior/sbec/domain/shared/inner"
 )
 
 type (

@@ -1,4 +1,4 @@
-module github.com/purplior/podoroot
+module github.com/purplior/sbec
 
 go 1.23.0
 

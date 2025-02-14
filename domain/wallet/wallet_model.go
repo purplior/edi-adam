@@ -3,7 +3,7 @@ package wallet
 import (
 	"time"
 
-	"github.com/purplior/podoroot/domain/ledger"
+	"github.com/purplior/sbec/domain/ledger"
 )
 
 type (

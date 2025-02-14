@@ -10,44 +10,44 @@ import (
 	"context"
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"github.com/purplior/podoroot/application/admin"
-	"github.com/purplior/podoroot/application/config"
-	"github.com/purplior/podoroot/application/middleware"
-	"github.com/purplior/podoroot/application/router"
-	"github.com/purplior/podoroot/domain/assistant"
-	"github.com/purplior/podoroot/domain/assistant/app"
-	"github.com/purplior/podoroot/domain/assister"
-	app2 "github.com/purplior/podoroot/domain/assister/app"
-	"github.com/purplior/podoroot/domain/auth"
-	app3 "github.com/purplior/podoroot/domain/auth/app"
-	"github.com/purplior/podoroot/domain/bookmark"
-	app4 "github.com/purplior/podoroot/domain/bookmark/app"
-	"github.com/purplior/podoroot/domain/category"
-	app5 "github.com/purplior/podoroot/domain/category/app"
-	"github.com/purplior/podoroot/domain/challenge"
-	app6 "github.com/purplior/podoroot/domain/challenge/app"
-	"github.com/purplior/podoroot/domain/customervoice"
-	app7 "github.com/purplior/podoroot/domain/customervoice/app"
-	"github.com/purplior/podoroot/domain/ledger"
-	"github.com/purplior/podoroot/domain/me"
-	app8 "github.com/purplior/podoroot/domain/me/app"
-	"github.com/purplior/podoroot/domain/mission"
-	app9 "github.com/purplior/podoroot/domain/mission/app"
-	"github.com/purplior/podoroot/domain/review"
-	app10 "github.com/purplior/podoroot/domain/review/app"
-	"github.com/purplior/podoroot/domain/user"
-	app11 "github.com/purplior/podoroot/domain/user/app"
-	"github.com/purplior/podoroot/domain/verification"
-	app12 "github.com/purplior/podoroot/domain/verification/app"
-	"github.com/purplior/podoroot/domain/wallet"
-	"github.com/purplior/podoroot/infra"
-	"github.com/purplior/podoroot/infra/database"
-	"github.com/purplior/podoroot/infra/database/podomongo"
-	"github.com/purplior/podoroot/infra/database/podosql"
-	"github.com/purplior/podoroot/infra/port/podoopenai"
-	"github.com/purplior/podoroot/infra/port/podoslack"
-	"github.com/purplior/podoroot/infra/port/podosms"
-	"github.com/purplior/podoroot/infra/repository"
+	"github.com/purplior/sbec/application/admin"
+	"github.com/purplior/sbec/application/config"
+	"github.com/purplior/sbec/application/middleware"
+	"github.com/purplior/sbec/application/router"
+	"github.com/purplior/sbec/domain/assistant"
+	"github.com/purplior/sbec/domain/assistant/app"
+	"github.com/purplior/sbec/domain/assister"
+	app2 "github.com/purplior/sbec/domain/assister/app"
+	"github.com/purplior/sbec/domain/auth"
+	app3 "github.com/purplior/sbec/domain/auth/app"
+	"github.com/purplior/sbec/domain/bookmark"
+	app4 "github.com/purplior/sbec/domain/bookmark/app"
+	"github.com/purplior/sbec/domain/category"
+	app5 "github.com/purplior/sbec/domain/category/app"
+	"github.com/purplior/sbec/domain/challenge"
+	app6 "github.com/purplior/sbec/domain/challenge/app"
+	"github.com/purplior/sbec/domain/customervoice"
+	app7 "github.com/purplior/sbec/domain/customervoice/app"
+	"github.com/purplior/sbec/domain/ledger"
+	"github.com/purplior/sbec/domain/me"
+	app8 "github.com/purplior/sbec/domain/me/app"
+	"github.com/purplior/sbec/domain/mission"
+	app9 "github.com/purplior/sbec/domain/mission/app"
+	"github.com/purplior/sbec/domain/review"
+	app10 "github.com/purplior/sbec/domain/review/app"
+	"github.com/purplior/sbec/domain/user"
+	app11 "github.com/purplior/sbec/domain/user/app"
+	"github.com/purplior/sbec/domain/verification"
+	app12 "github.com/purplior/sbec/domain/verification/app"
+	"github.com/purplior/sbec/domain/wallet"
+	"github.com/purplior/sbec/infra"
+	"github.com/purplior/sbec/infra/database"
+	"github.com/purplior/sbec/infra/database/mongodb"
+	"github.com/purplior/sbec/infra/database/sqldb"
+	"github.com/purplior/sbec/infra/port/openai"
+	"github.com/purplior/sbec/infra/port/slack"
+	"github.com/purplior/sbec/infra/port/sms"
+	"github.com/purplior/sbec/infra/repository"
 	"log"
 	"os"
 	"os/signal"
@@ -58,10 +58,10 @@ import (
 // Injectors from app.go:
 
 func Start() error {
-	client := podosql.NewClient()
-	podomongoClient := podomongo.NewClient()
-	databaseManager := database.NewDatabaseManager(client, podomongoClient)
-	podoopenaiClient := podoopenai.NewClient()
+	client := sqldb.NewClient()
+	mongodbClient := mongodb.NewClient()
+	databaseManager := database.NewDatabaseManager(client, mongodbClient)
+	openaiClient := openai.NewClient()
 	assistantRepository := repository.NewAssistantRepository(client)
 	categoryRepository := repository.NewCategoryRepository(client)
 	categoryService := category.NewCategoryService(categoryRepository)
@@ -69,12 +69,12 @@ func Start() error {
 	ledgerRepository := repository.NewLedgerRepository(client)
 	ledgerService := ledger.NewLedgerService(ledgerRepository)
 	walletService := wallet.NewWalletService(walletRepository, ledgerService)
-	assisterRepository := repository.NewAssisterRepository(podomongoClient)
+	assisterRepository := repository.NewAssisterRepository(mongodbClient)
 	contextManager := infra.NewContextManager(client)
-	assisterService := assister.NewAssisterService(podoopenaiClient, walletService, assisterRepository, contextManager)
+	assisterService := assister.NewAssisterService(openaiClient, walletService, assisterRepository, contextManager)
 	reviewRepository := repository.NewReviewRepository(client)
 	reviewService := review.NewReviewService(reviewRepository)
-	assistantService := assistant.NewAssistantService(podoopenaiClient, assistantRepository, categoryService, assisterService, walletService, reviewService, contextManager)
+	assistantService := assistant.NewAssistantService(openaiClient, assistantRepository, categoryService, assisterService, walletService, reviewService, contextManager)
 	adminController := admin.NewAdminController(assistantService, contextManager)
 	adminRouter := admin.NewAdminRouter(adminController)
 	assistantController := app.NewAssistantController(assistantService, contextManager)
@@ -83,9 +83,9 @@ func Start() error {
 	assisterRouter := app2.NewAssisterRouter(assisterController)
 	emailVerificationRepository := repository.NewEmailVerificationRepository(client)
 	emailVerificationService := verification.NewEmailVerificationService(emailVerificationRepository)
-	podosmsClient := podosms.NewClient()
+	smsClient := sms.NewClient()
 	phoneVerificationRepository := repository.NewPhoneVerificationRepository(client)
-	phoneVerificationService := verification.NewPhoneVerificationService(podosmsClient, phoneVerificationRepository)
+	phoneVerificationService := verification.NewPhoneVerificationService(smsClient, phoneVerificationRepository)
 	userRepository := repository.NewUserRepository(client)
 	userService := user.NewUserService(userRepository)
 	challengeRepository := repository.NewChallengeRepository(client)
@@ -101,9 +101,9 @@ func Start() error {
 	categoryRouter := app5.NewCategoryRouter(categoryController)
 	challengeController := app6.NewChallengeController(challengeService, contextManager)
 	challengeRouter := app6.NewChallengeRouter(challengeController)
-	podoslackClient := podoslack.NewClient()
+	slackClient := slack.NewClient()
 	customerVoiceRepository := repository.NewCustomerVoiceRepository(client)
-	customerVoiceService := customervoice.NewCustomerVoiceService(podoslackClient, customerVoiceRepository, userService, contextManager)
+	customerVoiceService := customervoice.NewCustomerVoiceService(slackClient, customerVoiceRepository, userService, contextManager)
 	customerVoiceController := app7.NewCustomerVoiceController(customerVoiceService, contextManager)
 	customerVoiceRouter := app7.NewCustomerVoiceRouter(customerVoiceController)
 	meService := me.NewMeService()

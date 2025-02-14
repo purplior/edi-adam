@@ -1,6 +1,6 @@
 package customervoice
 
-import "github.com/purplior/podoroot/domain/shared/inner"
+import "github.com/purplior/sbec/domain/shared/inner"
 
 type (
 	CustomerVoiceRepository interface {

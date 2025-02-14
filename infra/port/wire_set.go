@@ -2,13 +2,13 @@ package port
 
 import (
 	"github.com/google/wire"
-	"github.com/purplior/podoroot/infra/port/podoopenai"
-	"github.com/purplior/podoroot/infra/port/podoslack"
-	"github.com/purplior/podoroot/infra/port/podosms"
+	"github.com/purplior/sbec/infra/port/openai"
+	"github.com/purplior/sbec/infra/port/slack"
+	"github.com/purplior/sbec/infra/port/sms"
 )
 
 var New = wire.NewSet(
-	podoopenai.NewClient,
-	podoslack.NewClient,
-	podosms.NewClient,
+	openai.NewClient,
+	slack.NewClient,
+	sms.NewClient,
 )

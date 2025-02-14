@@ -4,16 +4,16 @@ import (
 	"context"
 	"time"
 
-	"github.com/purplior/podoroot/domain/shared/exception"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/infra/database/podosql"
+	"github.com/purplior/sbec/domain/shared/exception"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/infra/database/sqldb"
 	"gorm.io/gorm"
 )
 
 type (
 	ctx struct {
-		value     context.Context
-		podosqlTX *gorm.DB
+		value   context.Context
+		sqldbTX *gorm.DB
 	}
 )
 
@@ -23,8 +23,8 @@ func (c *ctx) Value() context.Context {
 
 func (c *ctx) TX(target inner.TX) *gorm.DB {
 	switch target {
-	case inner.TX_PodoSql:
-		return c.podosqlTX
+	case inner.TX_sqldb:
+		return c.sqldbTX
 	}
 
 	return nil
@@ -32,21 +32,21 @@ func (c *ctx) TX(target inner.TX) *gorm.DB {
 
 func (c *ctx) SetTX(target inner.TX, tx *gorm.DB) {
 	switch target {
-	case inner.TX_PodoSql:
-		c.podosqlTX = tx
+	case inner.TX_sqldb:
+		c.sqldbTX = tx
 	}
 }
 
 func (c *ctx) ClearTX(target inner.TX) {
 	switch target {
-	case inner.TX_PodoSql:
-		c.podosqlTX = nil
+	case inner.TX_sqldb:
+		c.sqldbTX = nil
 	}
 }
 
 type (
 	contextManager struct {
-		podosqlClient *podosql.Client
+		sqldbClient *sqldb.Client
 	}
 )
 
@@ -55,8 +55,8 @@ func (c *contextManager) NewContext() (inner.Context, context.CancelFunc) {
 	value, cancel := context.WithTimeout(todoCtx, time.Duration(12*time.Second))
 
 	return &ctx{
-		value:     value,
-		podosqlTX: nil,
+		value:   value,
+		sqldbTX: nil,
 	}, cancel
 }
 
@@ -65,8 +65,8 @@ func (c *contextManager) NewStreamingContext() (inner.Context, context.CancelFun
 	value, cancel := context.WithTimeout(todoCtx, time.Duration(5*time.Minute))
 
 	return &ctx{
-		value:     value,
-		podosqlTX: nil,
+		value:   value,
+		sqldbTX: nil,
 	}, cancel
 }
 
@@ -77,8 +77,8 @@ func (c *contextManager) BeginTX(ctx inner.Context, target inner.TX) error {
 	}
 
 	switch target {
-	case inner.TX_PodoSql:
-		tx := c.podosqlClient.WithContext(ctx.Value()).Begin()
+	case inner.TX_sqldb:
+		tx := c.sqldbClient.WithContext(ctx.Value()).Begin()
 		ctx.SetTX(target, tx)
 	}
 
@@ -115,9 +115,9 @@ func (c *contextManager) ClearTX(ctx inner.Context, target inner.TX) {
 }
 
 func NewContextManager(
-	podosqlClient *podosql.Client,
+	sqldbClient *sqldb.Client,
 ) inner.ContextManager {
 	return &contextManager{
-		podosqlClient: podosqlClient,
+		sqldbClient: sqldbClient,
 	}
 }

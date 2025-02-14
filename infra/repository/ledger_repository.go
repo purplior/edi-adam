@@ -1,16 +1,16 @@
 package repository
 
 import (
-	domain "github.com/purplior/podoroot/domain/ledger"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/infra/database"
-	"github.com/purplior/podoroot/infra/database/podosql"
-	"github.com/purplior/podoroot/infra/entity"
+	domain "github.com/purplior/sbec/domain/ledger"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/infra/database"
+	"github.com/purplior/sbec/infra/database/sqldb"
+	"github.com/purplior/sbec/infra/entity"
 )
 
 type (
 	ledgerRepository struct {
-		client *podosql.Client
+		client *sqldb.Client
 	}
 )
 
@@ -34,7 +34,7 @@ func (r *ledgerRepository) InsertOne(
 }
 
 func NewLedgerRepository(
-	client *podosql.Client,
+	client *sqldb.Client,
 ) domain.LedgerRepository {
 	return &ledgerRepository{
 		client: client,

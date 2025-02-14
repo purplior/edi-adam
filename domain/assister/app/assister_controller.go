@@ -4,13 +4,13 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/purplior/podoroot/application/api"
-	"github.com/purplior/podoroot/application/response"
-	domain "github.com/purplior/podoroot/domain/assister"
-	"github.com/purplior/podoroot/domain/shared/exception"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/domain/shared/logger"
-	"github.com/purplior/podoroot/infra/port/podoopenai"
+	"github.com/purplior/sbec/application/api"
+	"github.com/purplior/sbec/application/response"
+	domain "github.com/purplior/sbec/domain/assister"
+	"github.com/purplior/sbec/domain/shared/exception"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/domain/shared/logger"
+	"github.com/purplior/sbec/infra/port/openai"
 )
 
 type (
@@ -169,7 +169,7 @@ func (c *assisterController) ExecuteAsStream() api.HandlerFunc {
 				logger.Debug("%s", err.Error())
 
 				switch err {
-				case podoopenai.ErrOnStream:
+				case openai.ErrOnStream:
 					return nil
 				case exception.ErrBadRequest:
 					return ctx.String(http.StatusBadRequest, "입력폼을 다시 확인해주세요")

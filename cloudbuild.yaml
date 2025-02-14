@@ -1,8 +1,8 @@
 substitutions:
   _REGION: 'asia-northeast3'
   _AR_HOSTNAME: 'asia-northeast3-docker.pkg.dev'
-  _AR_REPO: 'podossaem/podoroot'
-  _SERVICE_NAME: 'podoroot'
+  _AR_REPO: 'sbec-2025/sbec-docker-images'
+  _SERVICE_NAME: 'sbec'
 options:
   substitutionOption: ALLOW_LOOSE
   logging: CLOUD_LOGGING_ONLY

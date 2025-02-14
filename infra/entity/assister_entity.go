@@ -3,7 +3,7 @@ package entity
 import (
 	"time"
 
-	domain "github.com/purplior/podoroot/domain/assister"
+	domain "github.com/purplior/sbec/domain/assister"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )

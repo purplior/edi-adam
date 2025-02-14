@@ -1,16 +1,16 @@
 package repository
 
 import (
-	domain "github.com/purplior/podoroot/domain/customervoice"
-	"github.com/purplior/podoroot/domain/shared/inner"
-	"github.com/purplior/podoroot/infra/database"
-	"github.com/purplior/podoroot/infra/database/podosql"
-	"github.com/purplior/podoroot/infra/entity"
+	domain "github.com/purplior/sbec/domain/customervoice"
+	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/sbec/infra/database"
+	"github.com/purplior/sbec/infra/database/sqldb"
+	"github.com/purplior/sbec/infra/entity"
 )
 
 type (
 	customerVoiceRepository struct {
-		client *podosql.Client
+		client *sqldb.Client
 	}
 )
 
@@ -32,7 +32,7 @@ func (r *customerVoiceRepository) InsertOne(
 }
 
 func NewCustomerVoiceRepository(
-	client *podosql.Client,
+	client *sqldb.Client,
 ) domain.CustomerVoiceRepository {
 	return &customerVoiceRepository{
 		client: client,
