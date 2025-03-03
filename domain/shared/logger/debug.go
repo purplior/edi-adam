@@ -2,8 +2,9 @@ package logger
 
 import (
 	"log"
+	"runtime/debug"
 
-	"github.com/purplior/sbec/application/config"
+	"github.com/purplior/edi-adam/application/config"
 )
 
 func Info(format string, v ...interface{}) {
@@ -20,5 +21,12 @@ func Error(err error, format string, v ...interface{}) {
 func Debug(format string, v ...interface{}) {
 	if config.DebugMode() {
 		log.Printf(format+"\n", v...)
+	}
+}
+
+func DebugAny(target interface{}) {
+	if config.DebugMode() {
+		log.Println(target)
+		log.Printf("Stack Trace:\n%s", debug.Stack())
 	}
 }

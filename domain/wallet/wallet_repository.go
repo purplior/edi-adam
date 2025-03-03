@@ -1,34 +1,46 @@
 package wallet
 
 import (
-	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/model"
 )
 
 type (
 	WalletRepository interface {
-		InsertOne(
-			ctx inner.Context,
-			wallet Wallet,
+		Read(
+			session inner.Session,
+			queryOption QueryOption,
 		) (
-			Wallet,
+			model.Wallet,
 			error,
 		)
 
-		FindOne_ByUserID(
-			ctx inner.Context,
-			userID string,
+		Create(
+			session inner.Session,
+			m model.Wallet,
 		) (
-			Wallet,
+			model.Wallet,
 			error,
 		)
 
-		UpdateOne_ByUserIDAndDelta(
-			ctx inner.Context,
-			userID string,
-			podoDelta int,
+		Updates(
+			session inner.Session,
+			queryOption QueryOption,
+			m model.Wallet,
+		) error
+
+		UpdatesCoinDelta_ByOwnerID(
+			session inner.Session,
+			userID uint,
+			delta int,
 		) (
-			Wallet,
+			model.Wallet,
 			error,
 		)
+
+		Delete(
+			session inner.Session,
+			queryOption QueryOption,
+		) error
 	}
 )

@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/purplior/sbec/domain/shared/logger"
+	"github.com/purplior/edi-adam/domain/shared/logger"
 )
 
 type (

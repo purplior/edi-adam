@@ -1,53 +1,47 @@
 package review
 
 import (
-	"github.com/purplior/sbec/domain/shared/inner"
-	"github.com/purplior/sbec/domain/shared/pagination"
+	"github.com/purplior/edi-adam/domain/shared/dto/pagination"
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/model"
 )
 
 type (
 	ReviewRepository interface {
-		FindOne_ByID(
-			ctx inner.Context,
-			id string,
-			queryOption ReviewQueryOption,
+		Read(
+			session inner.Session,
+			queryOption QueryOption,
 		) (
-			Review,
+			model.Review,
 			error,
 		)
 
-		FindOne_ByAuthorAndAssistantID(
-			ctx inner.Context,
-			authorID string,
-			assistantID string,
-			queryOption ReviewQueryOption,
+		ReadPaginatedList(
+			session inner.Session,
+			query pagination.PaginationQuery[QueryOption],
 		) (
-			Review,
-			error,
-		)
-
-		FindPaginatedList_ByAssistantID(
-			ctx inner.Context,
-			assistantID string,
-			pageRequest pagination.PaginationRequest,
-		) (
-			[]Review,
+			[]model.Review,
 			pagination.PaginationMeta,
 			error,
 		)
 
-		InsertOne(
-			ctx inner.Context,
-			review Review,
+		Create(
+			session inner.Session,
+			m model.Review,
 		) (
-			Review,
+			model.Review,
 			error,
 		)
 
-		UpdateOne_ByID(
-			ctx inner.Context,
-			id string,
-			review Review,
+		Updates(
+			session inner.Session,
+			queryOption QueryOption,
+			m model.Review,
+		) error
+
+		Delete(
+			session inner.Session,
+			queryOption QueryOption,
 		) error
 	}
 )

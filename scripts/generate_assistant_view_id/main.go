@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/purplior/sbec/lib/strgen"
+	"github.com/purplior/edi-adam/lib/strgen"
 )
 
 func main() {

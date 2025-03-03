@@ -12,9 +12,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/purplior/sbec/application/config"
-	"github.com/purplior/sbec/domain/shared/constant"
-	"github.com/purplior/sbec/domain/shared/logger"
+	"github.com/purplior/edi-adam/application/config"
+	"github.com/purplior/edi-adam/domain/shared/constant"
+	"github.com/purplior/edi-adam/domain/shared/logger"
 )
 
 const (
@@ -64,7 +64,6 @@ const (
 func (c *Client) RequestChatCompletions(
 	ctx context.Context,
 	request ChatCompletionRequest,
-	onInit func() error,
 ) (string, error) {
 	requestBody, err := json.Marshal(map[string]interface{}{
 		"model":       request.Model,
@@ -103,10 +102,6 @@ func (c *Client) RequestChatCompletions(
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("unexpected HTTP status: %s", resp.Status)
-	}
-
-	if err := onInit(); err != nil {
-		return "", err
 	}
 
 	responseBody, err := io.ReadAll(resp.Body)
@@ -218,7 +213,7 @@ func (c *Client) RequestChatCompletionsStream(
 		return fmt.Errorf("unexpected HTTP status: %s", resp.Status)
 	}
 
-	if err := onInit(); err != nil {
+	if err = onInit(); err != nil {
 		return err
 	}
 
@@ -295,9 +290,9 @@ func (c *Client) RequestChatCompletionsStream(
 
 func NewClient() *Client {
 	opt := ConstructorOption{
-		ApiKey:         config.OpenAiServiceAccountApiKey(),
-		OrganizationID: config.OpenAiOrganizationID(),
-		ProjectID:      config.OpenAiProjectID(),
+		ApiKey:         config.OpenAIServiceAccountApiKey(),
+		OrganizationID: config.OpenAIOrganizationID(),
+		ProjectID:      config.OpenAIProjectID(),
 	}
 
 	return &Client{

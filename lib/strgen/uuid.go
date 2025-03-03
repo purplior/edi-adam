@@ -1,10 +1,20 @@
 package strgen
 
 import (
+	"math/rand"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/oklog/ulid/v2"
 )
+
+func UniqueSortableID() (string, error) {
+	entropy := ulid.Monotonic(rand.New(rand.NewSource(time.Now().UnixNano())), 0)
+	id, err := ulid.New(ulid.Timestamp(time.Now()), entropy)
+
+	return id.String(), err
+}
 
 func UniqueID() string {
 	return uuid.New().String()

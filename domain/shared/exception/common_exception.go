@@ -9,6 +9,6 @@ var (
 	ErrUnauthorized    = errors.New("인증에 실패 했어요")
 	ErrNotAcceptable   = errors.New("받아들일 수 없는 요청이에요")
 	ErrNotFound        = errors.New("리소스를 찾을 수 없어요")
-	ErrNoPodo          = errors.New("사용할 수 있는 포도가 더 필요해요")
+	ErrNoCoin          = errors.New("사용할 수 있는 코인이 부족해요")
 	ErrAlreadyReceived = errors.New("이미 수령했어요")
 )

@@ -10,44 +10,33 @@ import (
 	"context"
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"github.com/purplior/sbec/application/admin"
-	"github.com/purplior/sbec/application/config"
-	"github.com/purplior/sbec/application/middleware"
-	"github.com/purplior/sbec/application/router"
-	"github.com/purplior/sbec/domain/assistant"
-	"github.com/purplior/sbec/domain/assistant/app"
-	"github.com/purplior/sbec/domain/assister"
-	app2 "github.com/purplior/sbec/domain/assister/app"
-	"github.com/purplior/sbec/domain/auth"
-	app3 "github.com/purplior/sbec/domain/auth/app"
-	"github.com/purplior/sbec/domain/bookmark"
-	app4 "github.com/purplior/sbec/domain/bookmark/app"
-	"github.com/purplior/sbec/domain/category"
-	app5 "github.com/purplior/sbec/domain/category/app"
-	"github.com/purplior/sbec/domain/challenge"
-	app6 "github.com/purplior/sbec/domain/challenge/app"
-	"github.com/purplior/sbec/domain/customervoice"
-	app7 "github.com/purplior/sbec/domain/customervoice/app"
-	"github.com/purplior/sbec/domain/ledger"
-	"github.com/purplior/sbec/domain/me"
-	app8 "github.com/purplior/sbec/domain/me/app"
-	"github.com/purplior/sbec/domain/mission"
-	app9 "github.com/purplior/sbec/domain/mission/app"
-	"github.com/purplior/sbec/domain/review"
-	app10 "github.com/purplior/sbec/domain/review/app"
-	"github.com/purplior/sbec/domain/user"
-	app11 "github.com/purplior/sbec/domain/user/app"
-	"github.com/purplior/sbec/domain/verification"
-	app12 "github.com/purplior/sbec/domain/verification/app"
-	"github.com/purplior/sbec/domain/wallet"
-	"github.com/purplior/sbec/infra"
-	"github.com/purplior/sbec/infra/database"
-	"github.com/purplior/sbec/infra/database/mongodb"
-	"github.com/purplior/sbec/infra/database/sqldb"
-	"github.com/purplior/sbec/infra/port/openai"
-	"github.com/purplior/sbec/infra/port/slack"
-	"github.com/purplior/sbec/infra/port/sms"
-	"github.com/purplior/sbec/infra/repository"
+	controller2 "github.com/purplior/edi-adam/application/admin/controller"
+	router2 "github.com/purplior/edi-adam/application/admin/router"
+	"github.com/purplior/edi-adam/application/api/controller"
+	"github.com/purplior/edi-adam/application/api/router"
+	"github.com/purplior/edi-adam/application/config"
+	"github.com/purplior/edi-adam/application/middleware"
+	"github.com/purplior/edi-adam/domain/assistant"
+	"github.com/purplior/edi-adam/domain/assister"
+	"github.com/purplior/edi-adam/domain/auth"
+	"github.com/purplior/edi-adam/domain/bookmark"
+	"github.com/purplior/edi-adam/domain/category"
+	"github.com/purplior/edi-adam/domain/customervoice"
+	"github.com/purplior/edi-adam/domain/mission"
+	"github.com/purplior/edi-adam/domain/missionlog"
+	"github.com/purplior/edi-adam/domain/review"
+	"github.com/purplior/edi-adam/domain/user"
+	"github.com/purplior/edi-adam/domain/verification"
+	"github.com/purplior/edi-adam/domain/wallet"
+	"github.com/purplior/edi-adam/domain/walletlog"
+	"github.com/purplior/edi-adam/infra/database"
+	"github.com/purplior/edi-adam/infra/database/dynamo"
+	"github.com/purplior/edi-adam/infra/database/postgre"
+	"github.com/purplior/edi-adam/infra/port/openai"
+	"github.com/purplior/edi-adam/infra/port/slack"
+	"github.com/purplior/edi-adam/infra/port/sms"
+	"github.com/purplior/edi-adam/infra/repository"
+	"github.com/purplior/edi-adam/infra/session"
 	"log"
 	"os"
 	"os/signal"
@@ -58,102 +47,93 @@ import (
 // Injectors from app.go:
 
 func Start() error {
-	client := sqldb.NewClient()
-	mongodbClient := mongodb.NewClient()
-	databaseManager := database.NewDatabaseManager(client, mongodbClient)
-	openaiClient := openai.NewClient()
+	client := postgre.NewClient()
+	sessionFactory := session.NewFactory(client)
 	assistantRepository := repository.NewAssistantRepository(client)
-	categoryRepository := repository.NewCategoryRepository(client)
-	categoryService := category.NewCategoryService(categoryRepository)
+	assistantService := assistant.NewAssistantService(assistantRepository)
+	openaiClient := openai.NewClient()
 	walletRepository := repository.NewWalletRepository(client)
-	ledgerRepository := repository.NewLedgerRepository(client)
-	ledgerService := ledger.NewLedgerService(ledgerRepository)
-	walletService := wallet.NewWalletService(walletRepository, ledgerService)
-	assisterRepository := repository.NewAssisterRepository(mongodbClient)
-	contextManager := infra.NewContextManager(client)
-	assisterService := assister.NewAssisterService(openaiClient, walletService, assisterRepository, contextManager)
-	reviewRepository := repository.NewReviewRepository(client)
-	reviewService := review.NewReviewService(reviewRepository)
-	assistantService := assistant.NewAssistantService(openaiClient, assistantRepository, categoryService, assisterService, walletService, reviewService, contextManager)
-	adminController := admin.NewAdminController(assistantService, contextManager)
-	adminRouter := admin.NewAdminRouter(adminController)
-	assistantController := app.NewAssistantController(assistantService, contextManager)
-	assistantRouter := app.NewAssistantRouter(assistantController)
-	assisterController := app2.NewAssisterController(assisterService, contextManager)
-	assisterRouter := app2.NewAssisterRouter(assisterController)
-	emailVerificationRepository := repository.NewEmailVerificationRepository(client)
-	emailVerificationService := verification.NewEmailVerificationService(emailVerificationRepository)
+	dynamoClient := dynamo.NewClient()
+	walletLogRepository := repository.NewWalletLogRepository(dynamoClient)
+	walletLogService := walletlog.NewWalletLogService(walletLogRepository)
+	walletService := wallet.NewWalletService(walletRepository, walletLogService)
+	assisterRepository := repository.NewAssisterRepository(dynamoClient)
+	assisterService := assister.NewAssisterService(openaiClient, walletService, assisterRepository)
+	assistantController := controller.NewAssistantController(assistantService, assisterService)
+	assisterController := controller.NewAssisterController(assisterService)
 	smsClient := sms.NewClient()
-	phoneVerificationRepository := repository.NewPhoneVerificationRepository(client)
-	phoneVerificationService := verification.NewPhoneVerificationService(smsClient, phoneVerificationRepository)
+	verificationRepository := repository.NewVerificationRepository(client)
+	verificationService := verification.NewVerificationService(smsClient, verificationRepository)
 	userRepository := repository.NewUserRepository(client)
 	userService := user.NewUserService(userRepository)
-	challengeRepository := repository.NewChallengeRepository(client)
-	challengeService := challenge.NewChallengeService(challengeRepository, contextManager)
-	authService := auth.NewAuthService(emailVerificationService, phoneVerificationService, userService, walletService, challengeService, contextManager)
-	authController := app3.NewAuthController(authService, contextManager)
-	authRouter := app3.NewAuthRouter(authController)
+	missionLogRepository := repository.NewMissionLogRepository(client)
+	missionLogService := missionlog.NewMissionLogService(missionLogRepository)
+	authService := auth.NewAuthService(verificationService, userService, walletService, missionLogService)
+	authController := controller.NewAuthController(authService)
 	bookmarkRepository := repository.NewBookmarkRepository(client)
 	bookmarkService := bookmark.NewBookmarkService(bookmarkRepository)
-	bookmarkController := app4.NewBookmarkController(bookmarkService, contextManager)
-	bookmarkRouter := app4.NewBookmarkRouter(bookmarkController)
-	categoryController := app5.NewCategoryController(categoryService, contextManager)
-	categoryRouter := app5.NewCategoryRouter(categoryController)
-	challengeController := app6.NewChallengeController(challengeService, contextManager)
-	challengeRouter := app6.NewChallengeRouter(challengeController)
+	bookmarkController := controller.NewBookmarkController(bookmarkService)
+	categoryRepository := repository.NewCategoryRepository(client)
+	categoryService := category.NewCategoryService(categoryRepository)
+	categoryController := controller.NewCategoryController(categoryService)
 	slackClient := slack.NewClient()
 	customerVoiceRepository := repository.NewCustomerVoiceRepository(client)
-	customerVoiceService := customervoice.NewCustomerVoiceService(slackClient, customerVoiceRepository, userService, contextManager)
-	customerVoiceController := app7.NewCustomerVoiceController(customerVoiceService, contextManager)
-	customerVoiceRouter := app7.NewCustomerVoiceRouter(customerVoiceController)
-	meService := me.NewMeService()
-	meController := app8.NewMeController(meService, assistantService, assisterService, authService, reviewService, userService, walletService, bookmarkService, contextManager)
-	meRouter := app8.NewMeRouter(meController)
+	customerVoiceService := customervoice.NewCustomerVoiceService(slackClient, customerVoiceRepository, userService)
+	customerVoiceController := controller.NewCustomerVoiceController(customerVoiceService)
 	missionRepository := repository.NewMissionRepository(client)
-	missionService := mission.NewMissionService(missionRepository, challengeService, walletService, contextManager)
-	missionController := app9.NewMissionController(missionService, contextManager)
-	missionRouter := app9.NewMissionRouter(missionController)
-	reviewController := app10.NewReviewController(reviewService, contextManager)
-	reviewRouter := app10.NewReviewRouter(reviewController)
-	userController := app11.NewUserController(userService, contextManager)
-	userRouter := app11.NewUserRouter(userController)
-	emailVerificationController := app12.NewEmailVerificationController(emailVerificationService, contextManager)
-	phoneVerificationController := app12.NewPhoneVerificationController(phoneVerificationService, userService, contextManager)
-	verificationRouter := app12.NewVerificationRouter(emailVerificationController, phoneVerificationController)
-	routerRouter := router.New(adminRouter, assistantRouter, assisterRouter, authRouter, bookmarkRouter, categoryRouter, challengeRouter, customerVoiceRouter, meRouter, missionRouter, reviewRouter, userRouter, verificationRouter)
-	error2 := StartApplication(databaseManager, routerRouter)
+	missionService := mission.NewMissionService(missionRepository)
+	missionController := controller.NewMissionController(missionService)
+	missionLogController := controller.NewMissionLogController(missionLogService)
+	reviewRepository := repository.NewReviewRepository(client)
+	reviewService := review.NewReviewService(reviewRepository)
+	reviewController := controller.NewReviewController(reviewService)
+	userController := controller.NewUserController(userService, walletService)
+	verificationController := controller.NewVerificationController(verificationService)
+	routerRouter := router.NewRouter(sessionFactory, assistantController, assisterController, authController, bookmarkController, categoryController, customerVoiceController, missionController, missionLogController, reviewController, userController, verificationController)
+	assistantAdminController := controller2.NewAssistantAdminController(assistantService)
+	router3 := router2.NewRouter(sessionFactory, assistantAdminController)
+	databaseManager := database.NewDatabaseManager(client, dynamoClient)
+	error2 := StartApplication(routerRouter, router3, databaseManager)
 	return error2
 }
 
 // app.go:
 
 func StartApplication(
-	databaseManager database.DatabaseManager, router2 router.Router,
-
+	apiRouter router.Router,
+	adminRouter router2.Router,
+	dbManager database.DatabaseManager,
 ) error {
 
-	if err := databaseManager.Init(); err != nil {
+	if err := dbManager.Init(); err != nil {
 		log.Println("[#] 데이터베이스를 초기화 하는데 실패 했어요")
 		return err
 	}
-	app13 := echo.New()
-	app13.
-		Use(middleware.New()...)
-	router2.
-		Attach(app13)
+
+	app := echo.New()
+	app.Use(middleware.New()...)
+	app.GET("/healthx", func(c echo.Context) error {
+		return c.String(200, "Hi, i'm edi-adam.")
+	})
+
+	adminGroup := app.Group("/__admin__")
+	adminRouter.Attach(adminGroup)
+
+	apiGroup := app.Group("/api/:version")
+	apiRouter.Attach(apiGroup)
 
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		if err := app13.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
+		if err := app.Start(fmt.Sprintf(":%d", config.Port())); err != nil {
 			log.Println("[#] 서버를 시작 하는데 실패 했어요")
 			panic(err)
 		}
 	}()
 
 	go func() {
-		databaseManager.Monitor()
+		dbManager.Monitor()
 	}()
 
 	sig := <-sigChan
@@ -162,12 +142,12 @@ func StartApplication(
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	if err := app13.Shutdown(ctx); err != nil {
+	if err := app.Shutdown(ctx); err != nil {
 		log.Println("[#] 서버를 종료 하는데 실패 했어요")
 		return err
 	}
 
-	if err := databaseManager.Dispose(); err != nil {
+	if err := dbManager.Dispose(); err != nil {
 		log.Println("[#] 데이터베이스를 종료 하는데 실패 했어요")
 		return err
 	}

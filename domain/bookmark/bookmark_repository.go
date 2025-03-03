@@ -1,43 +1,47 @@
 package bookmark
 
 import (
-	"github.com/purplior/sbec/domain/shared/inner"
-	"github.com/purplior/sbec/domain/shared/pagination"
+	"github.com/purplior/edi-adam/domain/shared/dto/pagination"
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/model"
 )
 
 type (
 	BookmarkRepository interface {
-		FindOne_ByUserIDAndAssistantID(
-			ctx inner.Context,
-			userID string,
-			assistantID string,
+		Read(
+			session inner.Session,
+			queryOption QueryOption,
 		) (
-			Bookmark,
+			model.Bookmark,
 			error,
 		)
 
-		FindPaginatedList_ByUserID(
-			ctx inner.Context,
-			userID string,
-			pageRequest pagination.PaginationRequest,
+		ReadPaginatedList(
+			session inner.Session,
+			query pagination.PaginationQuery[QueryOption],
 		) (
-			[]Bookmark,
+			[]model.Bookmark,
 			pagination.PaginationMeta,
 			error,
 		)
 
-		InsertOne(
-			ctx inner.Context,
-			target Bookmark,
+		Create(
+			session inner.Session,
+			m model.Bookmark,
 		) (
-			registered Bookmark,
-			err error,
+			model.Bookmark,
+			error,
 		)
 
-		DeleteOne_ByUserIDAndAssistantID(
-			ctx inner.Context,
-			userID string,
-			assistantID string,
+		Updates(
+			session inner.Session,
+			queryOption QueryOption,
+			m model.Bookmark,
+		) error
+
+		Delete(
+			session inner.Session,
+			queryOption QueryOption,
 		) error
 	}
 )

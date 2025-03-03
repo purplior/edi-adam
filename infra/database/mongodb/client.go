@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/purplior/sbec/application/config"
-	"github.com/purplior/sbec/domain/shared/constant"
+	"github.com/purplior/edi-adam/application/config"
+	"github.com/purplior/edi-adam/domain/shared/constant"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -110,8 +110,8 @@ func (c *Client) clientOptions() *options.ClientOptions {
 func NewClient() *Client {
 	opt := ConstructorOption{
 		Phase:         config.Phase(),
-		URI:           config.MongoDbURI(),
-		DefaultDbName: config.MongoDbName(),
+		URI:           config.MongoURI(),
+		DefaultDbName: config.MongoDatabaseName(),
 	}
 
 	client := &Client{

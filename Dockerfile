@@ -21,7 +21,7 @@ RUN git config --global url."https://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:x-
 COPY . .
 RUN go mod tidy
 RUN go mod download
-RUN GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o sbec ./application/cmd/main.go
+RUN GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o edi-adam ./application/cmd/main.go
 
 # 몽고 Atlas x509 에러 핸들링을 위한 패키지 설치 (스크래치에 포함시키기 위함)
 # @see: https://gist.github.com/michaelboke/564bf96f7331f35f1716b59984befc50
@@ -38,9 +38,9 @@ ARG PHASE
 
 ENV APP_PHASE prod
 
-COPY --from=builder /build/sbec /
+COPY --from=builder /build/edi-adam /
 COPY --from=builder /usr/share/zoneinfo /usr/share/zoneinfo
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 # 실행 엔트리
-ENTRYPOINT ["/sbec"]
+ENTRYPOINT ["/edi-adam"]

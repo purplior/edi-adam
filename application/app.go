@@ -14,21 +14,24 @@ import (
 
 	"github.com/google/wire"
 	"github.com/labstack/echo/v4"
-	"github.com/purplior/sbec/application/admin"
-	"github.com/purplior/sbec/application/config"
-	"github.com/purplior/sbec/application/middleware"
-	"github.com/purplior/sbec/application/router"
-	"github.com/purplior/sbec/domain"
-	"github.com/purplior/sbec/infra"
-	"github.com/purplior/sbec/infra/database"
+	"github.com/purplior/edi-adam/application/admin"
+	adminrouter "github.com/purplior/edi-adam/application/admin/router"
+	"github.com/purplior/edi-adam/application/api"
+	apirouter "github.com/purplior/edi-adam/application/api/router"
+	"github.com/purplior/edi-adam/application/config"
+	"github.com/purplior/edi-adam/application/middleware"
+	"github.com/purplior/edi-adam/domain"
+	"github.com/purplior/edi-adam/infra"
+	"github.com/purplior/edi-adam/infra/database"
 )
 
 func StartApplication(
-	databaseManager database.DatabaseManager,
-	router router.Router,
+	apiRouter apirouter.Router,
+	adminRouter adminrouter.Router,
+	dbManager database.DatabaseManager,
 ) error {
 	// 데이터베이스 연결
-	if err := databaseManager.Init(); err != nil {
+	if err := dbManager.Init(); err != nil {
 		log.Println("[#] 데이터베이스를 초기화 하는데 실패 했어요")
 		return err
 	}
@@ -36,21 +39,29 @@ func StartApplication(
 	// 서버 생성
 	app := echo.New()
 	app.Use(middleware.New()...)
-	router.Attach(app)
+	app.GET("/healthx", func(c echo.Context) error {
+		return c.String(200, "Hi, i'm edi-adam.")
+	})
+
+	adminGroup := app.Group("/__admin__")
+	adminRouter.Attach(adminGroup)
+
+	apiGroup := app.Group("/api/:version")
+	apiRouter.Attach(apiGroup)
 
 	// shutdown 채널 생성
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		if err := app.Start(fmt.Sprintf(":%d", config.AppPort())); err != nil {
+		if err := app.Start(fmt.Sprintf(":%d", config.Port())); err != nil {
 			log.Println("[#] 서버를 시작 하는데 실패 했어요")
 			panic(err)
 		}
 	}()
 
 	go func() {
-		databaseManager.Monitor()
+		dbManager.Monitor()
 	}()
 
 	sig := <-sigChan
@@ -64,7 +75,7 @@ func StartApplication(
 		return err
 	}
 
-	if err := databaseManager.Dispose(); err != nil {
+	if err := dbManager.Dispose(); err != nil {
 		log.Println("[#] 데이터베이스를 종료 하는데 실패 했어요")
 		return err
 	}
@@ -76,10 +87,10 @@ func Start() error {
 	panic(
 		wire.Build(
 			StartApplication,
-			admin.New,
-			router.New,
-			domain.New,
 			infra.New,
+			admin.New,
+			api.New,
+			domain.New,
 		),
 	)
 }

@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/joho/godotenv"
-	"github.com/purplior/sbec/domain/shared/constant"
+	"github.com/purplior/edi-adam/domain/shared/constant"
 )
 
 func Init() error {
@@ -38,6 +38,10 @@ func Init() error {
 	return err
 }
 
+func DebugMode() bool {
+	return os.Getenv("APP_DEBUG_MODE") == "1"
+}
+
 func Phase() constant.Phase {
 	phase := os.Getenv("APP_PHASE")
 	if len(phase) == 0 {
@@ -47,44 +51,64 @@ func Phase() constant.Phase {
 	return convertPhaseStringToEnum(phase)
 }
 
+func Port() int {
+	portStr := os.Getenv("APP_PORT")
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		return 8080
+	}
+
+	return port
+}
+
+func SymmetricKey() string {
+	return os.Getenv("APP_SYMMETRIC_KEY")
+}
+
 func JwtSecretKey() string {
-	return os.Getenv("JWT_SECRET_KEY")
+	return os.Getenv("APP_JWT_SECRET_KEY")
 }
 
-func SqlDbDSN() string {
-	return os.Getenv("SQL_DB_DSN")
+func PostgreSQLDSN() string {
+	host := os.Getenv("DB_POSTGRE_HOST")
+	user := os.Getenv("DB_POSTGRE_USER")
+	password := os.Getenv("DB_POSTGRE_PASSWORD")
+	dbName := os.Getenv("DB_POSTGRE_DBNAME")
+	dsn := "host=" + host + " user= " + user + " password=" + password + " dbname=" + dbName + " port=5432 sslmode=require TimeZone=Asia/Seoul"
+
+	return dsn
 }
 
-func MongoDbURI() string {
-	return os.Getenv("MONGO_DB_URI")
+func MongoURI() string {
+	return os.Getenv("DB_MONGO_URI")
 }
 
-func MongoDbName() string {
-	return os.Getenv("MONGO_DB_NAME")
+func MongoDatabaseName() string {
+	return os.Getenv("DB_MONGO_DATABASE_NAME")
 }
 
-func OpenAiServiceAccountApiKey() string {
+func OpenAIServiceAccountApiKey() string {
 	return os.Getenv("OPENAI_SA_API_KEY")
 }
 
-func OpenAiOrganizationID() string {
+func OpenAIOrganizationID() string {
 	return os.Getenv("OPENAI_ORGANIZATION_ID")
 }
 
-func OpenAiProjectID() string {
+func OpenAIProjectID() string {
 	return os.Getenv("OPENAI_PROJECT_ID")
 }
 
-func CsEmail() string {
-	return os.Getenv("CS_EMAIL")
+func CustomerVoiceEmail() string {
+	return os.Getenv("CLIENT_CS_EMAIL")
 }
 
-func CsEmailPassword() string {
-	return os.Getenv("CS_EMAIL_PASSWORD")
+func CustomerVoiceEmailPassword() string {
+	return os.Getenv("CLIENT_CS_EMAIL_PASSWORD")
 }
 
 func SlackBotToken() string {
-	return os.Getenv("SLACK_BOT_TOKEN")
+	return os.Getenv("CLIENT_SLACK_BOT_TOKEN")
 }
 
 func NCloudSMSServiceID() string {
@@ -103,22 +127,16 @@ func NCloudSecretKey() string {
 	return os.Getenv("NCLOUD_SECRET_KEY")
 }
 
+func AWSBaseRegion() string {
+	return os.Getenv("AWS_BASE_REGION")
+}
+
+func AWSDynamoDBEndpoint() string {
+	return os.Getenv("AWS_DYNAMODB_ENDPOINT")
+}
+
 func IsEnvLoaded() bool {
 	return isEnvLoaded
-}
-
-func AppPort() int {
-	portStr := os.Getenv("PORT")
-	port, err := strconv.Atoi(portStr)
-	if err != nil {
-		return 8080
-	}
-
-	return port
-}
-
-func DebugMode() bool {
-	return os.Getenv("DEBUG_MODE") == "true"
 }
 
 func convertPhaseStringToEnum(phaseString string) constant.Phase {

@@ -3,7 +3,7 @@ package mymail
 import (
 	"log"
 
-	"github.com/purplior/sbec/domain/shared/logger"
+	"github.com/purplior/edi-adam/domain/shared/logger"
 	"gopkg.in/gomail.v2"
 )
 

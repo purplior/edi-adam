@@ -1,60 +1,53 @@
 package assister
 
 import (
-	"fmt"
-	"strings"
-
-	"github.com/purplior/sbec/domain/ledger"
-	"github.com/purplior/sbec/domain/shared/exception"
-	"github.com/purplior/sbec/domain/shared/inner"
-	"github.com/purplior/sbec/domain/wallet"
-	"github.com/purplior/sbec/infra/port/openai"
-	"github.com/purplior/sbec/lib/dt"
+	"github.com/purplior/edi-adam/domain/shared/exception"
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/model"
+	"github.com/purplior/edi-adam/domain/wallet"
+	"github.com/purplior/edi-adam/domain/walletlog"
+	"github.com/purplior/edi-adam/infra/port/openai"
 )
 
 type (
 	AssisterService interface {
-		GetOne_ByID(
-			ctx inner.Context,
-			id string,
+		Get(
+			session inner.Session,
+			queryOption QueryOption,
 		) (
-			Assister,
+			model.Assister,
 			error,
 		)
 
-		RegisterOne(
-			ctx inner.Context,
-			request AssisterRegisterRequest,
+		Register(
+			session inner.Session,
+			dto RegisterDTO,
 		) (
-			Assister,
+			model.Assister,
 			error,
 		)
 
-		UpdateOne(
-			ctx inner.Context,
-			assister Assister,
+		Update(
+			session inner.Session,
+			dto UpdateDTO,
 		) error
 
-		RemoveOne_ByID(
-			ctx inner.Context,
-			id string,
+		Remove(
+			session inner.Session,
+			queryOption QueryOption,
 		) error
 
 		Request(
-			ctx inner.Context,
-			userId string,
-			id string,
-			inputs []AssisterInput,
+			session inner.Session,
+			dto RequestDTO,
 		) (
 			string,
 			error,
 		)
 
 		RequestAsStream(
-			ctx inner.Context,
-			userId string,
-			id string,
-			inputs []AssisterInput,
+			session inner.Session,
+			dto RequestDTO,
 			onInit func() error,
 			onReceiveMessage func(msg string) error,
 		) error
@@ -63,281 +56,186 @@ type (
 
 type (
 	assisterService struct {
-		openaiClient       *openai.Client
+		openAI             *assisterOpenAI
 		walletService      wallet.WalletService
 		assisterRepository AssisterRepository
-		cm                 inner.ContextManager
 	}
 )
 
-func (s *assisterService) GetOne_ByID(
-	ctx inner.Context,
-	id string,
+func (s *assisterService) Get(
+	session inner.Session,
+	queryOption QueryOption,
 ) (
-	Assister,
+	model.Assister,
 	error,
 ) {
-	return s.assisterRepository.FindOne_ByID(
-		ctx,
-		id,
+	return s.assisterRepository.Read(
+		session,
+		queryOption,
 	)
 }
 
-func (s *assisterService) RegisterOne(
-	ctx inner.Context,
-	request AssisterRegisterRequest,
+func (s *assisterService) Register(
+	session inner.Session,
+	dto RegisterDTO,
 ) (
-	Assister,
+	model.Assister,
 	error,
 ) {
-	return s.assisterRepository.InsertOne(
-		ctx,
-		request.ToModelForInsert(),
+	return s.assisterRepository.Create(
+		session,
+		model.Assister{
+			ID:            dto.ID,
+			Origin:        dto.Origin,
+			Model:         dto.Model,
+			Fields:        dto.Fields,
+			QueryMessages: dto.QueryMessages,
+			Cost:          3,
+			Tests:         dto.Tests,
+			AssistantID:   dto.AssistantID,
+		},
 	)
 }
 
-func (s *assisterService) UpdateOne(
-	ctx inner.Context,
-	assister Assister,
+func (s *assisterService) Update(
+	session inner.Session,
+	dto UpdateDTO,
 ) error {
-	return s.assisterRepository.UpdateOne(ctx, assister)
+	return s.assisterRepository.Updates(
+		session,
+		QueryOption{
+			ID: dto.ID,
+		},
+		model.Assister{
+			ID:            dto.ID,
+			Origin:        dto.Origin,
+			Model:         dto.Model,
+			Fields:        dto.Fields,
+			QueryMessages: dto.QueryMessages,
+			Tests:         dto.Tests,
+		},
+	)
 }
 
-func (s *assisterService) RemoveOne_ByID(
-	ctx inner.Context,
-	id string,
+func (s *assisterService) Remove(
+	session inner.Session,
+	queryOption QueryOption,
 ) error {
-	return s.assisterRepository.DeleteOne_ByID(
-		ctx,
-		id,
+	return s.assisterRepository.Delete(
+		session,
+		queryOption,
 	)
 }
 
 func (s *assisterService) Request(
-	ctx inner.Context,
-	userId string,
-	id string,
-	inputs []AssisterInput,
+	session inner.Session,
+	dto RequestDTO,
 ) (
-	string,
-	error,
+	result string,
+	err error,
 ) {
-	assister, err := s.assisterRepository.FindOne_ByID(ctx, id)
-	if err != nil {
+	var m model.Assister
+	if m, err = s.assisterRepository.Read(
+		session,
+		QueryOption{
+			ID: dto.ID,
+		},
+	); err != nil {
 		return "", err
 	}
-
-	isFree := assister.Cost == 0
-	if !isFree && len(userId) == 0 {
+	// 로그인 하지 않은 사용자는 Cost
+	if dto.UserID == 0 && m.Cost > 0 {
 		return "", exception.ErrBadRequest
 	}
-
-	messageData, err := s.createMessageData(assister, inputs)
-	if err != nil {
-		return "", err
-	}
-	messages, err := s.createMessagesOfGPT(assister, messageData)
-	if err != nil {
-		return "", err
-	}
-
-	if !isFree {
-		if err := s.cm.BeginTX(ctx, inner.TX_sqldb); err != nil {
-			return "", err
-		}
-
-		if err := s.walletService.Expend(
-			ctx,
-			userId,
-			int(assister.Cost),
-			ledger.LedgerAction_ConsumeByAssister,
-			assister.ID,
+	if m.Cost > 0 {
+		if err = s.walletService.Expend(
+			session,
+			wallet.ExpendDTO{
+				OwnerID: dto.UserID,
+				Delta:   m.Cost,
+				LogAddDTO: walletlog.AddDTO{
+					Type:    model.WalletLogType_ExpendOnUsingAssister,
+					Delta:   int(m.Cost),
+					Comment: "샘비서 ID: " + m.ID,
+				},
+			},
 		); err != nil {
-			s.cm.RollbackTX(ctx, inner.TX_sqldb)
 			return "", err
 		}
 	}
 
-	return s.openaiClient.RequestChatCompletions(
-		ctx.Value(),
-		openai.ChatCompletionRequest{
-			Model:    string(assister.Model),
-			Messages: messages,
-		},
-		func() error {
-			if !isFree {
-				if err := s.cm.CommitTX(ctx, inner.TX_sqldb); err != nil {
-					return err
-				}
-			}
+	switch m.Origin {
+	case model.AssisterOrigin_OpenAI:
+		result, err = s.openAI.RequestChatCompletions(
+			session,
+			m,
+			dto.Inputs,
+		)
+	}
 
-			return nil
-		},
-	)
+	return result, err
 }
 
 func (s *assisterService) RequestAsStream(
-	ctx inner.Context,
-	userId string,
-	id string,
-	inputs []AssisterInput,
+	session inner.Session,
+	dto RequestDTO,
 	onInit func() error,
 	onReceiveMessage func(msg string) error,
-) error {
-	assister, err := s.assisterRepository.FindOne_ByID(ctx, id)
-	if err != nil {
+) (err error) {
+	var m model.Assister
+	if m, err = s.assisterRepository.Read(
+		session,
+		QueryOption{
+			ID: dto.ID,
+		},
+	); err != nil {
 		return err
 	}
 
-	isFree := assister.Cost == 0
-	if !isFree && len(userId) == 0 {
+	if dto.UserID == 0 && m.Cost > 0 {
 		return exception.ErrBadRequest
 	}
-
-	messageData, err := s.createMessageData(assister, inputs)
-	if err != nil {
-		return err
-	}
-	messages, err := s.createMessagesOfGPT(assister, messageData)
-	if err != nil {
-		return err
-	}
-
-	if !isFree {
-		if err := s.cm.BeginTX(ctx, inner.TX_sqldb); err != nil {
-			return err
-		}
-
-		if err := s.walletService.Expend(
-			ctx,
-			userId,
-			int(assister.Cost),
-			ledger.LedgerAction_ConsumeByAssister,
-			assister.ID,
+	if m.Cost > 0 {
+		if err = s.walletService.Expend(
+			session,
+			wallet.ExpendDTO{
+				OwnerID: dto.UserID,
+				Delta:   m.Cost,
+				LogAddDTO: walletlog.AddDTO{
+					Type:    model.WalletLogType_ExpendOnUsingAssister,
+					Delta:   int(m.Cost),
+					Comment: "샘비서 ID: " + m.ID,
+				},
+			},
 		); err != nil {
-			s.cm.RollbackTX(ctx, inner.TX_sqldb)
 			return err
 		}
 	}
 
-	err = s.openaiClient.RequestChatCompletionsStream(
-		ctx.Value(),
-		openai.ChatCompletionRequest{
-			Model:    string(assister.Model),
-			Messages: messages,
-		},
-		func() error {
-			if err := onInit(); err != nil {
-				return err
-			}
-			if !isFree {
-				if err := s.cm.CommitTX(ctx, inner.TX_sqldb); err != nil {
-					return err
-				}
-			}
-
-			return nil
-		},
-		onReceiveMessage,
-	)
-	if err != nil {
-		if !isFree {
-			s.cm.RollbackTX(ctx, inner.TX_sqldb)
-		}
+	switch m.Origin {
+	case model.AssisterOrigin_OpenAI:
+		err = s.openAI.RequestChatCompletionsAsStream(
+			session,
+			m,
+			dto.Inputs,
+			onInit,
+			onReceiveMessage,
+		)
 	}
 
 	return err
-}
-
-func (s *assisterService) createMessageData(
-	_assister Assister,
-	inputs []AssisterInput,
-) (map[string]string, error) {
-	fieldTypeMap := map[string]AssisterFieldType{}
-	for _, field := range _assister.Fields {
-		fieldTypeMap[field.Name] = field.Type
-	}
-
-	data := map[string]string{}
-	for _, input := range inputs {
-		fieldType, ok := fieldTypeMap[input.Name]
-		if !ok {
-			return nil, ErrInvalidAssisterInput
-		}
-
-		values := ""
-
-		switch fieldType {
-		case AssisterFieldType_Keyword:
-			for i, value := range input.Values {
-				if i > 0 {
-					values += ","
-				}
-				values += value.(string)
-			}
-		case AssisterFieldType_Paragraph:
-			for i, value := range input.Values {
-				if i > 0 {
-					values += "\n"
-				}
-				values += "- " + value.(string)
-			}
-		case AssisterFieldType_ParagraphGroup:
-			for i, value := range input.Values {
-				if i > 0 {
-					values += "\n"
-				}
-				values += dt.Str(i+1) + ". "
-
-				childrenInterface := value.([]interface{})
-				for _, childInterface := range childrenInterface {
-					child := childInterface.(map[string]interface{})
-					childName := child["name"].(string)
-					childValue := child["value"].(string)
-
-					values += "\n\t- " + childName + ": " + childValue
-				}
-			}
-		}
-
-		data[input.Name] = values
-	}
-
-	return data, nil
-}
-
-func (s *assisterService) createMessagesOfGPT(
-	_assister Assister,
-	data map[string]string,
-) ([]map[string]string, error) {
-	messages := make([]map[string]string, len(_assister.QueryMessages))
-
-	for i, queryMessage := range _assister.QueryMessages {
-		template := queryMessage.Content
-		for key, val := range data {
-			placeholder := fmt.Sprintf("{{ %s }}", key)
-			template = strings.ReplaceAll(template, placeholder, val)
-		}
-
-		messages[i] = map[string]string{
-			"role":    string(queryMessage.Role),
-			"content": template,
-		}
-	}
-
-	return messages, nil
 }
 
 func NewAssisterService(
 	openaiClient *openai.Client,
 	walletService wallet.WalletService,
 	assisterRepository AssisterRepository,
-	cm inner.ContextManager,
 ) AssisterService {
 	return &assisterService{
-		openaiClient:       openaiClient,
+		openAI: &assisterOpenAI{
+			openaiClient: openaiClient,
+		},
 		walletService:      walletService,
 		assisterRepository: assisterRepository,
-		cm:                 cm,
 	}
 }

@@ -1,33 +1,47 @@
 package assister
 
-import "github.com/purplior/sbec/domain/shared/inner"
+import (
+	"github.com/purplior/edi-adam/domain/shared/dto/pagination"
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/model"
+)
 
 type (
 	AssisterRepository interface {
-		FindOne_ByID(
-			ctx inner.Context,
-			id string,
+		Read(
+			session inner.Session,
+			queryOption QueryOption,
 		) (
-			Assister,
+			model.Assister,
 			error,
 		)
 
-		InsertOne(
-			ctx inner.Context,
-			assister Assister,
+		ReadPaginatedList(
+			session inner.Session,
+			query pagination.PaginationQuery[QueryOption],
 		) (
-			Assister,
+			[]model.Assister,
+			pagination.PaginationMeta,
 			error,
 		)
 
-		UpdateOne(
-			ctx inner.Context,
-			assister Assister,
+		Create(
+			session inner.Session,
+			m model.Assister,
+		) (
+			model.Assister,
+			error,
+		)
+
+		Updates(
+			session inner.Session,
+			queryOption QueryOption,
+			m model.Assister,
 		) error
 
-		DeleteOne_ByID(
-			ctx inner.Context,
-			id string,
+		Delete(
+			session inner.Session,
+			queryOption QueryOption,
 		) error
 	}
 )

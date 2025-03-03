@@ -1,21 +1,24 @@
 package category
 
-import "github.com/purplior/sbec/domain/shared/inner"
+import (
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/model"
+)
 
 type (
 	CategoryService interface {
-		GetOne_ByAlias(
-			ctx inner.Context,
-			alias string,
+		Get(
+			session inner.Session,
+			queryOption QueryOption,
 		) (
-			Category,
+			model.Category,
 			error,
 		)
 
-		GetMainCategoryList(
-			ctx inner.Context,
+		GetMainList(
+			session inner.Session,
 		) (
-			[]Category,
+			[]model.Category,
 			error,
 		)
 	}
@@ -27,29 +30,29 @@ type (
 	}
 )
 
-func (s *categoryService) GetOne_ByAlias(
-	ctx inner.Context,
-	alias string,
+func (s *categoryService) Get(
+	session inner.Session,
+	queryOption QueryOption,
 ) (
-	Category,
+	model.Category,
 	error,
 ) {
-	return s.categoryRepository.FindOne_ByAlias(ctx, alias)
+	return s.categoryRepository.Read(
+		session,
+		queryOption,
+	)
 }
 
-func (s *categoryService) GetMainCategoryList(
-	ctx inner.Context,
+func (s *categoryService) GetMainList(
+	session inner.Session,
 ) (
-	[]Category,
+	[]model.Category,
 	error,
 ) {
-	return s.categoryRepository.FindList_ByIDs(ctx, []string{
-		"1",
-		"2",
-		"4",
-		"6",
-		"7",
-	})
+	return s.categoryRepository.ReadList(
+		session,
+		QueryOption{},
+	)
 }
 
 func NewCategoryService(

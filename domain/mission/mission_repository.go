@@ -1,30 +1,47 @@
 package mission
 
 import (
-	"github.com/purplior/sbec/domain/shared/inner"
-	"github.com/purplior/sbec/domain/shared/pagination"
+	"github.com/purplior/edi-adam/domain/shared/dto/pagination"
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/model"
 )
 
 type (
 	MissionRepository interface {
-		FindOne_ByIDAndUserID(
-			ctx inner.Context,
-			id string,
-			userID string,
+		Read(
+			session inner.Session,
+			queryOption QueryOption,
 		) (
-			Mission,
+			model.Mission,
 			error,
 		)
 
-		FindPaginatedList_OnlyPublic_ByUserID(
-			ctx inner.Context,
-			userID string,
-			page int,
-			pageSize int,
+		ReadPaginatedList(
+			session inner.Session,
+			query pagination.PaginationQuery[QueryOption],
 		) (
-			[]Mission,
+			[]model.Mission,
 			pagination.PaginationMeta,
 			error,
 		)
+
+		Create(
+			session inner.Session,
+			m model.Mission,
+		) (
+			model.Mission,
+			error,
+		)
+
+		Updates(
+			session inner.Session,
+			queryOption QueryOption,
+			m model.Mission,
+		) error
+
+		Delete(
+			session inner.Session,
+			queryOption QueryOption,
+		) error
 	}
 )

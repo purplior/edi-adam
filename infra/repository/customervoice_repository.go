@@ -1,40 +1,28 @@
 package repository
 
 import (
-	domain "github.com/purplior/sbec/domain/customervoice"
-	"github.com/purplior/sbec/domain/shared/inner"
-	"github.com/purplior/sbec/infra/database"
-	"github.com/purplior/sbec/infra/database/sqldb"
-	"github.com/purplior/sbec/infra/entity"
+	domain "github.com/purplior/edi-adam/domain/customervoice"
+	"github.com/purplior/edi-adam/domain/shared/model"
+	"github.com/purplior/edi-adam/infra/database/postgre"
 )
 
 type (
 	customerVoiceRepository struct {
-		client *sqldb.Client
+		postgreRepository[model.CustomerVoice, domain.QueryOption]
 	}
 )
 
-func (r *customerVoiceRepository) InsertOne(
-	ctx inner.Context,
-	customerVoice domain.CustomerVoice,
-) (
-	domain.CustomerVoice,
-	error,
-) {
-	e := entity.MakeCustomerVoice(customerVoice)
-	result := r.client.DBWithContext(ctx).Create(&e)
+func NewCustomerVoiceRepository(
+	client *postgre.Client,
+) domain.CustomerVoiceRepository {
+	var repo postgreRepository[model.CustomerVoice, domain.QueryOption]
 
-	if result.Error != nil {
-		return domain.CustomerVoice{}, database.ToDomainError(result.Error)
+	repo.client = client
+	repo.applyQueryOption = func(db *postgre.DB, opt domain.QueryOption) (*postgre.DB, error) {
+		return db, nil
 	}
 
-	return e.ToModel(), nil
-}
-
-func NewCustomerVoiceRepository(
-	client *sqldb.Client,
-) domain.CustomerVoiceRepository {
 	return &customerVoiceRepository{
-		client: client,
+		postgreRepository: repo,
 	}
 }

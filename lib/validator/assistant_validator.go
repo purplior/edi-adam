@@ -6,8 +6,7 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/purplior/sbec/domain/assistant"
-	"github.com/purplior/sbec/domain/assister"
+	"github.com/purplior/edi-adam/domain/shared/model"
 )
 
 var (
@@ -19,7 +18,7 @@ var (
 	ErrInvalidQueryMessages        = errors.New("잘못된 형식의 질의문이에요")
 )
 
-func checkValidAssistantTitle(
+func CheckValidAssistantTitle(
 	title string,
 ) bool {
 	// 1. 길이 검사 (3 ~ 20 글자)
@@ -46,7 +45,7 @@ func checkValidAssistantTitle(
 	return hasKoreanOrEnglish.MatchString(title)
 }
 
-func checkValidAssistantDescription(
+func CheckValidAssistantDescription(
 	description string,
 ) bool {
 	// 1. 길이 검사 (10~150자)
@@ -74,7 +73,7 @@ func checkValidAssistantDescription(
 	return hasKoreanOrEnglish.MatchString(description)
 }
 
-func checkValidAssistantTag(tag string) bool {
+func CheckValidAssistantTag(tag string) bool {
 	// 1. 길이 검사 (1~10자)
 	length := utf8.RuneCountInString(tag)
 	if length < 1 || length > 10 {
@@ -97,7 +96,7 @@ func checkValidAssistantTag(tag string) bool {
 	return true
 }
 
-func checkValidAssistantTags(
+func CheckValidAssistantTags(
 	tags []string,
 ) bool {
 	tagLen := len(tags)
@@ -106,7 +105,7 @@ func checkValidAssistantTags(
 	}
 
 	for _, tag := range tags {
-		isValid := checkValidAssistantTag(tag)
+		isValid := CheckValidAssistantTag(tag)
 		if !isValid {
 			return false
 		}
@@ -115,14 +114,14 @@ func checkValidAssistantTags(
 	return true
 }
 
-func checkValidAssisterFieldName(input string) bool {
+func CheckValidAssisterFieldName(input string) bool {
 	re := regexp.MustCompile(`^[가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9.,\s]{1,15}$`)
 
 	return re.MatchString(input)
 }
 
-func checkValidAssistantFields(
-	fields []assister.AssisterField,
+func CheckValidAssisterFields(
+	fields []model.AssisterField,
 ) bool {
 	checkingMap := map[string]bool{}
 
@@ -132,7 +131,7 @@ func checkValidAssistantFields(
 		if len(name) == 0 {
 			return false
 		}
-		if !checkValidAssisterFieldName(name) {
+		if !CheckValidAssisterFieldName(name) {
 			return false
 		}
 
@@ -141,11 +140,11 @@ func checkValidAssistantFields(
 			return false
 		}
 
-		if field.Type == assister.AssisterFieldType_ParagraphGroup {
+		if field.Type == model.AssisterFieldType_ParagraphGroup {
 			mapChildren := field.Option["children"].([]interface{})
-			children := make([]assister.AssisterField, len(mapChildren))
+			children := make([]model.AssisterField, len(mapChildren))
 			for i, mapChild := range mapChildren {
-				child, err := assister.MakeAssisterFieldFromMap(mapChild.(map[string]interface{}))
+				child, err := model.MakeAssisterFieldFromMap(mapChild.(map[string]interface{}))
 				if err != nil {
 					return false
 				}
@@ -153,7 +152,7 @@ func checkValidAssistantFields(
 				children[i] = child
 			}
 
-			isChildrenValid := checkValidAssistantFields(children)
+			isChildrenValid := CheckValidAssisterFields(children)
 			if !isChildrenValid {
 				return false
 			}
@@ -165,9 +164,9 @@ func checkValidAssistantFields(
 	return true
 }
 
-func checkValidAssistantQueryMessages(
-	fields []assister.AssisterField,
-	queryMessages []assister.AssisterQueryMessage,
+func CheckValidAssisterQueryMessages(
+	fields []model.AssisterField,
+	queryMessages []model.AssisterQueryMessage,
 ) bool {
 	names := make([]string, len(fields))
 	for i, field := range fields {
@@ -203,54 +202,4 @@ func checkValidAssistantQueryMessages(
 	}
 
 	return true
-}
-
-func CheckValidAssistantRegisterRequest(
-	request assistant.RegisterOneRequest,
-) error {
-	if !checkValidAssistantTitle(request.Title) {
-		return ErrInvalidAssistantTitle
-	}
-	if !checkValidAssistantDescription(request.Description) {
-		return ErrInvalidAssistantDescription
-	}
-	if !checkValidAssistantTags(request.Tags) {
-		return ErrInvalidTags
-	}
-	if !checkValidAssistantFields(request.Fields) {
-		return ErrInvalidFields
-	}
-	if !checkValidAssistantQueryMessages(
-		request.Fields,
-		request.QueryMessages,
-	) {
-		return ErrInvalidQueryMessages
-	}
-
-	return nil
-}
-
-func CheckValidAssistantUpdateRequest(
-	request assistant.UpdateOneRequest,
-) error {
-	if !checkValidAssistantTitle(request.Title) {
-		return ErrInvalidAssistantTitle
-	}
-	if !checkValidAssistantDescription(request.Description) {
-		return ErrInvalidAssistantDescription
-	}
-	if !checkValidAssistantTags(request.Tags) {
-		return ErrInvalidTags
-	}
-	if !checkValidAssistantFields(request.Fields) {
-		return ErrInvalidFields
-	}
-	if !checkValidAssistantQueryMessages(
-		request.Fields,
-		request.QueryMessages,
-	) {
-		return ErrInvalidQueryMessages
-	}
-
-	return nil
 }

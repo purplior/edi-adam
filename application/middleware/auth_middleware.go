@@ -4,11 +4,10 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
-	"github.com/purplior/sbec/application/api"
-	"github.com/purplior/sbec/application/config"
-	"github.com/purplior/sbec/application/response"
-	"github.com/purplior/sbec/domain/auth"
-	"github.com/purplior/sbec/lib/myjwt"
+	"github.com/purplior/edi-adam/application/common"
+	"github.com/purplior/edi-adam/application/config"
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/lib/myjwt"
 )
 
 var (
@@ -17,97 +16,34 @@ var (
 
 func NewAuthMiddleware() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(_ctx echo.Context) error {
+			c := _ctx.(*common.Context)
 			request := c.Request()
-			method := request.Method
-			pathname := request.URL.Path
-
-			action := isWhiteList(method, pathname)
-			if action == Action_Skip {
-				return next(&api.Context{
-					Context: c,
-				})
-			}
 
 			accessToken := request.Header.Get("Authorization")
 			accessToken = strings.TrimSpace(strings.Replace(accessToken, "Bearer ", "", 1))
 
-			var identity *auth.Identity
-			var err error
+			var identity *inner.Identity = nil
+			var err error = nil
 			if len(accessToken) > 0 {
 				identity, err = authorize(accessToken)
-			}
-
-			switch action {
-			case Action_Verify:
-				if err == nil {
-					return next(&api.Context{
-						Context:  c,
-						Identity: identity,
-					})
-				} else {
-					return c.JSON(response.Status_Unauthorized, response.ErrorResponse{
-						Status:  response.Status_Unauthorized,
-						Message: "unauthorized",
-					})
-				}
-			case Action_SkipButParse:
-				if err == nil {
-					return next(&api.Context{
-						Context:  c,
-						Identity: identity,
-					})
+				if err == nil && identity != nil {
+					c.Identity = identity
 				}
 			}
 
-			return next(&api.Context{
-				Context: c,
-			})
+			return next(c)
 		}
 	}
 }
 
-func isWhiteList(
-	method string,
-	pathname string,
-) AuthWhiteListAction {
-	// ["", "api", "v1", "auth"]
-	segments := strings.Split(pathname, "/")
-
-	if len(segments) < 4 {
-		return Action_Skip
-	}
-
-	if item, isItem := authWhiteListMap[segments[3]]; isItem {
-		if item.Method == Method_All || string(item.Method) == method {
-			return item.Action
-		}
-		if len(segments) < 5 {
-			return Action_Verify
-		}
-
-		children := item.Children
-		if len(children) <= 0 {
-			return Action_Verify
-		}
-
-		if child, isChild := children[segments[4]]; isChild {
-			if child.Method == Method_All || string(child.Method) == method {
-				return child.Action
-			}
-		}
-	}
-
-	return Action_Verify
-}
-
-func authorize(accessToken string) (*auth.Identity, error) {
+func authorize(accessToken string) (*inner.Identity, error) {
 	payload, err := myjwt.ParseWithHMAC(accessToken, jwtSecretKey)
 	if err != nil {
 		return nil, err
 	}
 
-	var identity auth.Identity
+	var identity inner.Identity
 	identity.SyncWith(payload)
 
 	return &identity, nil

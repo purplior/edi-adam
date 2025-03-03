@@ -3,6 +3,7 @@
   "editor.defaultFormatter": "golang.go",
   "editor.formatOnSave": true,
   "editor.inlineSuggest.enabled": false,
+  "editor.autoIndent": "full",
   "[go]": {
     "editor.insertSpaces": false,
     "editor.tabSize": 2,

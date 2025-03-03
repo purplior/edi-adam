@@ -1,42 +1,37 @@
 package wallet
 
 import (
-	"github.com/purplior/sbec/domain/ledger"
-	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/model"
+	"github.com/purplior/edi-adam/domain/walletlog"
 )
 
 type (
 	WalletService interface {
-		RegisterOne(
-			ctx inner.Context,
-			wallet Wallet,
+		Get(
+			session inner.Session,
+			queryOption QueryOption,
 		) (
-			Wallet,
+			model.Wallet,
 			error,
 		)
 
-		GetOne_ByUserID(
-			ctx inner.Context,
-			userID string,
+		Add(
+			session inner.Session,
+			dto AddDTO,
 		) (
-			Wallet,
+			model.Wallet,
 			error,
 		)
 
 		Expend(
-			ctx inner.Context,
-			userID string,
-			podoDelta int,
-			ledgerAction ledger.LedgerAction,
-			ledgerReason string,
+			session inner.Session,
+			dto ExpendDTO,
 		) error
 
 		Charge(
-			ctx inner.Context,
-			userID string,
-			podoDelta int,
-			ledgerAction ledger.LedgerAction,
-			ledgerReason string,
+			session inner.Session,
+			dto ChargeDTO,
 		) error
 	}
 )
@@ -44,60 +39,59 @@ type (
 type (
 	walletService struct {
 		walletRepository WalletRepository
-		ledgerService    ledger.LedgerService
+		walletLogService walletlog.WalletLogService
 	}
 )
 
-func (s *walletService) RegisterOne(
-	ctx inner.Context,
-	wallet Wallet,
+func (s *walletService) Get(
+	session inner.Session,
+	queryOption QueryOption,
 ) (
-	Wallet,
-	error,
+	m model.Wallet,
+	err error,
 ) {
-	return s.walletRepository.InsertOne(ctx, wallet)
-}
-
-func (s *walletService) GetOne_ByUserID(
-	ctx inner.Context,
-	userID string,
-) (
-	Wallet,
-	error,
-) {
-	return s.walletRepository.FindOne_ByUserID(
-		ctx,
-		userID,
+	return s.walletRepository.Read(
+		session,
+		queryOption,
 	)
 }
 
+func (s *walletService) Add(
+	session inner.Session,
+	dto AddDTO,
+) (
+	model.Wallet,
+	error,
+) {
+	return s.walletRepository.Create(session, model.Wallet{
+		OwnerID: dto.OwnerID,
+		Coin:    0,
+	})
+}
+
+// dto의 WalletID는 무시됨
 func (s *walletService) Expend(
-	ctx inner.Context,
-	userID string,
-	podoDelta int,
-	ledgerAction ledger.LedgerAction,
-	ledgerReason string,
+	session inner.Session,
+	dto ExpendDTO,
 ) error {
-	// 0은 히스토리에 남기지 않아요
-	if podoDelta == 0 {
+	if dto.Delta == 0 {
 		return nil
 	}
 
-	podoDelta = -1 * podoDelta
-	wallet, err := s.walletRepository.UpdateOne_ByUserIDAndDelta(
-		ctx,
-		userID,
-		podoDelta,
+	m, err := s.walletRepository.UpdatesCoinDelta_ByOwnerID(
+		session,
+		dto.OwnerID,
+		-1*int(dto.Delta),
 	)
 	if err != nil {
 		return err
 	}
 
-	if _, err = s.ledgerService.RegisterOne(ctx, ledger.Ledger{
-		WalletID:   wallet.ID,
-		PodoAmount: podoDelta,
-		Action:     ledgerAction,
-		Reason:     ledgerReason,
+	if _, err = s.walletLogService.Add(session, walletlog.AddDTO{
+		Type:     dto.LogAddDTO.Type,
+		Delta:    int(dto.Delta),
+		Comment:  dto.LogAddDTO.Comment,
+		WalletID: m.ID,
 	}); err != nil {
 		return err
 	}
@@ -105,32 +99,29 @@ func (s *walletService) Expend(
 	return nil
 }
 
+// dto의 WalletID는 무시됨
 func (s *walletService) Charge(
-	ctx inner.Context,
-	userID string,
-	podoDelta int,
-	ledgerAction ledger.LedgerAction,
-	ledgerReason string,
+	session inner.Session,
+	dto ChargeDTO,
 ) error {
-	// 0은 히스토리에 남기지 않아요
-	if podoDelta == 0 {
+	if dto.Delta == 0 {
 		return nil
 	}
 
-	wallet, err := s.walletRepository.UpdateOne_ByUserIDAndDelta(
-		ctx,
-		userID,
-		podoDelta,
+	m, err := s.walletRepository.UpdatesCoinDelta_ByOwnerID(
+		session,
+		dto.OwnerID,
+		int(dto.Delta),
 	)
 	if err != nil {
 		return err
 	}
 
-	if _, err = s.ledgerService.RegisterOne(ctx, ledger.Ledger{
-		WalletID:   wallet.ID,
-		PodoAmount: podoDelta,
-		Action:     ledgerAction,
-		Reason:     ledgerReason,
+	if _, err = s.walletLogService.Add(session, walletlog.AddDTO{
+		Type:     dto.LogAddDTO.Type,
+		Delta:    int(dto.Delta),
+		Comment:  dto.LogAddDTO.Comment,
+		WalletID: m.ID,
 	}); err != nil {
 		return err
 	}
@@ -140,10 +131,10 @@ func (s *walletService) Charge(
 
 func NewWalletService(
 	walletRepository WalletRepository,
-	ledgerService ledger.LedgerService,
+	walletLogService walletlog.WalletLogService,
 ) WalletService {
 	return &walletService{
 		walletRepository: walletRepository,
-		ledgerService:    ledgerService,
+		walletLogService: walletLogService,
 	}
 }

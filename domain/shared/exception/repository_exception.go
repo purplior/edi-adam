@@ -11,4 +11,5 @@ var (
 	ErrInvalidTransaction = errors.New("invalid transaction")
 	ErrInTransaction      = errors.New("in transaction")
 	ErrNoTransaction      = errors.New("no transaction")
+	ErrNoAffected         = errors.New("no affected")
 )

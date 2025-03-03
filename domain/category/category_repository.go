@@ -1,23 +1,55 @@
 package category
 
-import "github.com/purplior/sbec/domain/shared/inner"
+import (
+	"github.com/purplior/edi-adam/domain/shared/dto/pagination"
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/model"
+)
 
 type (
 	CategoryRepository interface {
-		FindOne_ByAlias(
-			ctx inner.Context,
-			alias string,
+		Read(
+			session inner.Session,
+			queryOption QueryOption,
 		) (
-			Category,
+			model.Category,
 			error,
 		)
 
-		FindList_ByIDs(
-			ctx inner.Context,
-			ids []string,
+		ReadList(
+			session inner.Session,
+			queryOption QueryOption,
 		) (
-			[]Category,
+			[]model.Category,
 			error,
 		)
+
+		ReadPaginatedList(
+			session inner.Session,
+			query pagination.PaginationQuery[QueryOption],
+		) (
+			[]model.Category,
+			pagination.PaginationMeta,
+			error,
+		)
+
+		Create(
+			session inner.Session,
+			m model.Category,
+		) (
+			model.Category,
+			error,
+		)
+
+		Updates(
+			session inner.Session,
+			queryOption QueryOption,
+			m model.Category,
+		) error
+
+		Delete(
+			session inner.Session,
+			queryOption QueryOption,
+		) error
 	}
 )

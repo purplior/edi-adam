@@ -1,58 +1,47 @@
 package user
 
 import (
-	"time"
-
-	"github.com/purplior/sbec/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/dto/pagination"
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/model"
 )
 
 type (
 	UserRepository interface {
-		FindOne_ByID(
-			ctx inner.Context,
-			id string,
+		Read(
+			session inner.Session,
+			queryOption QueryOption,
 		) (
-			User,
+			model.User,
 			error,
 		)
 
-		FindOne_ByAccount(
-			ctx inner.Context,
-			joinMethod string,
-			accountID string,
+		ReadPaginatedList(
+			session inner.Session,
+			query pagination.PaginationQuery[QueryOption],
 		) (
-			User,
+			[]model.User,
+			pagination.PaginationMeta,
 			error,
 		)
 
-		FindOne_ByNickname(
-			ctx inner.Context,
-			nickname string,
+		Create(
+			session inner.Session,
+			m model.User,
 		) (
-			User,
+			model.User,
 			error,
 		)
 
-		InsertOne(
-			ctx inner.Context,
-			user User,
-		) (
-			User,
-			error,
-		)
-
-		UpdateOne_InactivatedFields(
-			ctx inner.Context,
-			userID string,
-			isInactivated bool,
-			inactivatedAt time.Time,
+		Updates(
+			session inner.Session,
+			queryOption QueryOption,
+			m model.User,
 		) error
 
-		UpdateOne_Password_ByAccount(
-			ctx inner.Context,
-			joinMethod string,
-			accountID string,
-			newPassword string,
+		Delete(
+			session inner.Session,
+			queryOption QueryOption,
 		) error
 	}
 )

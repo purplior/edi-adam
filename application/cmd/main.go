@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/purplior/sbec/application"
-	"github.com/purplior/sbec/application/config"
+	"github.com/purplior/edi-adam/application"
+	"github.com/purplior/edi-adam/application/config"
 )
 
 func main() {

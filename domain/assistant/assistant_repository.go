@@ -1,67 +1,47 @@
 package assistant
 
 import (
-	"github.com/purplior/sbec/domain/shared/inner"
-	"github.com/purplior/sbec/domain/shared/pagination"
+	"github.com/purplior/edi-adam/domain/shared/dto/pagination"
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/model"
 )
 
 type (
 	AssistantRepository interface {
-		FindOne_ByID(
-			ctx inner.Context,
-			id string,
-			joinOption AssistantJoinOption,
+		Read(
+			session inner.Session,
+			queryOption QueryOption,
 		) (
-			Assistant,
+			model.Assistant,
 			error,
 		)
 
-		FindOne_ByViewID(
-			ctx inner.Context,
-			viewID string,
-			joinOption AssistantJoinOption,
+		ReadPaginatedList(
+			session inner.Session,
+			query pagination.PaginationQuery[QueryOption],
 		) (
-			Assistant,
-			error,
-		)
-
-		FindPaginatedList_ByCategoryID(
-			ctx inner.Context,
-			categoryID string,
-			isPublicOnly bool,
-			pageRequest pagination.PaginationRequest,
-		) (
-			[]Assistant,
+			[]model.Assistant,
 			pagination.PaginationMeta,
 			error,
 		)
 
-		FindPaginatedList_ByAuthorID(
-			ctx inner.Context,
-			authorID string,
-			pageRequest pagination.PaginationRequest,
+		Create(
+			session inner.Session,
+			m model.Assistant,
 		) (
-			[]Assistant,
-			pagination.PaginationMeta,
+			model.Assistant,
 			error,
 		)
 
-		InsertOne(
-			ctx inner.Context,
-			assistant Assistant,
-		) (
-			Assistant,
-			error,
-		)
-
-		UpdateOne(
-			ctx inner.Context,
-			assistant Assistant,
+		Updates(
+			session inner.Session,
+			queryOption QueryOption,
+			m model.Assistant,
 		) error
 
-		DeleteOne_ByID(
-			ctx inner.Context,
-			id string,
+		Delete(
+			session inner.Session,
+			queryOption QueryOption,
 		) error
 	}
 )

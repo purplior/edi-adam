@@ -1,20 +1,22 @@
 package auth
 
 import (
-	"strings"
 	"time"
 
-	"github.com/purplior/sbec/application/config"
-	"github.com/purplior/sbec/domain/challenge"
-	"github.com/purplior/sbec/domain/shared/constant"
-	"github.com/purplior/sbec/domain/shared/exception"
-	"github.com/purplior/sbec/domain/shared/inner"
-	"github.com/purplior/sbec/domain/user"
-	"github.com/purplior/sbec/domain/verification"
-	"github.com/purplior/sbec/domain/wallet"
-	"github.com/purplior/sbec/lib/myjwt"
-	"github.com/purplior/sbec/lib/strgen"
-	"github.com/purplior/sbec/lib/validator"
+	"github.com/purplior/edi-adam/application/config"
+	"github.com/purplior/edi-adam/domain/missionlog"
+	"github.com/purplior/edi-adam/domain/shared/constant"
+	"github.com/purplior/edi-adam/domain/shared/exception"
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/model"
+	"github.com/purplior/edi-adam/domain/user"
+	"github.com/purplior/edi-adam/domain/verification"
+	"github.com/purplior/edi-adam/domain/wallet"
+	"github.com/purplior/edi-adam/lib/dt"
+	"github.com/purplior/edi-adam/lib/myjwt"
+	"github.com/purplior/edi-adam/lib/security"
+	"github.com/purplior/edi-adam/lib/strgen"
+	"github.com/purplior/edi-adam/lib/validator"
 )
 
 var (
@@ -23,210 +25,160 @@ var (
 
 type (
 	AuthService interface {
-		SignIn_ByPhoneNumberVerification(
-			ctx inner.Context,
-			request SignInRequest,
+		SignIn(
+			session inner.Session,
+			dto SignInDTO,
 		) (
 			identityToken IdentityToken,
-			identity Identity,
+			identity inner.Identity,
 			err error,
 		)
 
-		SignUp_ByPhoneNumberVerification(
-			ctx inner.Context,
-			request SignUpRequest,
+		SignUp(
+			session inner.Session,
+			dto SignUpDTO,
 		) (
-			err error,
-		)
-
-		RefreshIdentityToken(
-			ctx inner.Context,
 			identityToken IdentityToken,
-		) (
-			refreshedIdentityToken IdentityToken,
+			identity inner.Identity,
 			err error,
 		)
 
 		GetTempAccessToken(
-			ctx inner.Context,
-			identity Identity,
+			session inner.Session,
+			identity inner.Identity,
 		) (
 			accessToken string,
-			err error,
-		)
-
-		ResetPassword_ByPhoneNumberVerification(
-			ctx inner.Context,
-			request ResetPasswordRequest,
-		) (
 			err error,
 		)
 	}
 
 	authService struct {
-		emailVerificationService verification.EmailVerificationService
-		phoneVerificationService verification.PhoneVerificationService
-		userService              user.UserService
-		walletService            wallet.WalletService
-		challengeService         challenge.ChallengeService
-		cm                       inner.ContextManager
+		verificationService verification.VerificationService
+		userService         user.UserService
+		walletService       wallet.WalletService
+		missionLogService   missionlog.MissionLogService
 	}
 )
 
-func (s *authService) SignIn_ByPhoneNumberVerification(
-	ctx inner.Context,
-	request SignInRequest,
+func (s *authService) SignIn(
+	session inner.Session,
+	dto SignInDTO,
 ) (
-	IdentityToken,
-	Identity,
-	error,
+	identityToken IdentityToken,
+	identity inner.Identity,
+	err error,
 ) {
-	phoneNumber := strings.ReplaceAll(request.AccountID, "-", "")
-	existedUser, err := s.userService.GetOne_ByAccount(
-		ctx,
-		user.JoinMethod_PhoneNumber,
-		phoneNumber,
-	)
+	phoneNumber, _, err := s.consumeVerification(session, dto.VerificationID)
 	if err != nil {
-		return IdentityToken{}, Identity{}, exception.ErrUnauthorized
-	}
-	if existedUser.IsInactivated {
-		return IdentityToken{}, Identity{}, exception.ErrUnauthorized
-	}
-	if err := existedUser.ComparePassword(request.Password); err != nil {
-		return IdentityToken{}, Identity{}, exception.ErrUnauthorized
+		return identityToken, identity, err
 	}
 
-	identityToken, identity, err := s.makeToken(existedUser)
+	existedUser, err := s.userService.Get(
+		session,
+		user.QueryOption{
+			PhoneNumber: phoneNumber,
+		},
+	)
 	if err != nil {
-		return IdentityToken{}, Identity{}, exception.ErrUnauthorized
+		return identityToken, identity, exception.ErrUnauthorized
+	}
+	if existedUser.IsInactivated {
+		return identityToken, identity, exception.ErrUnauthorized
+	}
+
+	if identityToken, identity, err = s.makeToken(existedUser); err != nil {
+		return identityToken, identity, exception.ErrUnauthorized
 	}
 
 	return identityToken, identity, nil
 }
 
-func (s *authService) SignUp_ByPhoneNumberVerification(
-	ctx inner.Context,
-	request SignUpRequest,
+func (s *authService) SignUp(
+	session inner.Session,
+	dto SignUpDTO,
 ) (
+	identityToken IdentityToken,
+	identity inner.Identity,
 	err error,
 ) {
-	if err := validator.CheckValidNickname(request.Nickname); err != nil {
-		return err
+	if err = validator.CheckValidNickname(dto.Nickname); err != nil {
+		return identityToken, identity, err
 	}
-	if err := validator.CheckValidPassword(request.Password); err != nil {
-		return err
-	}
-
-	if err := s.cm.BeginTX(ctx, inner.TX_sqldb); err != nil {
-		return err
+	if err = session.BeginTransaction(); err != nil {
+		return identityToken, identity, err
 	}
 
-	defer func() {
-		if r := recover(); r != nil {
-			s.cm.RollbackTX(ctx, inner.TX_sqldb)
-			panic(r)
-		}
-	}()
-
-	// 1. 휴대전화 검증
-	verification, err := s.phoneVerificationService.Consume(
-		ctx,
-		request.VerificationID,
-	)
-	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_sqldb)
-		return err
+	var phoneNumber string
+	if phoneNumber, _, err = s.consumeVerification(session, dto.VerificationID); err != nil {
+		session.RollbackTransaction()
+		return identityToken, identity, err
 	}
 
 	// 2. 계정 생성
-	me, err := s.userService.RegisterOne(
-		ctx,
-		user.User{
-			JoinMethod:       user.JoinMethod_PhoneNumber,
-			AccountID:        verification.PhoneNumber,
-			AccountPassword:  request.Password,
-			AvatarTheme:      1,
-			AvatarText:       strgen.ExtractInitialChar(request.Nickname),
-			Nickname:         request.Nickname,
-			Role:             user.Role_User,
-			PhoneNumber:      verification.PhoneNumber,
-			IsMarketingAgree: request.IsMarketingAgree,
+	me, err := s.userService.RegisterMember(
+		session,
+		user.RegisterMemberDTO{
+			PhoneNumber: phoneNumber,
+			Nickname:    dto.Nickname,
+			Avatar: model.UserAvatar{
+				Text:  strgen.ExtractInitialChar(dto.Nickname),
+				Theme: "default",
+			},
+			IsMarketingAgree: dto.IsMarketingAgree,
 		},
 	)
 	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_sqldb)
-		return err
+		session.RollbackTransaction()
+		return identityToken, identity, err
 	}
 
 	// 3. 지갑 생성
-	_, err = s.walletService.RegisterOne(
-		ctx,
-		wallet.Wallet{
+	_, err = s.walletService.Add(
+		session,
+		wallet.AddDTO{
 			OwnerID: me.ID,
-			Podo:    0,
 		},
 	)
 	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_sqldb)
-		return err
+		session.RollbackTransaction()
+		return identityToken, identity, err
 	}
 
 	// 4. 회원가입 미션 달성
-	if err := s.challengeService.AchieveOne_ByUserAndMission(
-		ctx,
-		me.ID,
-		constant.MissionID_SignUp,
+	if err := s.missionLogService.Achieve(
+		session,
+		missionlog.AchieveDTO{
+			UserID:    me.ID,
+			MissionID: constant.MissionID_SignUp,
+		},
 	); err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_sqldb)
-		return err
+		session.RollbackTransaction()
+		return identityToken, identity, err
 	}
-	if err := s.challengeService.AchieveOne_ByUserAndMission(
-		ctx,
-		me.ID,
-		constant.MissionID_SignUpOpenEvent,
+	if err := s.missionLogService.Achieve(
+		session,
+		missionlog.AchieveDTO{
+			UserID:    me.ID,
+			MissionID: constant.MissionID_SignUpOpenEvent,
+		},
 	); err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_sqldb)
-		return err
+		session.RollbackTransaction()
+		return identityToken, identity, err
 	}
 
-	if err := s.cm.CommitTX(ctx, inner.TX_sqldb); err != nil {
-		return err
+	if err := session.CommitTransaction(); err != nil {
+		return identityToken, identity, err
+	}
+	if identityToken, identity, err = s.makeToken(me); err != nil {
+		return identityToken, identity, exception.ErrUnauthorized
 	}
 
-	return nil
-}
-
-func (s *authService) RefreshIdentityToken(
-	ctx inner.Context,
-	identityToken IdentityToken,
-) (
-	IdentityToken,
-	error,
-) {
-	rtPayload, err := s.getRefreshTokenPayload(identityToken.RefreshToken)
-	if err != nil {
-		return IdentityToken{}, exception.ErrUnauthorized
-	}
-
-	identity, newAt, err := s.getIdentityAndNewAccessTokenWithoutVerify(identityToken.AccessToken)
-	if err != nil {
-		return IdentityToken{}, exception.ErrUnauthorized
-	}
-
-	if rtPayload.ID != identity.ID || rtPayload.Version != identity.Version {
-		return IdentityToken{}, exception.ErrUnauthorized
-	}
-
-	return IdentityToken{
-		AccessToken:  newAt,
-		RefreshToken: identityToken.RefreshToken,
-	}, nil
+	return identityToken, identity, err
 }
 
 func (s *authService) GetTempAccessToken(
-	ctx inner.Context,
-	identity Identity,
+	session inner.Session,
+	identity inner.Identity,
 ) (
 	string,
 	error,
@@ -241,56 +193,37 @@ func (s *authService) GetTempAccessToken(
 	return s.makeAccessToken(atPayload, atExpires)
 }
 
-func (s *authService) ResetPassword_ByPhoneNumberVerification(
-	ctx inner.Context,
-	request ResetPasswordRequest,
-) error {
-	if err := validator.CheckValidPassword(request.Password); err != nil {
-		return err
-	}
-
-	if err := s.cm.BeginTX(ctx, inner.TX_sqldb); err != nil {
-		return err
-	}
-
-	defer func() {
-		if r := recover(); r != nil {
-			s.cm.RollbackTX(ctx, inner.TX_sqldb)
-			panic(r)
-		}
-	}()
-
-	verification, err := s.phoneVerificationService.Consume(
-		ctx,
-		request.VerificationID,
+func (s *authService) consumeVerification(
+	session inner.Session,
+	verificationID uint,
+) (
+	phoneNumber string,
+	m model.Verification,
+	err error,
+) {
+	m, err = s.verificationService.Consume(
+		session,
+		verificationID,
 	)
 	if err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_sqldb)
-		return err
+		return phoneNumber, m, err
 	}
 
-	_user := user.User{
-		AccountPassword: request.Password,
+	var data map[string]interface{}
+	data, err = security.DecryptMapDataWithAESGCM(m.Encrypted, config.SymmetricKey())
+	if err != nil {
+		return phoneNumber, m, err
 	}
-	if err := _user.HashPassword(); err != nil {
-		return err
-	}
-
-	if err := s.userService.UpdateOne_Password_ByAccount(
-		ctx,
-		user.JoinMethod_PhoneNumber,
-		verification.PhoneNumber,
-		_user.AccountPassword,
-	); err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_sqldb)
-		return err
+	if model.VerificationMethod(dt.Str(data["method"])) != model.VerificationMethod_Phone {
+		return phoneNumber, m, exception.ErrBadRequest
 	}
 
-	if err := s.cm.CommitTX(ctx, inner.TX_sqldb); err != nil {
-		return err
+	phoneNumber = dt.Str(data["target"])
+	if len(phoneNumber) == 0 {
+		return phoneNumber, m, exception.ErrBadRequest
 	}
 
-	return nil
+	return phoneNumber, m, err
 }
 
 func (s *authService) makeAccessToken(
@@ -300,11 +233,6 @@ func (s *authService) makeAccessToken(
 	string,
 	error,
 ) {
-	// 유효 기간: 1년
-	// atExpires := time.Now().Add(time.Hour * 24 * 365).Unix()
-
-	// 임시 10초
-	// atExpires := time.Now().Add(time.Second * 10).Unix()
 	at, err := myjwt.SignWithHS256(
 		payload,
 		atExpires,
@@ -317,130 +245,51 @@ func (s *authService) makeAccessToken(
 	return at, nil
 }
 
-func (s *authService) makeRefreshToken(
-	payload map[string]interface{},
-) (
-	string,
-	error,
-) {
-	// 유효 기간: 6개월
-	rtExpires := time.Now().Add(time.Hour * 24 * 365).Unix()
-
-	// 유효 기간: 1분
-	// rtExpires := time.Now().Add(time.Minute).Unix()
-	rt, err := myjwt.SignWithHS256(
-		payload,
-		rtExpires,
-		jwtSecretKey,
-	)
-	if err != nil {
-		return "", err
-	}
-
-	return rt, nil
-}
-
 func (s *authService) makeToken(
-	user user.User,
+	m model.User,
 ) (
-	IdentityToken,
-	Identity,
-	error,
+	identityToken IdentityToken,
+	identity inner.Identity,
+	err error,
 ) {
 	version := "v1"
-	identity := Identity{
+	identity = inner.Identity{
 		Version:    version,
-		ID:         user.ID,
-		JoinMethod: user.JoinMethod,
-		AccountID:  user.AccountID,
-		Nickname:   user.Nickname,
-		Role:       user.Role,
-	}
-
-	atPayload, err := identity.ToMap()
-	if err != nil {
-		return IdentityToken{}, Identity{}, err
+		ID:         m.ID,
+		AccountID:  m.AccountID,
+		Nickname:   m.Nickname,
+		Membership: "", // TODO: membership 정보 추가
+		Role:       m.Role,
 	}
 
 	atExpires := time.Now().Add(time.Hour * 24 * 365).Unix()
-	at, err := s.makeAccessToken(atPayload, atExpires)
-	if err != nil {
-		return IdentityToken{}, Identity{}, err
+
+	var atPayload map[string]interface{}
+	var at string
+	if atPayload, err = identity.ToMap(); err != nil {
+		return identityToken, identity, err
+	}
+	if at, err = s.makeAccessToken(atPayload, atExpires); err != nil {
+		return identityToken, identity, err
 	}
 
-	refreshTokenPayload := RefreshTokenPayload{
-		Version: version,
-		ID:      user.ID,
-	}
-	rtPayload, err := refreshTokenPayload.ToMap()
-	if err != nil {
-		return IdentityToken{}, Identity{}, err
+	identityToken = IdentityToken{
+		AccessToken: at,
 	}
 
-	rt, err := s.makeRefreshToken(rtPayload)
-	if err != nil {
-		return IdentityToken{}, Identity{}, err
-	}
-
-	return IdentityToken{
-		AccessToken:  at,
-		RefreshToken: rt,
-	}, identity, nil
-}
-
-func (s *authService) getIdentityAndNewAccessTokenWithoutVerify(
-	accessToken string,
-) (
-	Identity,
-	string,
-	error,
-) {
-	atPayload, _ := myjwt.ParseWithHMACWithoutVerify(accessToken)
-
-	var identity Identity
-	identity.SyncWith(atPayload)
-
-	// 유효 기간: 1년
-	atExpires := time.Now().Add(time.Hour * 24 * 365).Unix()
-	newAccessToken, err := s.makeAccessToken(atPayload, atExpires)
-	if err != nil {
-		return Identity{}, "", err
-	}
-
-	return identity, newAccessToken, nil
-}
-
-func (s *authService) getRefreshTokenPayload(
-	refreshToken string,
-) (
-	RefreshTokenPayload,
-	error,
-) {
-	payload, err := myjwt.ParseWithHMAC(refreshToken, jwtSecretKey)
-	if err != nil {
-		return RefreshTokenPayload{}, err
-	}
-
-	var rtPayload RefreshTokenPayload
-	rtPayload.SyncWith(payload)
-
-	return rtPayload, nil
+	return identityToken, identity, nil
 }
 
 func NewAuthService(
-	emailVerificationService verification.EmailVerificationService,
-	phoneVerificationService verification.PhoneVerificationService,
+	verificationService verification.VerificationService,
 	userService user.UserService,
 	walletService wallet.WalletService,
-	challengeService challenge.ChallengeService,
-	cm inner.ContextManager,
+	missionLogService missionlog.MissionLogService,
 ) AuthService {
 	return &authService{
-		emailVerificationService: emailVerificationService,
-		phoneVerificationService: phoneVerificationService,
-		userService:              userService,
-		walletService:            walletService,
-		challengeService:         challengeService,
-		cm:                       cm,
+		verificationService: verificationService,
+		userService:         userService,
+		walletService:       walletService,
+		missionLogService:   missionLogService,
 	}
 }

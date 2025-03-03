@@ -1,221 +1,45 @@
 package repository
 
 import (
-	domain "github.com/purplior/sbec/domain/assistant"
-	"github.com/purplior/sbec/domain/shared/inner"
-	"github.com/purplior/sbec/domain/shared/pagination"
-	"github.com/purplior/sbec/infra/database"
-	"github.com/purplior/sbec/infra/database/sqldb"
-	"github.com/purplior/sbec/infra/entity"
-	"github.com/purplior/sbec/infra/repoutil"
-	"github.com/purplior/sbec/lib/dt"
+	domain "github.com/purplior/edi-adam/domain/assistant"
+	"github.com/purplior/edi-adam/domain/shared/model"
+	"github.com/purplior/edi-adam/infra/database/postgre"
 	"gorm.io/gorm"
 )
 
 type (
 	assistantRepository struct {
-		client *sqldb.Client
+		postgreRepository[model.Assistant, domain.QueryOption]
 	}
 )
 
-func (r *assistantRepository) FindOne_ByID(
-	ctx inner.Context,
-	id string,
-	joinOption domain.AssistantJoinOption,
-) (
-	domain.Assistant,
-	error,
-) {
-	var e entity.Assistant
-	db := r.client.DBWithContext(ctx)
-	eID := dt.UInt(id)
-
-	query := db
-	if joinOption.WithAuthor {
-		query = query.Preload("Author")
-	}
-	if joinOption.WithCategory {
-		query = query.Preload("Category")
-	}
-
-	if err := query.
-		Where("id = ?", eID).
-		First(&e).Error; err != nil {
-		return domain.Assistant{}, database.ToDomainError(err)
-	}
-
-	return e.ToModel(), nil
-}
-
-func (r *assistantRepository) FindOne_ByViewID(
-	ctx inner.Context,
-	viewID string,
-	joinOption domain.AssistantJoinOption,
-) (
-	domain.Assistant,
-	error,
-) {
-	var e entity.Assistant
-	db := r.client.DBWithContext(ctx)
-
-	query := db
-	if joinOption.WithAuthor {
-		query = query.Preload("Author")
-	}
-	if joinOption.WithCategory {
-		query = query.Preload("Category")
-	}
-	if joinOption.WithReviews {
-		query = query.Preload("Reviews", func(db *gorm.DB) *gorm.DB {
-			return db.Order("created_at DESC").Limit(10)
-		})
-	}
-
-	if err := query.
-		Where("view_id = ?", viewID).
-		First(&e).Error; err != nil {
-		return domain.Assistant{}, database.ToDomainError(err)
-	}
-
-	return e.ToModel(), nil
-}
-
-func (r *assistantRepository) FindPaginatedList_ByCategoryID(
-	ctx inner.Context,
-	categoryID string,
-	isPublicOnly bool,
-	pageRequest pagination.PaginationRequest,
-) (
-	[]domain.Assistant,
-	pagination.PaginationMeta,
-	error,
-) {
-	var entities []entity.Assistant
-
-	db := r.client.DBWithContext(ctx)
-	pageMeta, err := repoutil.FindPaginatedList(
-		db,
-		&entity.Assistant{},
-		&entities,
-		pageRequest,
-		repoutil.FindPaginatedListOption{
-			Condition: func(db *sqldb.DB) *sqldb.DB {
-				query := db.
-					Preload("Author").
-					Order("created_at DESC").
-					Where("category_id = ?", categoryID)
-
-				if isPublicOnly {
-					query = query.Where("category_id = ? AND is_public = ?", categoryID, true)
-				} else {
-					query = query.Where("category_id = ?", categoryID)
-				}
-
-				return query
-			},
-		},
-	)
-	if err != nil {
-		return nil, pagination.PaginationMeta{}, database.ToDomainError(err)
-	}
-
-	assistants := make([]domain.Assistant, len(entities))
-	for i, entity := range entities {
-		assistants[i] = entity.ToModel()
-	}
-
-	return assistants, pageMeta, nil
-}
-
-func (r *assistantRepository) FindPaginatedList_ByAuthorID(
-	ctx inner.Context,
-	authorID string,
-	pageRequest pagination.PaginationRequest,
-) (
-	[]domain.Assistant,
-	pagination.PaginationMeta,
-	error,
-) {
-	var entities []entity.Assistant
-
-	db := r.client.DBWithContext(ctx)
-	pageMeta, err := repoutil.FindPaginatedList(
-		db,
-		&entity.Assistant{},
-		&entities,
-		pageRequest,
-		repoutil.FindPaginatedListOption{
-			Condition: func(db *sqldb.DB) *sqldb.DB {
-				return db.
-					Preload("Category").
-					Order("created_at DESC").
-					Where("author_id = ?", authorID)
-			},
-		},
-	)
-	if err != nil {
-		return nil, pagination.PaginationMeta{}, database.ToDomainError(err)
-	}
-
-	assistants := make([]domain.Assistant, len(entities))
-	for i, entity := range entities {
-		assistants[i] = entity.ToModel()
-	}
-
-	return assistants, pageMeta, nil
-}
-
-func (r *assistantRepository) InsertOne(
-	ctx inner.Context,
-	assistantForInsert domain.Assistant,
-) (
-	domain.Assistant,
-	error,
-) {
-	db := r.client.DBWithContext(ctx)
-	e := entity.MakeAssistant(assistantForInsert)
-
-	if err := db.Create(&e).Error; err != nil {
-		return domain.Assistant{}, database.ToDomainError(err)
-	}
-
-	return e.ToModel(), nil
-}
-
-func (r *assistantRepository) UpdateOne(
-	ctx inner.Context,
-	assistant domain.Assistant,
-) error {
-	db := r.client.DBWithContext(ctx)
-	e := entity.MakeAssistant(assistant)
-
-	if err := db.Save(&e).Error; err != nil {
-		return database.ToDomainError(err)
-	}
-
-	return nil
-}
-
-func (r *assistantRepository) DeleteOne_ByID(
-	ctx inner.Context,
-	id string,
-) error {
-	db := r.client.DBWithContext(ctx)
-	eID := dt.UInt(id)
-
-	if err := db.
-		Where("id = ?", eID).
-		Delete(&entity.Assistant{}).Error; err != nil {
-		return database.ToDomainError(err)
-	}
-
-	return nil
-}
-
 func NewAssistantRepository(
-	client *sqldb.Client,
+	client *postgre.Client,
 ) domain.AssistantRepository {
+	var repo postgreRepository[model.Assistant, domain.QueryOption]
+
+	repo.client = client
+	repo.applyQueryOption = func(query *gorm.DB, opt domain.QueryOption) (*gorm.DB, error) {
+		if opt.WithAuthor {
+			query = query.Preload("Author")
+		}
+		if opt.WithCategory {
+			query = query.Preload("Category")
+		}
+		if opt.ID > 0 {
+			query = query.Where("id = ?", opt.ID)
+		}
+		if opt.AuthorID > 0 {
+			query = query.Where("author_id = ?", opt.AuthorID)
+		}
+		if len(opt.CategoryID) > 0 {
+			query = query.Where("category_id = ?", opt.CategoryID)
+		}
+
+		return query, nil
+	}
+
 	return &assistantRepository{
-		client: client,
+		postgreRepository: repo,
 	}
 }

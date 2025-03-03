@@ -1,19 +1,20 @@
 package customervoice
 
 import (
-	"github.com/purplior/sbec/domain/shared/inner"
-	"github.com/purplior/sbec/domain/shared/logger"
-	"github.com/purplior/sbec/domain/user"
-	"github.com/purplior/sbec/infra/port/slack"
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/logger"
+	"github.com/purplior/edi-adam/domain/shared/model"
+	"github.com/purplior/edi-adam/domain/user"
+	"github.com/purplior/edi-adam/infra/port/slack"
 )
 
 type (
 	CustomerVoiceService interface {
-		RegisterOne(
-			ctx inner.Context,
-			request CustomerVoiceRegisterRequest,
+		Register(
+			session inner.Session,
+			request CustomerVoiceRegisterDTO,
 		) (
-			CustomerVoice,
+			model.CustomerVoice,
 			error,
 		)
 	}
@@ -24,86 +25,78 @@ type (
 		slackClient             *slack.Client
 		customerVoiceRepository CustomerVoiceRepository
 		userService             user.UserService
-		cm                      inner.ContextManager
 	}
 )
 
-func (s *customerVoiceService) RegisterOne(
-	ctx inner.Context,
-	request CustomerVoiceRegisterRequest,
+func (s *customerVoiceService) Register(
+	session inner.Session,
+	dto CustomerVoiceRegisterDTO,
 ) (
-	CustomerVoice,
+	model.CustomerVoice,
 	error,
 ) {
 	if err := s.slackClient.SendMessage(slack.SendMessageRequest{
 		ChannelID: slack.ChannelID_CustomerVoice,
-		Text:      request.ToSlackMessageText(),
+		Text:      dto.ToSlackMessageText(),
 	}); err != nil {
 		logger.Error(err, "slack error occurred")
 	}
 
-	if request.Type == CustomerVoiceType_Withdrawal {
+	if dto.Type == model.CustomerVoiceType_Withdrawal {
 		return s.processWithdrawal(
-			ctx,
-			request,
+			session,
+			dto,
 		)
 	}
 
-	return s.customerVoiceRepository.InsertOne(ctx, CustomerVoice{
-		UserID:  request.UserID,
-		Type:    request.Type,
-		Content: request.Content,
-	})
+	return s.create(session, dto)
 }
 
 func (s *customerVoiceService) processWithdrawal(
-	ctx inner.Context,
-	request CustomerVoiceRegisterRequest,
+	session inner.Session,
+	dto CustomerVoiceRegisterDTO,
 ) (
-	CustomerVoice,
-	error,
+	m model.CustomerVoice,
+	err error,
 ) {
-	if err := s.cm.BeginTX(ctx, inner.TX_sqldb); err != nil {
-		return CustomerVoice{}, err
+	if err = session.BeginTransaction(); err != nil {
+		return m, err
 	}
 
-	defer func() {
-		if r := recover(); r != nil {
-			s.cm.RollbackTX(ctx, inner.TX_sqldb)
-			panic(r)
-		}
-	}()
-
-	customerVoice, err := s.customerVoiceRepository.InsertOne(ctx, CustomerVoice{
-		UserID:  request.UserID,
-		Type:    request.Type,
-		Content: request.Content,
-	})
+	m, err = s.create(session, dto)
 	if err != nil {
-		return CustomerVoice{}, err
+		return m, err
 	}
-	if err := s.userService.Inactive(ctx, request.UserID); err != nil {
-		s.cm.RollbackTX(ctx, inner.TX_sqldb)
-		return CustomerVoice{}, err
+	if err = s.userService.Inactive(session, dto.UserID); err != nil {
+		session.RollbackTransaction()
+		return m, err
+	}
+	if err = session.CommitTransaction(); err != nil {
+		return m, err
 	}
 
-	if err := s.cm.CommitTX(ctx, inner.TX_sqldb); err != nil {
-		return CustomerVoice{}, err
-	}
+	return m, nil
+}
 
-	return customerVoice, nil
+func (s *customerVoiceService) create(
+	session inner.Session,
+	dto CustomerVoiceRegisterDTO,
+) (model.CustomerVoice, error) {
+	return s.customerVoiceRepository.Create(session, model.CustomerVoice{
+		UserID:  dto.UserID,
+		Type:    dto.Type,
+		Content: dto.Content,
+	})
 }
 
 func NewCustomerVoiceService(
 	slackClient *slack.Client,
 	customerVoiceRepository CustomerVoiceRepository,
 	userService user.UserService,
-	cm inner.ContextManager,
 ) CustomerVoiceService {
 	return &customerVoiceService{
 		slackClient:             slackClient,
 		customerVoiceRepository: customerVoiceRepository,
 		userService:             userService,
-		cm:                      cm,
 	}
 }

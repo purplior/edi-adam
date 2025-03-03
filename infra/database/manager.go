@@ -3,8 +3,8 @@ package database
 import (
 	"time"
 
-	"github.com/purplior/sbec/infra/database/mongodb"
-	"github.com/purplior/sbec/infra/database/sqldb"
+	"github.com/purplior/edi-adam/infra/database/dynamo"
+	"github.com/purplior/edi-adam/infra/database/postgre"
 )
 
 type (
@@ -19,19 +19,16 @@ type (
 
 type (
 	databaseManager struct {
-		sqlDBClient   *sqldb.Client
-		mongoDBClient *mongodb.Client
+		postgreClient *postgre.Client
+		dyanmoClient  *dynamo.Client
 	}
 )
 
 func (m *databaseManager) Init() error {
-	if err := m.mongoDBClient.Connect(); err != nil {
+	if err := m.postgreClient.ConnectDB(); err != nil {
 		return err
 	}
-	if err := m.sqlDBClient.ConnectDB(); err != nil {
-		return err
-	}
-	if err := m.sqlDBClient.MigrateDB(); err != nil {
+	if err := m.postgreClient.MigrateDB(); err != nil {
 		return err
 	}
 
@@ -40,26 +37,26 @@ func (m *databaseManager) Init() error {
 
 func (m *databaseManager) Monitor() error {
 	for {
-		err := m.sqlDBClient.PingDB()
+		err := m.postgreClient.PingDB()
 		if err != nil {
 			// - 최대 5번의 재연결 시도
 			// - 지수 백오프 시작 시간 2초
-			m.sqlDBClient.ReconnectDB(5, 2*time.Second)
+			m.postgreClient.ReconnectDB(5, 2*time.Second)
 		}
 		time.Sleep(30 * time.Second) // 30초마다 연결 상태 확인
 	}
 }
 
 func (m *databaseManager) Dispose() error {
-	return m.sqlDBClient.Dispose()
+	return m.postgreClient.Dispose()
 }
 
 func NewDatabaseManager(
-	sqlDBClient *sqldb.Client,
-	mongoDBClient *mongodb.Client,
+	postgreClient *postgre.Client,
+	dynamoClient *dynamo.Client,
 ) DatabaseManager {
 	return &databaseManager{
-		sqlDBClient:   sqlDBClient,
-		mongoDBClient: mongoDBClient,
+		postgreClient: postgreClient,
+		dyanmoClient:  dynamoClient,
 	}
 }

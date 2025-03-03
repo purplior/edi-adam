@@ -3,65 +3,44 @@ package user
 import (
 	"strings"
 
-	"github.com/purplior/sbec/domain/shared/exception"
-	"github.com/purplior/sbec/domain/shared/inner"
-	"github.com/purplior/sbec/lib/mydate"
+	"github.com/purplior/edi-adam/domain/shared/exception"
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/model"
+	"github.com/purplior/edi-adam/lib/mydate"
 )
 
 type (
 	UserService interface {
-		GetOne_ByID(
-			ctx inner.Context,
-			id string,
+		Get(
+			session inner.Session,
+			queryOption QueryOption,
 		) (
-			User,
+			model.User,
 			error,
 		)
 
-		GetOne_ByAccount(
-			ctx inner.Context,
-			joinMethod string,
-			accountID string,
+		RegisterMember(
+			session inner.Session,
+			request RegisterMemberDTO,
 		) (
-			User,
-			error,
-		)
-
-		GetDetailOne_ByID(
-			ctx inner.Context,
-			id string,
-		) (
-			UserDetail,
-			error,
-		)
-
-		RegisterOne(
-			ctx inner.Context,
-			user User,
-		) (
-			newUser User,
+			newUser model.User,
 			err error,
 		)
 
 		CheckNicknameExistence(
-			ctx inner.Context,
+			session inner.Session,
 			nickname string,
 		) (
-			bool,
-			error,
+			exist bool,
+			err error,
 		)
 
 		Inactive(
-			ctx inner.Context,
-			userID string,
-		) error
-
-		UpdateOne_Password_ByAccount(
-			ctx inner.Context,
-			joinMethod string,
-			accountID string,
-			newPassword string,
-		) error
+			session inner.Session,
+			userID uint,
+		) (
+			err error,
+		)
 	}
 
 	userService struct {
@@ -69,74 +48,62 @@ type (
 	}
 )
 
-func (s *userService) GetOne_ByID(
-	ctx inner.Context,
-	id string,
+func (s *userService) Get(
+	session inner.Session,
+	queryOption QueryOption,
 ) (
-	User,
-	error,
-) {
-	return s.userRepository.FindOne_ByID(ctx, id)
-}
-
-func (s *userService) GetOne_ByAccount(
-	ctx inner.Context,
-	joinMethod string,
-	accountID string,
-) (
-	User,
-	error,
-) {
-	return s.userRepository.FindOne_ByAccount(
-		ctx,
-		joinMethod,
-		accountID,
-	)
-}
-
-func (s *userService) GetDetailOne_ByID(
-	ctx inner.Context,
-	id string,
-) (
-	UserDetail,
-	error,
-) {
-	user, err := s.userRepository.FindOne_ByID(ctx, id)
-	if err != nil {
-		return UserDetail{}, err
-	}
-
-	return user.ToDetail(), nil
-}
-
-func (s *userService) RegisterOne(
-	ctx inner.Context,
-	user User,
-) (
-	newUser User,
+	m model.User,
 	err error,
 ) {
-	if err := user.HashPassword(); err != nil {
-		return User{}, err
+	accountID, err := PhoneNumberToAccountID(queryOption.PhoneNumber)
+	if err != nil {
+		return m, err
 	}
 
-	return s.userRepository.InsertOne(ctx, user)
+	queryOption.AccountID = accountID
+	queryOption.PhoneNumber = ""
+	m, err = s.userRepository.Read(session, queryOption)
+
+	return m, err
+}
+
+func (s *userService) RegisterMember(
+	session inner.Session,
+	dto RegisterMemberDTO,
+) (
+	m model.User,
+	err error,
+) {
+	accountID, err := PhoneNumberToAccountID(dto.PhoneNumber)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	m, err = s.userRepository.Create(session, model.User{
+		AccountID:        accountID,
+		Nickname:         dto.Nickname,
+		Avatar:           dto.Avatar,
+		Role:             model.UserRole_Member,
+		IsMarketingAgree: dto.IsMarketingAgree,
+	})
+
+	return m, err
 }
 
 func (s *userService) CheckNicknameExistence(
-	ctx inner.Context,
+	session inner.Session,
 	nickname string,
 ) (
 	bool,
 	error,
 ) {
-	if strings.Contains(nickname, "포도쌤") {
+	if strings.Contains(nickname, "샘비서") {
 		return false, exception.ErrNotAllowedNickname
 	}
 
-	_, err := s.userRepository.FindOne_ByNickname(
-		ctx,
-		nickname,
+	_, err := s.userRepository.Read(
+		session,
+		QueryOption{Nickname: nickname},
 	)
 	if err != nil {
 		if err == exception.ErrNoRecord {
@@ -150,28 +117,19 @@ func (s *userService) CheckNicknameExistence(
 }
 
 func (s *userService) Inactive(
-	ctx inner.Context,
-	userID string,
+	session inner.Session,
+	userID uint,
 ) error {
-	return s.userRepository.UpdateOne_InactivatedFields(
-		ctx,
-		userID,
-		true,
-		mydate.Now(),
-	)
-}
-
-func (s *userService) UpdateOne_Password_ByAccount(
-	ctx inner.Context,
-	joinMethod string,
-	accountID string,
-	newPassword string,
-) error {
-	return s.userRepository.UpdateOne_Password_ByAccount(
-		ctx,
-		joinMethod,
-		accountID,
-		newPassword,
+	now := mydate.Now()
+	return s.userRepository.Updates(
+		session,
+		QueryOption{
+			ID: userID,
+		},
+		model.User{
+			IsInactivated: true,
+			InactivatedAt: &now,
+		},
 	)
 }
 

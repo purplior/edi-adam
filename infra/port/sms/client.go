@@ -3,9 +3,9 @@ package sms
 import (
 	"time"
 
-	"github.com/purplior/sbec/application/config"
-	"github.com/purplior/sbec/lib/myncloud"
-	"github.com/purplior/sbec/lib/myrequest"
+	"github.com/purplior/edi-adam/application/config"
+	"github.com/purplior/edi-adam/lib/myncloud"
+	"github.com/purplior/edi-adam/lib/myrequest"
 )
 
 type (

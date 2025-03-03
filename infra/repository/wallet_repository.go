@@ -1,87 +1,61 @@
 package repository
 
 import (
-	"github.com/purplior/sbec/domain/shared/exception"
-	"github.com/purplior/sbec/domain/shared/inner"
-	domain "github.com/purplior/sbec/domain/wallet"
-	"github.com/purplior/sbec/infra/database"
-	"github.com/purplior/sbec/infra/database/sqldb"
-	"github.com/purplior/sbec/infra/entity"
+	"github.com/purplior/edi-adam/domain/shared/exception"
+	"github.com/purplior/edi-adam/domain/shared/inner"
+	"github.com/purplior/edi-adam/domain/shared/model"
+	domain "github.com/purplior/edi-adam/domain/wallet"
+	"github.com/purplior/edi-adam/infra/database"
+	"github.com/purplior/edi-adam/infra/database/postgre"
 )
 
 type (
 	walletRepository struct {
-		client *sqldb.Client
+		postgreRepository[model.Wallet, domain.QueryOption]
 	}
 )
 
-func (r *walletRepository) InsertOne(
-	ctx inner.Context,
-	wallet domain.Wallet,
+func (r *walletRepository) UpdatesCoinDelta_ByOwnerID(
+	session inner.Session,
+	ownerID uint,
+	delta int,
 ) (
-	domain.Wallet,
-	error,
+	m model.Wallet,
+	err error,
 ) {
-	db := r.client.DBWithContext(ctx)
-	e := entity.MakeWallet(wallet)
+	db := r.client.DBWithContext(session)
 
-	result := db.Create(&e)
+	if m, err = r.Read(
+		session,
+		domain.QueryOption{OwnerID: ownerID},
+	); err != nil {
+		return m, err
+	}
 
+	newCoin := m.Coin + int64(delta)
+	if newCoin < 0 {
+		return m, exception.ErrNoCoin
+	}
+
+	result := db.Model(&m).Update("podo", newCoin)
 	if result.Error != nil {
-		return domain.Wallet{}, database.ToDomainError(result.Error)
+		return m, database.ToDomainError(result.Error)
 	}
 
-	return e.ToModel(), nil
-}
-
-func (r *walletRepository) FindOne_ByUserID(
-	ctx inner.Context,
-	userID string,
-) (
-	domain.Wallet,
-	error,
-) {
-	db := r.client.DBWithContext(ctx)
-
-	var wallet entity.Wallet
-	if err := db.Where("owner_id = ?", userID).First(&wallet).Error; err != nil {
-		return domain.Wallet{}, database.ToDomainError(err)
-	}
-
-	return wallet.ToModel(), nil
-}
-
-func (r *walletRepository) UpdateOne_ByUserIDAndDelta(
-	ctx inner.Context,
-	userID string,
-	podoDelta int,
-) (
-	domain.Wallet,
-	error,
-) {
-	db := r.client.DBWithContext(ctx)
-
-	var wallet entity.Wallet
-	if err := db.Where("owner_id = ?", userID).First(&wallet).Error; err != nil {
-		return domain.Wallet{}, database.ToDomainError(err)
-	}
-
-	if wallet.Podo+int64(podoDelta) < 0 {
-		return domain.Wallet{}, exception.ErrNoPodo
-	}
-
-	result := db.Model(&wallet).Update("podo", wallet.Podo+int64(podoDelta))
-	if result.Error != nil {
-		return domain.Wallet{}, database.ToDomainError(result.Error)
-	}
-
-	return wallet.ToModel(), nil
+	return m, nil
 }
 
 func NewWalletRepository(
-	client *sqldb.Client,
+	client *postgre.Client,
 ) domain.WalletRepository {
+	var repo postgreRepository[model.Wallet, domain.QueryOption]
+
+	repo.client = client
+	repo.applyQueryOption = func(db *postgre.DB, opt domain.QueryOption) (*postgre.DB, error) {
+		return db, nil
+	}
+
 	return &walletRepository{
-		client: client,
+		postgreRepository: repo,
 	}
 }
